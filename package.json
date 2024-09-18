@@ -1,0 +1,50 @@
+{
+  "name": "furry-event-china-cms",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "rsbuild build",
+    "check": "biome check --write",
+    "dev": "rsbuild dev --open",
+    "format": "biome format --write",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@mantine/core": "^7.12.2",
+    "@mantine/dates": "^7.12.2",
+    "@mantine/dropzone": "^7.12.2",
+    "@mantine/form": "^7.12.2",
+    "@mantine/hooks": "^7.12.2",
+    "@mantine/notifications": "^7.12.2",
+    "@tabler/icons-react": "^3.14.0",
+    "@tailwindcss/forms": "^0.5.9",
+    "@tanstack/react-query": "^5.55.0",
+    "antd": "^5.20.5",
+    "axios": "^1.7.7",
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21",
+    "mantine-form-zod-resolver": "^1.1.0",
+    "nanoid": "^5.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.1",
+    "swr": "^2.2.5",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@rsbuild/core": "1.0.1-rc.5",
+    "@rsbuild/plugin-react": "1.0.1-rc.5",
+    "@rsbuild/plugin-svgr": "^1.0.1-rc.5",
+    "@types/lodash": "^4",
+    "@types/node": "^22.5.4",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "postcss-preset-mantine": "^1.17.0",
+    "postcss-simple-vars": "^7.0.1",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.2"
+  },
+  "packageManager": "yarn@4.4.1"
+}
