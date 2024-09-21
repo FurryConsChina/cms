@@ -27,7 +27,6 @@ import {
   Select,
   SimpleGrid,
   Stack,
-  Text,
   TextInput,
   Textarea,
   Title,
