@@ -2132,9 +2132,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"furry-event-china-new-cms@workspace:.":
+"furry-event-china-cms@workspace:.":
   version: 0.0.0-use.local
-  resolution: "furry-event-china-new-cms@workspace:."
+  resolution: "furry-event-china-cms@workspace:."
   dependencies:
     "@biomejs/biome": "npm:^1.8.3"
     "@mantine/core": "npm:^7.12.2"

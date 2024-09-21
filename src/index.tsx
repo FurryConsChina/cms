@@ -9,6 +9,7 @@ import router from "@/routes";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
+  components: {},
 });
 const queryClient = new QueryClient();
 
