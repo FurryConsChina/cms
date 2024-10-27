@@ -1,3 +1,4 @@
+import { cleanPageCache } from "@/api/dashboard/cache";
 import { Button } from "@mantine/core";
 
 export default function CacheManager() {
@@ -9,10 +10,5 @@ export default function CacheManager() {
 }
 
 async function refreshPage(path: string) {
-  const res = await fetch("/api/refresh-page", {
-    method: "POST",
-    body: JSON.stringify({ path }),
-  });
-
-  console.log(res);
+  await cleanPageCache(path);
 }
