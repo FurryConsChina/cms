@@ -1,29 +1,50 @@
-import { Button, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { ActionIcon, Button, Group, Menu, rem } from "@mantine/core";
 import dayjs from "dayjs";
-import { useState } from "react";
-import { IconEdit } from "@tabler/icons-react";
-import OrganizationEditor from "@/components/OrganizationEditor";
-import { useQuery } from "@tanstack/react-query";
-import { getOrganizationList } from "@/api/dashboard/organization";
-import { OrganizationType } from "@/types/organization";
 import Table, { ColumnsType } from "antd/es/table";
 import { Space, Tag } from "antd";
 
-export default function OrganizationList() {
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 20,
-  });
+import { List } from "@/types/Request";
+import { OrganizationType } from "@/types/organization";
+import { useNavigate } from "react-router-dom";
+import {
+  IconEdit,
+  IconMenu,
+  IconRefresh,
+  IconTrash,
+} from "@tabler/icons-react";
+import { useMutation } from "@tanstack/react-query";
+import { cleanPageCache } from "@/api/dashboard/cache";
+import { notifications } from "@mantine/notifications";
 
-  const { isPending, isError, data, error, refetch } = useQuery({
-    queryKey: ["event-list", pagination],
-    queryFn: () => getOrganizationList(pagination),
-  });
+export default function OrganizationList({
+  data,
+  pagination,
+  isPending,
+  updatePagination,
+  setEditingOrganization,
+}: {
+  data: List<OrganizationType>;
+  pagination: { current: number; pageSize: number };
+  isPending: boolean;
+  updatePagination: React.Dispatch<
+    React.SetStateAction<{
+      current: number;
+      pageSize: number;
+    }>
+  >;
+  setEditingOrganization: (record?: OrganizationType) => void;
+}) {
+  const navigate = useNavigate();
 
-  const [opened, { open, close }] = useDisclosure(false);
-  const [editingOrganization, setEditingOrganization] =
-    useState<OrganizationType>();
+  const { mutate: refreshPage } = useMutation({
+    mutationFn: cleanPageCache,
+    onSuccess: () => {
+      notifications.show({
+        message: "刷新成功",
+        description: "刷新页面缓存成功",
+      });
+    },
+  });
 
   const columns: ColumnsType<OrganizationType> = [
     {
@@ -43,13 +64,21 @@ export default function OrganizationList() {
       title: "类型",
       dataIndex: "type",
       key: "type",
+      render: (type) => <Tag>{type || "未配置"}</Tag>,
+    },
+    {
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
     },
     {
       title: "建立日期",
       key: "date",
       render: (_, record) => (
         <Space>
-          <Tag>{dayjs(record.creationTime).format("YYYY/MM/DD")}</Tag>
+          {record.creationTime
+            ? dayjs(record.creationTime).format("YYYY年MM月DD日")
+            : "未配置"}
         </Space>
       ),
     },
@@ -60,28 +89,53 @@ export default function OrganizationList() {
       width: 250,
       render: (_, record) => (
         <Space size="middle">
-          {/* <Button
-            color="teal"
-            size="xs"
+          <ActionIcon
+            variant="light"
+            color="green"
+            aria-label="view"
             onClick={() => {
-              refreshPage(`/${record.organization.slug}/${record.slug}`);
+              navigate(`/dashboard/organization/${record.id}/edit`);
             }}
           >
-            刷新
-          </Button> */}
-          <Button
-            color=""
-            size="xs"
-            onClick={() => {
-              setEditingOrganization(record);
-              open();
-            }}
-          >
-            编辑
-          </Button>
-          <Button color="red" size="xs" onClick={() => {}}>
-            删除
-          </Button>
+            <IconEdit style={{ width: "70%", height: "70%" }} stroke={1.5} />
+          </ActionIcon>
+
+          <Menu shadow="md" width={200}>
+            <Menu.Target>
+              <ActionIcon variant="light" aria-label="Settings">
+                <IconMenu
+                  style={{ width: "70%", height: "70%" }}
+                  stroke={1.5}
+                />
+              </ActionIcon>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Label>菜单</Menu.Label>
+              <Menu.Item
+                leftSection={
+                  <IconRefresh style={{ width: rem(14), height: rem(14) }} />
+                }
+                onClick={() => {
+                  refreshPage(`/${record.slug}`);
+                }}
+              >
+                刷新
+              </Menu.Item>
+
+              {/* <Menu.Divider /> */}
+
+              {/* <Menu.Label>危险</Menu.Label>
+              <Menu.Item
+                color="red"
+                leftSection={
+                  <IconTrash style={{ width: rem(14), height: rem(14) }} />
+                }
+              >
+                删除
+              </Menu.Item> */}
+            </Menu.Dropdown>
+          </Menu>
         </Space>
       ),
     },
@@ -89,41 +143,28 @@ export default function OrganizationList() {
 
   return (
     <>
-      <Group justify="flex-end" my="md">
-        <Button
-          onClick={() => {
-            setEditingOrganization(undefined);
-            open();
-          }}
-        >
-          添加展商
-        </Button>
-      </Group>
-
       <Table
         rowKey={(row) => row.id}
         columns={columns}
         loading={isPending}
         dataSource={data?.records || []}
-        scroll={{ x: 1500, y: 600 }}
+        scroll={
+          {
+            // x: 1500,
+            // y: 600
+          }
+        }
         pagination={{
           pageSize: pagination.pageSize,
           total: data?.total,
           current: pagination.current,
         }}
         onChange={(pagination) => {
-          console.log(pagination);
-          setPagination((exist) => ({
-            ...exist,
-            ...(pagination.current && { current: pagination.current }),
+          updatePagination((exist) => ({
+            pageSize: pagination.pageSize || exist.pageSize,
+            current: pagination.current || exist.current,
           }));
         }}
-      />
-
-      <OrganizationEditor
-        organization={editingOrganization}
-        opened={opened}
-        onClose={close}
       />
     </>
   );

@@ -81,9 +81,7 @@ export default function DashboardLayout() {
       </AppShellNavbar>
 
       <AppShellMain className="bg-slate-100">
-        <div className="shadow-xl p-4 rounded-xl bg-white">
-          <Outlet />
-        </div>
+        <Outlet />
       </AppShellMain>
     </AppShell>
   );
