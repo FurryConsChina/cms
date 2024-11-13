@@ -1,20 +1,20 @@
-import { ActionIcon, Button, Group, Menu, rem } from "@mantine/core";
-import dayjs from "dayjs";
-import Table, { ColumnsType } from "antd/es/table";
-import { Space, Tag } from "antd";
+import { ActionIcon, Button, Group, Menu, rem } from '@mantine/core';
+import dayjs from 'dayjs';
+import Table, { ColumnsType } from 'antd/es/table';
+import { Space, Tag } from 'antd';
 
-import { List } from "@/types/Request";
-import { OrganizationType } from "@/types/organization";
-import { useNavigate } from "react-router-dom";
+import { List } from '@/types/Request';
+import { OrganizationType } from '@/types/organization';
+import { useNavigate } from 'react-router-dom';
 import {
   IconEdit,
   IconMenu,
   IconRefresh,
   IconTrash,
-} from "@tabler/icons-react";
-import { useMutation } from "@tanstack/react-query";
-import { cleanPageCache } from "@/api/dashboard/cache";
-import { notifications } from "@mantine/notifications";
+} from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import { cleanPageCache } from '@/api/dashboard/cache';
+import { notifications } from '@mantine/notifications';
 
 export default function OrganizationList({
   data,
@@ -38,52 +38,52 @@ export default function OrganizationList({
     mutationFn: cleanPageCache,
     onSuccess: () => {
       notifications.show({
-        message: "刷新成功",
-        description: "刷新页面缓存成功",
+        message: '刷新成功',
+        description: '刷新页面缓存成功',
       });
     },
   });
 
   const columns: ColumnsType<OrganizationType> = [
     {
-      title: "展方名称",
-      dataIndex: "name",
-      key: "name",
-      fixed: "left",
+      title: '展方名称',
+      dataIndex: 'name',
+      key: 'name',
+      fixed: 'left',
     },
     {
-      title: "状态",
-      dataIndex: "status",
+      title: '状态',
+      dataIndex: 'status',
       width: 100,
-      key: "status",
+      key: 'status',
       render: (status) => status,
     },
     {
-      title: "类型",
-      dataIndex: "type",
-      key: "type",
-      render: (type) => <Tag>{type || "未配置"}</Tag>,
+      title: '类型',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => <Tag>{type || '未配置'}</Tag>,
     },
     {
-      title: "Slug",
-      dataIndex: "slug",
-      key: "slug",
+      title: 'Slug',
+      dataIndex: 'slug',
+      key: 'slug',
     },
     {
-      title: "建立日期",
-      key: "date",
+      title: '建立日期',
+      key: 'date',
       render: (_, record) => (
         <Space>
           {record.creationTime
-            ? dayjs(record.creationTime).format("YYYY年MM月DD日")
-            : "未配置"}
+            ? dayjs(record.creationTime).format('YYYY年MM月DD日')
+            : '未配置'}
         </Space>
       ),
     },
     {
-      title: "操作",
-      key: "action",
-      fixed: "right",
+      title: '操作',
+      key: 'action',
+      fixed: 'right',
       width: 250,
       render: (_, record) => (
         <Space size="middle">
@@ -95,14 +95,14 @@ export default function OrganizationList({
               navigate(`/dashboard/organization/${record.id}/edit`);
             }}
           >
-            <IconEdit style={{ width: "70%", height: "70%" }} stroke={1.5} />
+            <IconEdit style={{ width: '70%', height: '70%' }} stroke={1.5} />
           </ActionIcon>
 
           <Menu shadow="md" width={200}>
             <Menu.Target>
               <ActionIcon variant="light" aria-label="Settings">
                 <IconMenu
-                  style={{ width: "70%", height: "70%" }}
+                  style={{ width: '70%', height: '70%' }}
                   stroke={1.5}
                 />
               </ActionIcon>

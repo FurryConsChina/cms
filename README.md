@@ -1,11 +1,18 @@
-# FEC CMS
+# FCC CMS
 
-## Setup
+## Development
+
+Make sure you already use right node version and yarn, if you not sure, please run:
+
+```bash
+nvm use
+corepack enable
+```
 
 Install the dependencies:
 
 ```bash
-pnpm install
+yarn install
 ```
 
 ## Get Started
@@ -13,17 +20,17 @@ pnpm install
 Start the dev server:
 
 ```bash
-pnpm dev
+yarn dev
 ```
 
 Build the app for production:
 
 ```bash
-pnpm build
+yarn build
 ```
 
 Preview the production build locally:
 
 ```bash
-pnpm preview
+yarn preview
 ```

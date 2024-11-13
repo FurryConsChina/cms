@@ -17,6 +17,7 @@ import {
   IconSwitchHorizontal,
 } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
+import clsx from "clsx";
 
 const linksData = [
   { link: "/dashboard/event", label: "展会", icon: IconTicket },
@@ -34,18 +35,11 @@ export default function DashboardLayout() {
 
   return (
     <AppShell navbar={{ width: 300, breakpoint: "sm" }} padding="xl">
-      <AppShellNavbar withBorder={false} p="md" className="bg-slate-100">
-        <AppShellSection>
-          <Group justify="space-between" mb="xl">
-            <Title className="text-slate-700">FEC CMS</Title>
-            <Code fw={700} className="text-slate-500">
-              v1.0.0
-            </Code>
-          </Group>
-        </AppShellSection>
+      <AppShellNavbar withBorder={false} p="xl" className="bg-slate-100">
+        {/* <AppShellSection></AppShellSection> */}
 
         <AppShellSection grow>
-          <nav>
+          <nav className="flex flex-col gap-2">
             {linksData.map((link) => (
               <NavLink
                 key={link.link}
@@ -56,7 +50,10 @@ export default function DashboardLayout() {
                 }}
                 label={link.label}
                 leftSection={<link.icon size="1.1rem" stroke={1.5} />}
-                className="rounded"
+                className={clsx(
+                  "rounded",
+                  link.link === activeRoute && "shadow shadow-blue-500/20"
+                )}
               />
             ))}
           </nav>

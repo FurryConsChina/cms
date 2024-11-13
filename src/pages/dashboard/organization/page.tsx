@@ -1,13 +1,10 @@
-import { getOrganizationList } from "@/api/dashboard/organization";
-import DefaultContainer from "@/components/Container";
-import OrganizationEditor from "@/components/OrganizationEditor";
-import OrganizationList from "@/pages/dashboard/organization/components/List";
-import type { OrganizationType } from "@/types/organization";
-import { Button, Group, Title } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { getOrganizationList } from '@/api/dashboard/organization';
+import DefaultContainer from '@/components/Container';
+import OrganizationList from '@/pages/dashboard/organization/components/OrganizationList';
+import { Button, Group, Title } from '@mantine/core';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
@@ -18,7 +15,7 @@ export default function OrganizationPage() {
   });
 
   const { isPending, isError, data, error, refetch } = useQuery({
-    queryKey: ["organization-list", pagination],
+    queryKey: ['organization-list', pagination],
     queryFn: () => getOrganizationList(pagination),
   });
 
@@ -30,7 +27,7 @@ export default function OrganizationPage() {
 
           <Button
             onClick={() => {
-              navigate("/dashboard/organization/create");
+              navigate('/dashboard/organization/create');
             }}
           >
             添加展商

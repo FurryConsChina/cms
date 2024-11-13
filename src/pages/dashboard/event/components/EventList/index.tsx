@@ -1,22 +1,22 @@
-import { Space, Table, Tag } from "antd";
-import dayjs from "dayjs";
-import { ActionIcon, Menu, rem } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
+import { Space, Table, Tag } from 'antd';
+import dayjs from 'dayjs';
+import { ActionIcon, Menu, rem } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 
-import type { ColumnsType } from "antd/es/table";
-import { EventScaleLabel, EventStatusLabel } from "@/consts/event";
-import type { EventType } from "@/types/event";
-import { useMutation } from "@tanstack/react-query";
-import { cleanPageCache } from "@/api/dashboard/cache";
+import type { ColumnsType } from 'antd/es/table';
+import { EventScaleLabel, EventStatusLabel } from '@/consts/event';
+import type { EventType } from '@/types/event';
+import { useMutation } from '@tanstack/react-query';
+import { cleanPageCache } from '@/api/dashboard/cache';
 import {
   IconEdit,
   IconMenu,
   IconRefresh,
   IconTrash,
-} from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+} from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 
-import type { List } from "@/types/Request";
+import type { List } from '@/types/Request';
 
 function EventList({
   data,
@@ -38,8 +38,8 @@ function EventList({
     mutationFn: cleanPageCache,
     onSuccess: () => {
       notifications.show({
-        message: "刷新成功",
-        description: "刷新页面缓存成功",
+        message: '刷新成功',
+        description: '刷新页面缓存成功',
       });
     },
   });
@@ -48,55 +48,55 @@ function EventList({
 
   const columns: ColumnsType<EventType> = [
     {
-      title: "展会名称",
-      dataIndex: "name",
-      key: "name",
-      fixed: "left",
+      title: '展会名称',
+      dataIndex: 'name',
+      key: 'name',
+      fixed: 'left',
     },
     {
-      title: "日期",
-      key: "date",
+      title: '日期',
+      key: 'date',
       render: (_, record) => (
         <Space>
           <Tag>
-            {dayjs(record.startAt).format("YYYY/MM/DD")}-
-            {dayjs(record.endAt).format("YYYY/MM/DD")}
+            {dayjs(record.startAt).format('YYYY/MM/DD')}-
+            {dayjs(record.endAt).format('YYYY/MM/DD')}
           </Tag>
         </Space>
       ),
     },
     {
-      title: "状态",
-      dataIndex: "status",
+      title: '状态',
+      dataIndex: 'status',
       width: 100,
-      key: "status",
+      key: 'status',
       render: (status) => EventStatusLabel[status],
     },
     {
-      title: "规模",
-      dataIndex: "scale",
-      key: "scale",
+      title: '规模',
+      dataIndex: 'scale',
+      key: 'scale',
       render: (scale) => EventScaleLabel[scale],
     },
     {
-      title: "城市",
-      dataIndex: ["addressExtra", "city"],
-      key: "city",
+      title: '城市',
+      dataIndex: ['addressExtra', 'city'],
+      key: 'city',
     },
     {
-      title: "展商",
-      dataIndex: ["organization", "name"],
-      key: "organizationName",
+      title: '展商',
+      dataIndex: ['organization', 'name'],
+      key: 'organizationName',
     },
     {
-      title: "地址",
-      dataIndex: "address",
-      key: "address",
+      title: '地址',
+      dataIndex: 'address',
+      key: 'address',
     },
     {
-      title: "操作",
-      key: "action",
-      fixed: "right",
+      title: '操作',
+      key: 'action',
+      fixed: 'right',
       // width: 'fit',
       render: (_, record) => (
         <Space size="middle">
@@ -117,14 +117,14 @@ function EventList({
               navigate(`/dashboard/event/${record.id}/edit`);
             }}
           >
-            <IconEdit style={{ width: "70%", height: "70%" }} stroke={1.5} />
+            <IconEdit style={{ width: '70%', height: '70%' }} stroke={1.5} />
           </ActionIcon>
 
           <Menu shadow="md" width={200}>
             <Menu.Target>
-              <ActionIcon variant="light" aria-label="Settings">
+              <ActionIcon color="green" variant="light" aria-label="Settings">
                 <IconMenu
-                  style={{ width: "70%", height: "70%" }}
+                  style={{ width: '70%', height: '70%' }}
                   stroke={1.5}
                 />
               </ActionIcon>
