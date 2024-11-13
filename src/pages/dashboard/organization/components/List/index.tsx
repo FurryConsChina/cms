@@ -21,7 +21,6 @@ export default function OrganizationList({
   pagination,
   isPending,
   updatePagination,
-  setEditingOrganization,
 }: {
   data: List<OrganizationType>;
   pagination: { current: number; pageSize: number };
@@ -32,7 +31,6 @@ export default function OrganizationList({
       pageSize: number;
     }>
   >;
-  setEditingOrganization: (record?: OrganizationType) => void;
 }) {
   const navigate = useNavigate();
 
@@ -123,17 +121,18 @@ export default function OrganizationList({
                 刷新
               </Menu.Item>
 
-              {/* <Menu.Divider /> */}
+              <Menu.Divider />
 
-              {/* <Menu.Label>危险</Menu.Label>
+              <Menu.Label>危险</Menu.Label>
               <Menu.Item
+                disabled
                 color="red"
                 leftSection={
                   <IconTrash style={{ width: rem(14), height: rem(14) }} />
                 }
               >
                 删除
-              </Menu.Item> */}
+              </Menu.Item>
             </Menu.Dropdown>
           </Menu>
         </Space>

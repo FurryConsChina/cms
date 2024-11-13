@@ -4,6 +4,7 @@ import Dashboard from "@/pages/dashboard";
 import CacheManagerPage from "@/pages/dashboard/cacheManager";
 import EventEditPage from "@/pages/dashboard/event/edit";
 import EventPage from "@/pages/dashboard/event/page";
+import OrganizationEditPage from "@/pages/dashboard/organization/edit";
 import OrganizationPage from "@/pages/dashboard/organization/page";
 import ErrorPage from "@/pages/error";
 import useAuthStore from "@/stores/auth";
@@ -39,7 +40,21 @@ const router = createBrowserRouter([
       },
       {
         path: "organization",
-        Component: OrganizationPage,
+
+        children: [
+          {
+            index: true,
+            Component: OrganizationPage,
+          },
+          {
+            path: "create",
+            Component: OrganizationEditPage,
+          },
+          {
+            path: ":organizationId/edit",
+            Component: OrganizationEditPage,
+          },
+        ],
       },
       {
         path: "cache-manager",

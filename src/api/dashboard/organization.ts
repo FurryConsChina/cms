@@ -25,6 +25,12 @@ export async function getAllOrganizations(params: { search?: string }) {
   return res.data;
 }
 
+export async function getOrganizationDetail(params: { id: string }) {
+  const res = await Axios.get<OrganizationType>(`/organization/detail/${params.id}`);
+
+  return res.data;
+}
+
 export async function createOrganization(
   organization: EditableOrganizationType
 ) {

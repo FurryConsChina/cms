@@ -2,18 +2,15 @@ import { getOrganizationList } from "@/api/dashboard/organization";
 import DefaultContainer from "@/components/Container";
 import OrganizationEditor from "@/components/OrganizationEditor";
 import OrganizationList from "@/pages/dashboard/organization/components/List";
-import { OrganizationType } from "@/types/organization";
+import type { OrganizationType } from "@/types/organization";
 import { Button, Group, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
-import pagination from "antd/es/pagination";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function OrganizationPage() {
-  const [opened, { open, close }] = useDisclosure(false);
-
-  const [editingOrganization, setEditingOrganization] =
-    useState<OrganizationType>();
+  const navigate = useNavigate();
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -33,8 +30,7 @@ export default function OrganizationPage() {
 
           <Button
             onClick={() => {
-              setEditingOrganization(undefined);
-              open();
+              navigate("/dashboard/organization/create");
             }}
           >
             添加展商
@@ -48,15 +44,8 @@ export default function OrganizationPage() {
           isPending={isPending}
           pagination={pagination}
           updatePagination={setPagination}
-          setEditingOrganization={setEditingOrganization}
         />
       </div>
-
-      <OrganizationEditor
-        organization={editingOrganization}
-        opened={opened}
-        onClose={close}
-      />
     </>
   );
 }
