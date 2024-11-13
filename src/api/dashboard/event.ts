@@ -13,6 +13,12 @@ export async function getEventList(params: {
   return res.data;
 }
 
+export async function getEventDetail(params: { id: string }) {
+  const res = await Axios.get<EventType>(`/event/detail/${params.id}`);
+
+  return res.data;
+}
+
 export async function createEvent(event: EditableEventType) {
   const res = await Axios.post<EventType>("/event/create", {
     event,
