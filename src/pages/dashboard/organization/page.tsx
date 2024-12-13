@@ -2,6 +2,7 @@ import { getOrganizationList } from '@/api/dashboard/organization';
 import DefaultContainer from '@/components/Container';
 import OrganizationList from '@/pages/dashboard/organization/components/OrganizationList';
 import { Button, Group, Title } from '@mantine/core';
+import { IconCirclePlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,7 @@ export default function OrganizationPage() {
           <Title order={2}>展商列表</Title>
 
           <Button
+            leftSection={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
               navigate('/dashboard/organization/create');
             }}

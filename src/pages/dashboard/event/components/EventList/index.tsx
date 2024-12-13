@@ -1,6 +1,6 @@
 import { Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { ActionIcon, Menu, rem } from '@mantine/core';
+import { ActionIcon, Button, Menu, rem } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 import type { ColumnsType } from 'antd/es/table';
@@ -109,20 +109,20 @@ function EventList({
           >
             刷新
           </Button> */}
-          <ActionIcon
+          <Button
             variant="light"
-            color="blue"
-            aria-label="view"
+            color="green"
             onClick={() => {
               navigate(`/dashboard/event/${record.id}/edit`);
             }}
+            leftSection={<IconEdit size={14} />}
           >
-            <IconEdit style={{ width: '70%', height: '70%' }} stroke={1.5} />
-          </ActionIcon>
+            编辑
+          </Button>
 
           <Menu shadow="md" width={200}>
             <Menu.Target>
-              <ActionIcon color="green" variant="light" aria-label="Settings">
+              <ActionIcon variant="light" aria-label="Settings">
                 <IconMenu
                   style={{ width: '70%', height: '70%' }}
                   stroke={1.5}

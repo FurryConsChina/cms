@@ -87,16 +87,17 @@ export default function OrganizationList({
       width: 250,
       render: (_, record) => (
         <Space size="middle">
-          <ActionIcon
+          <Button
             variant="light"
             color="green"
             aria-label="view"
             onClick={() => {
               navigate(`/dashboard/organization/${record.id}/edit`);
             }}
+            leftSection={<IconEdit size={14} />}
           >
-            <IconEdit style={{ width: '70%', height: '70%' }} stroke={1.5} />
-          </ActionIcon>
+            编辑
+          </Button>
 
           <Menu shadow="md" width={200}>
             <Menu.Target>
