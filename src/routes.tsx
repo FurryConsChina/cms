@@ -2,15 +2,12 @@ import App from "@/App";
 import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import CacheManagerPage from "@/pages/dashboard/cacheManager";
+import EventEditPage from "@/pages/dashboard/event/edit";
 import EventPage from "@/pages/dashboard/event/page";
+import OrganizationEditPage from "@/pages/dashboard/organization/edit";
 import OrganizationPage from "@/pages/dashboard/organization/page";
 import ErrorPage from "@/pages/error";
 import useAuthStore from "@/stores/auth";
-// import Login from '@pages/auth/login';
-// import BannerManager from '@pages/content/banner';
-// import LandingDashboard from '@pages/landing-page';
-// import User from '@pages/user';
-// import UserDetail from '@pages/user/detail';
 import { createBrowserRouter, redirect } from "react-router-dom";
 
 const router = createBrowserRouter([
@@ -25,11 +22,39 @@ const router = createBrowserRouter([
       },
       {
         path: "event",
-        Component: EventPage,
+
+        children: [
+          {
+            index: true,
+            Component: EventPage,
+          },
+          {
+            path: "create",
+            Component: EventEditPage,
+          },
+          {
+            path: ":eventId/edit",
+            Component: EventEditPage,
+          },
+        ],
       },
       {
         path: "organization",
-        Component: OrganizationPage,
+
+        children: [
+          {
+            index: true,
+            Component: OrganizationPage,
+          },
+          {
+            path: "create",
+            Component: OrganizationEditPage,
+          },
+          {
+            path: ":organizationId/edit",
+            Component: OrganizationEditPage,
+          },
+        ],
       },
       {
         path: "cache-manager",
@@ -38,12 +63,12 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "login",
+    path: "auth",
     loader: () => {
       const user = useAuthStore.getState().user;
-      if (user) {
-        return redirect("/");
-      }
+      // if (user) {
+      //   return redirect("/dashboard");
+      // }
       return null;
     },
     Component: Auth,

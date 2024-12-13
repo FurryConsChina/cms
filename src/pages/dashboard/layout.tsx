@@ -5,6 +5,8 @@ import {
   AppShell,
   AppShellNavbar,
   AppShellMain,
+  AppShellSection,
+  NavLink,
 } from "@mantine/core";
 import { Title } from "@mantine/core";
 import {
@@ -12,9 +14,10 @@ import {
   IconTrademark,
   IconLogout,
   IconCloudStorm,
+  IconSwitchHorizontal,
 } from "@tabler/icons-react";
-import classes from "./layout.module.css";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import clsx from "clsx";
 
 const linksData = [
   { link: "/dashboard/event", label: "展会", icon: IconTicket },
@@ -27,62 +30,55 @@ const linksData = [
 ];
 
 export default function DashboardLayout() {
-  const location = useLocation();
+  const navigate = useNavigate();
   const [activeRoute, setActiveRoute] = useState(location.pathname);
-
-  const links = linksData.map((item) => (
-    <a
-      className={classes.link}
-      data-active={item.link === activeRoute || undefined}
-      href={item.link}
-      key={item.label}
-      onClick={() => {
-        setActiveRoute(item.link);
-      }}
-    >
-      <item.icon className={classes.linkIcon} stroke={1.5} />
-      <span>{item.label}</span>
-    </a>
-  ));
 
   return (
     <AppShell navbar={{ width: 300, breakpoint: "sm" }} padding="xl">
-      <AppShellNavbar withBorder={false} p="md">
-        <nav className={classes.navbar}>
-          <div className={classes.navbarMain}>
-            <Group className={classes.header} justify="space-between">
-              <Title>FEC CMS</Title>
-              <Code fw={700}>v1.0.0</Code>
-            </Group>
-            {links}
-          </div>
+      <AppShellNavbar withBorder={false} p="xl" className="bg-slate-100">
+        {/* <AppShellSection></AppShellSection> */}
 
-          <div className={classes.footer}>
-            {/* <a
-              href="#"
-              className={classes.link}
-              onClick={(event) => event.preventDefault()}
-            >
-              <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-              <span>Change account</span>
-            </a> */}
+        <AppShellSection grow>
+          <nav className="flex flex-col gap-2">
+            {linksData.map((link) => (
+              <NavLink
+                key={link.link}
+                active={link.link === activeRoute}
+                onClick={() => {
+                  navigate(link.link);
+                  setActiveRoute(link.link);
+                }}
+                label={link.label}
+                leftSection={<link.icon size="1.1rem" stroke={1.5} />}
+                className={clsx(
+                  "rounded",
+                  link.link === activeRoute && "shadow shadow-blue-500/20"
+                )}
+              />
+            ))}
+          </nav>
+        </AppShellSection>
 
-            <a
-              href="#"
-              className={classes.link}
-              onClick={(event) => event.preventDefault()}
-            >
-              <IconLogout className={classes.linkIcon} stroke={1.5} />
-              <span>注销</span>
-            </a>
+        <AppShellSection>
+          <div>
+            <NavLink
+              onClick={() => {}}
+              label="切换账户"
+              leftSection={<IconSwitchHorizontal size="1rem" stroke={1.5} />}
+              className="rounded"
+            />
+            <NavLink
+              onClick={() => {}}
+              label="注销"
+              leftSection={<IconLogout size="1rem" stroke={1.5} />}
+              className="rounded"
+            />
           </div>
-        </nav>
+        </AppShellSection>
       </AppShellNavbar>
 
-      <AppShellMain>
-        <div className={classes.main}>
-          <Outlet />
-        </div>
+      <AppShellMain className="bg-slate-100">
+        <Outlet />
       </AppShellMain>
     </AppShell>
   );

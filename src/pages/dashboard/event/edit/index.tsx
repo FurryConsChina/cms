@@ -1,95 +1,100 @@
-import { EventScaleLabel, EventStatusLabel } from "@/consts/event";
-import "dayjs/locale/zh-cn";
+import { useParams } from "react-router-dom";
 
 import {
   EditableEventSchema,
-  EditableEventType,
+  type EditableEventType,
   EventScale,
-  EventScaleKeyType,
+  type EventScaleKeyType,
   EventStatus,
-  EventStatusKeyType,
-  EventType,
+  type EventStatusKeyType,
+  type EventType,
 } from "@/types/event";
 import {
   ActionIcon,
+  Autocomplete,
   Box,
   Button,
-  Card,
-  Center,
   Chip,
   Container,
   Divider,
   Fieldset,
   Group,
-  Image,
-  Modal,
   NumberInput,
   Select,
-  SimpleGrid,
   Stack,
   TextInput,
   Textarea,
   Title,
-  rem,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
 import { useForm, zodResolver } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import {
-  IconPhoto,
-  IconPlus,
-  IconTrash,
-  IconUpload,
-  IconX,
-} from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { nanoid } from "nanoid";
+import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
 import { OrganizationType } from "@/types/organization";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllOrganizations } from "@/api/dashboard/organization";
-import { createEvent, updateEvent } from "@/api/dashboard/event";
-import { uploadStatic } from "@/api/dashboard/upload";
+import {
+  createEvent,
+  getEventDetail,
+  updateEvent,
+} from "@/api/dashboard/event";
 import { z } from "zod";
-import { start } from "repl";
 
-function EventEditor({
-  event,
-  opened,
-  onClose,
-}: {
-  event?: EventType;
-  opened: boolean;
-  onClose: () => void;
-}) {
+import "dayjs/locale/zh-cn";
+import { EventScaleLabel, EventStatusLabel } from "@/consts/event";
+import { Spin } from "antd";
+import UploadImage from "@/components/UploadImage";
+import DefaultContainer from "@/components/Container";
+
+export default function EventEditPage() {
+  const { eventId } = useParams();
+  const {
+    data: event,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["event-detail", eventId],
+    queryFn: () => getEventDetail({ id: eventId as string }),
+    refetchOnWindowFocus: false,
+    enabled: !!eventId,
+  });
+
+  console.log(isError);
+
+  if (isError) {
+    return <div>Hmm... something went wrong.</div>;
+  }
+
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={event ? "编辑展会" : "新建展会"}
-      centered
-      size="xl"
-    >
-      <EventEditorContent event={event} onClose={onClose} />
-    </Modal>
+    <div className="relative">
+      <DefaultContainer className="shadow sticky top-0 z-10">
+        <Title order={2}>{eventId ? "编辑展会" : "新建展会"}</Title>
+      </DefaultContainer>
+
+      {isLoading ? (
+        <Spin />
+      ) : (
+        <DefaultContainer className="mt-4">
+          <EventEditorContent event={event} />
+        </DefaultContainer>
+      )}
+    </div>
   );
 }
 
-function EventEditorContent({
-  event,
-  onClose,
-}: {
-  event?: EventType;
-  onClose: () => void;
-}) {
-  console.log(event?.startAt);
+function EventEditorContent({ event }: { event?: EventType }) {
+  const { data: addressSearchResult, mutate } = useMutation({
+    mutationFn: (params: { address: string; city: string }) =>
+      fetch(
+        `https://apis.map.qq.com/ws/place/v1/search?key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&keyword=${params.address}&boundary=region(${params.city},2)&page_size=10&page_index=1`
+      ),
+  });
   const form = useForm({
     initialValues: {
       name: event?.name || "",
       startAt: event?.startAt ? new Date(event?.startAt) : new Date(),
       endAt: event?.endAt ? new Date(event?.endAt) : new Date(),
-      city: event?.addressExtra?.city || "",
+      //   city: event?.addressExtra?.city || "",
       citySlug: event?.addressExtra?.citySlug || "",
       address: event?.address || "",
       addressExtra: event?.addressExtra || { city: null },
@@ -105,15 +110,15 @@ function EventEditorContent({
       addressLat: event?.addressLat || "",
       addressLon: event?.addressLon || "",
     },
-    validate: zodResolver(
-      z.object({
-        name: z.string().min(1),
-        startAt: z.date(),
-        endAt: z.date().nullable(),
-        city: z.string(),
-        citySlug: z.string(),
-      })
-    ),
+    // validate: zodResolver(
+    //   z.object({
+    //     name: z.string().min(1, { message: "文本不能为空" }),
+    //     startAt: z.date(),
+    //     endAt: z.date().nullable(),
+    //     city: z.string(),
+    //     citySlug: z.string(),
+    //   })
+    // ),
     // validate: zodResolver(EditableEventSchema),
   });
 
@@ -138,7 +143,7 @@ function EventEditorContent({
     const selectedMonth = form.values.startAt
       ?.toLocaleString("en-us", { month: "short" })
       .toLocaleLowerCase();
-    const city = form.values.city;
+    const city = form.values.citySlug;
     if (!selectedYear || !selectedMonth || !city) {
       return;
     }
@@ -155,7 +160,7 @@ function EventEditorContent({
       endAt: formData.endAt.toISOString(),
       poster: { all: formData.poster },
       addressExtra: {
-        city: formData.city,
+        city: formData.addressExtra.city,
         citySlug: formData.citySlug,
       },
       organizations: [{ id: formData.organization, isPrimary: true }],
@@ -166,7 +171,7 @@ function EventEditorContent({
         ...transFormData,
       });
       if (res) {
-        onClose();
+        // onClose();
         notifications.show({
           title: "更新成功",
           message: "更新展会数据成功",
@@ -178,7 +183,7 @@ function EventEditorContent({
       const res = await createEvent(transFormData);
       console.log("create res", res);
       if (res) {
-        onClose();
+        // onClose();
         notifications.show({
           title: "更新成功",
           message: "创建展会数据成功",
@@ -191,7 +196,7 @@ function EventEditorContent({
   return (
     <Box mx="auto">
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Container my="md">
+        <Container fluid>
           <Title order={5} my="sm">
             基础信息
           </Title>
@@ -203,6 +208,7 @@ function EventEditorContent({
             />
 
             <Select
+              withAsterisk
               label="展会展方"
               data={organizationSelectOptions}
               {...form.getInputProps("organization")}
@@ -214,15 +220,17 @@ function EventEditorContent({
                 valueFormat="YYYY年MM月DD日 hh:mm A"
                 locale="zh-cn"
                 label="开始日期"
-                placeholder="Pick date"
+                placeholder="选一个日期"
+                clearable
                 {...form.getInputProps("startAt")}
               />
               <DateTimePicker
                 withAsterisk
                 label="结束日期"
                 locale="zh-cn"
-                placeholder="Pick date"
+                placeholder="选一个日期"
                 valueFormat="YYYY年MM月DD日 hh:mm A"
+                clearable
                 {...form.getInputProps("endAt")}
               />
             </Group>
@@ -231,28 +239,58 @@ function EventEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container my="md" fluid>
           <Title order={5}>地理信息</Title>
           <Stack>
+            <Autocomplete
+              label="展会地址"
+              rightSection={
+                <IconSearch
+                  size="14"
+                  className="cursor-pointer"
+                  onClick={() => {
+                    console.log("aa");
+                    const nowValues = form.getValues();
+                    console.log(nowValues);
+                    const searchSchema = z.object({
+                      address: z.string(),
+                      city: z.string(),
+                    });
+
+                    try {
+                      mutate(
+                        searchSchema.parse({
+                          address: nowValues.address,
+                          city: nowValues.addressExtra.city,
+                        })
+                      );
+                    } catch (error) {
+                      notifications.show({
+                        title: "有错误发生",
+                        message: JSON.stringify(error),
+                      });
+                    }
+                  }}
+                />
+              }
+              {...form.getInputProps("address")}
+            />
+
             <Group grow>
               <TextInput
                 withAsterisk
                 label="展会城市"
-                {...form.getInputProps("city")}
+                placeholder="请填写后缀（如市）"
+                {...form.getInputProps("addressExtra.city")}
               />
 
               <TextInput
                 withAsterisk
                 label="城市Slug"
+                placeholder="请填写城市的拼音"
                 {...form.getInputProps("citySlug")}
               />
             </Group>
-
-            <TextInput
-              // withAsterisk
-              label="展会地址"
-              {...form.getInputProps("address")}
-            />
 
             <Group gap="xs" grow>
               <NumberInput
@@ -274,12 +312,13 @@ function EventEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container>
+        <Container fluid>
           <Title order={5}>URI构建</Title>
           <Stack>
             <TextInput
               withAsterisk
               label="展会Slug"
+              disabled
               {...form.getInputProps("slug")}
             />
             <Button
@@ -298,12 +337,13 @@ function EventEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container my="md" fluid>
           <Title order={5}>展会附加信息</Title>
           <Stack>
             <Select
               label="展会状态"
-              placeholder="Pick value"
+              withAsterisk
+              placeholder="选一个"
               data={Object.keys(EventStatus).map((key) => ({
                 label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
                 value: EventStatus[key as EventStatusKeyType],
@@ -313,7 +353,8 @@ function EventEditorContent({
 
             <Select
               label="展会规模"
-              placeholder="Pick value"
+              withAsterisk
+              placeholder="选一个"
               data={Object.keys(EventScale).map((key) => ({
                 label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
                 value: EventScale[key as EventScaleKeyType],
@@ -339,7 +380,7 @@ function EventEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container my="md" fluid>
           <Title order={5}>展会媒体资源</Title>
 
           <Stack justify="flex-start" gap="xs">
@@ -393,10 +434,11 @@ function EventEditorContent({
                 取消图片
               </Chip>
 
-              <UploadImgae
+              <UploadImage
                 pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
                 defaultImageName="cover"
                 onUploadSuccess={(s) => form.setFieldValue("thumbnail", s)}
+                disabled={!selectedOrganization?.slug || !form.values.slug}
               />
             </Group>
 
@@ -420,11 +462,14 @@ function EventEditorContent({
                       label={`展会详情图片 ${index + 1}`}
                       {...form.getInputProps(`poster.${index}`)}
                     />
-                    <UploadImgae
+                    <UploadImage
                       pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
                       defaultImageName={`details-${index + 1}`}
                       onUploadSuccess={(s) =>
                         form.setFieldValue(`poster.${index}`, s)
+                      }
+                      disabled={
+                        !selectedOrganization?.slug || !form.values.slug
                       }
                     />
                     <Button
@@ -446,189 +491,12 @@ function EventEditorContent({
           </Stack>
         </Container>
 
-        <Group justify="flex-end" mt="md">
-          <Button type="submit">Submit</Button>
-        </Group>
+        <Container>
+          <Group justify="flex-end" mt="md">
+            <Button type="submit">提交</Button>
+          </Group>
+        </Container>
       </form>
     </Box>
   );
 }
-
-function UploadImgae({
-  pathPrefix,
-  defaultImageName,
-  onUploadSuccess,
-}: {
-  pathPrefix: string;
-  defaultImageName?: string;
-  onUploadSuccess: (imagePath: string) => void;
-}) {
-  const [opened, { open, close }] = useDisclosure(false);
-  const [loading, setLoading] = useState(false);
-
-  const [images, setImages] = useState<FileWithPath[]>([]);
-  const [imageName, setImageName] = useState(() => {
-    if (defaultImageName) {
-      return `${defaultImageName}-${nanoid()}`;
-    }
-    return nanoid();
-  });
-  const [imageMIME, setImageMINE] = useState("");
-
-  const previews = images.map((file, index) => {
-    const imageUrl = URL.createObjectURL(file);
-    return (
-      <Image
-        alt={imageUrl}
-        key={index}
-        src={imageUrl}
-        onLoad={() => URL.revokeObjectURL(imageUrl)}
-      />
-    );
-  });
-
-  const onUpload = async () => {
-    try {
-      setLoading(true);
-      if (!images[0]) {
-        setLoading(false);
-        return notifications.show({
-          message: "没有图片",
-        });
-      }
-
-      let formData = new FormData();
-      const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
-      formData.append("imageKey", `${pathPrefix}${imageName}.${imageMIME}`);
-      formData.append("image", images[0], images[0].name);
-      const uploadRes = await uploadStatic(formData);
-      // const uploadRes = await fetch("/api/upload-image", {
-      //   cache: "no-cache",
-      //   method: "POST",
-      //   body: formData,
-      // }).then((res) => res.json());
-      console.log("uploadRes", uploadRes);
-      if (uploadRes?.S3UploadRes?.ETag) {
-        setLoading(false);
-        onUploadSuccess(imagePath);
-        notifications.show({
-          message: "图片上传成功",
-        });
-        close();
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <Button onClick={open}>上传</Button>
-      <Modal
-        opened={opened}
-        onClose={close}
-        title="上传图片"
-        centered
-        size="xl"
-      >
-        <Group wrap={"nowrap"} justify="flex-start" align="flex-start" gap="xl">
-          <Stack style={{ width: "50%" }}>
-            <Dropzone
-              onDrop={(files) => {
-                console.log("accepted files", files);
-                setImages(files);
-                if (files[0]) {
-                  setImageMINE(files[0].type.replace("image/", ""));
-                }
-              }}
-              onReject={(files) => console.log("rejected files", files)}
-              maxSize={3 * 1024 ** 2}
-              accept={IMAGE_MIME_TYPE}
-              multiple={false}
-            >
-              <Group
-                justify="center"
-                gap="xl"
-                // mih={220}
-                style={{ pointerEvents: "none" }}
-              >
-                {images.length ? (
-                  <SimpleGrid
-                    cols={{ base: 1, sm: 4 }}
-                    // mt={previews.length > 0 ? "xl" : 0}
-                  >
-                    {previews}
-                  </SimpleGrid>
-                ) : (
-                  <>
-                    <Dropzone.Accept>
-                      <IconUpload
-                        style={{
-                          width: rem(52),
-                          height: rem(52),
-                          color: "var(--mantine-color-blue-6)",
-                        }}
-                        stroke={1.5}
-                      />
-                    </Dropzone.Accept>
-                    <Dropzone.Reject>
-                      <IconX
-                        style={{
-                          width: rem(52),
-                          height: rem(52),
-                          color: "var(--mantine-color-red-6)",
-                        }}
-                        stroke={1.5}
-                      />
-                    </Dropzone.Reject>
-                    <Dropzone.Idle>
-                      <IconPhoto
-                        style={{
-                          width: rem(52),
-                          height: rem(52),
-                          color: "var(--mantine-color-dimmed)",
-                        }}
-                        stroke={1.5}
-                      />
-                    </Dropzone.Idle>
-                  </>
-                )}
-              </Group>
-            </Dropzone>
-            <Card
-              shadow="sm"
-              padding="lg"
-              radius="md"
-              withBorder
-              onPaste={(e) => {
-                if (e.clipboardData.files.length) {
-                  setImages([e.clipboardData.files[0]]);
-                  if (e.clipboardData.files[0]) {
-                    setImageMINE(
-                      e.clipboardData.files[0].type.replace("image/", "")
-                    );
-                  }
-                }
-              }}
-            >
-              <Center>在这里粘贴</Center>
-            </Card>
-          </Stack>
-          <Stack style={{ flexShrink: 0, width: "50%" }}>
-            <TextInput
-              description={`${pathPrefix}${imageName}.${imageMIME}`}
-              value={imageName}
-              onChange={(e) => setImageName(e.target.value)}
-            />
-            <Button loading={loading} onClick={onUpload}>
-              上传
-            </Button>
-          </Stack>
-        </Group>
-      </Modal>
-    </>
-  );
-}
-
-export default EventEditor;

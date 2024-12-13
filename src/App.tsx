@@ -9,6 +9,7 @@ import DashboardLayout from "@/pages/dashboard/layout";
 import "@/styles/global.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import '@mantine/notifications/styles.css';
 
 const App = () => {
   const { user, _hasHydrated } = useAuthStore();
