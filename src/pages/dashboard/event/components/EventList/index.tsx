@@ -1,6 +1,6 @@
 import { Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { ActionIcon, Button, Menu, rem } from '@mantine/core';
+import { ActionIcon, Button, Menu, rem, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 import type { ColumnsType } from 'antd/es/table';
@@ -10,6 +10,8 @@ import { useMutation } from '@tanstack/react-query';
 import { cleanPageCache } from '@/api/dashboard/cache';
 import {
   IconEdit,
+  IconInfoCircle,
+  IconLink,
   IconMenu,
   IconRefresh,
   IconTrash,
@@ -38,8 +40,8 @@ function EventList({
     mutationFn: cleanPageCache,
     onSuccess: () => {
       notifications.show({
-        message: '刷新成功',
-        description: '刷新页面缓存成功',
+        title: '刷新成功',
+        message: '刷新页面缓存成功',
       });
     },
   });
@@ -97,18 +99,8 @@ function EventList({
       title: '操作',
       key: 'action',
       fixed: 'right',
-      // width: 'fit',
       render: (_, record) => (
         <Space size="middle">
-          {/* <Button
-            color="teal"
-            size="xs"
-            onClick={() => {
-              refreshPage(`/${record.organization.slug}/${record.slug}`);
-            }}
-          >
-            刷新
-          </Button> */}
           <Button
             variant="light"
             color="green"
@@ -141,6 +133,42 @@ function EventList({
                 }}
               >
                 刷新
+              </Menu.Item>
+              <Menu.Item
+                leftSection={
+                  <IconLink style={{ width: rem(14), height: rem(14) }} />
+                }
+                rightSection={
+                  <Tooltip label="国际站没有缓存，修改后会立刻显示">
+                    <IconInfoCircle size={14} />
+                  </Tooltip>
+                }
+                onClick={() => {
+                  window.open(
+                    `https://www.furryeventchina.com/${record.organization.slug}/${record.slug}`,
+                    '_blank',
+                  );
+                }}
+              >
+                去国际站查看
+              </Menu.Item>
+              <Menu.Item
+                leftSection={
+                  <IconLink style={{ width: rem(14), height: rem(14) }} />
+                }
+                rightSection={
+                  <Tooltip label="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
+                    <IconInfoCircle size={14} />
+                  </Tooltip>
+                }
+                onClick={() => {
+                  window.open(
+                    `https://www.furrycons.cn/${record.organization.slug}/${record.slug}`,
+                    '_blank',
+                  );
+                }}
+              >
+                去国内站查看
               </Menu.Item>
 
               <Menu.Divider />

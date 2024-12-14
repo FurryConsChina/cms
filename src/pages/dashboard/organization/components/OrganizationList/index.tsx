@@ -1,20 +1,26 @@
-import { ActionIcon, Button, Group, Menu, rem } from '@mantine/core';
-import dayjs from 'dayjs';
-import Table, { ColumnsType } from 'antd/es/table';
+import { ActionIcon, Button, Menu, rem, Tooltip } from '@mantine/core';
 import { Space, Tag } from 'antd';
+import Table, { type ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 
-import { List } from '@/types/Request';
-import { OrganizationType } from '@/types/organization';
-import { useNavigate } from 'react-router-dom';
+import { cleanPageCache } from '@/api/dashboard/cache';
+import type { List } from '@/types/Request';
+import {
+  OrganizationStatusLabel,
+  type OrganizationType,
+  OrganizationTypeLabel,
+} from '@/types/organization';
+import { notifications } from '@mantine/notifications';
 import {
   IconEdit,
+  IconInfoCircle,
+  IconLink,
   IconMenu,
   IconRefresh,
   IconTrash,
 } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
-import { cleanPageCache } from '@/api/dashboard/cache';
-import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
 
 export default function OrganizationList({
   data,
@@ -38,8 +44,8 @@ export default function OrganizationList({
     mutationFn: cleanPageCache,
     onSuccess: () => {
       notifications.show({
-        message: '刷新成功',
-        description: '刷新页面缓存成功',
+        title: '刷新成功',
+        message: '刷新页面缓存成功',
       });
     },
   });
@@ -56,13 +62,13 @@ export default function OrganizationList({
       dataIndex: 'status',
       width: 100,
       key: 'status',
-      render: (status) => status,
+      render: (status) => OrganizationStatusLabel[status],
     },
     {
       title: '类型',
       dataIndex: 'type',
       key: 'type',
-      render: (type) => <Tag>{type || '未配置'}</Tag>,
+      render: (type) => <Tag>{OrganizationTypeLabel[type] || '未配置'}</Tag>,
     },
     {
       title: 'Slug',
@@ -70,7 +76,7 @@ export default function OrganizationList({
       key: 'slug',
     },
     {
-      title: '建立日期',
+      title: '创立日期',
       key: 'date',
       render: (_, record) => (
         <Space>
@@ -120,6 +126,43 @@ export default function OrganizationList({
                 }}
               >
                 刷新
+              </Menu.Item>
+
+              <Menu.Item
+                leftSection={
+                  <IconLink style={{ width: rem(14), height: rem(14) }} />
+                }
+                rightSection={
+                  <Tooltip label="国际站没有缓存，修改后会立刻显示">
+                    <IconInfoCircle size={14} />
+                  </Tooltip>
+                }
+                onClick={() => {
+                  window.open(
+                    `https://www.furryeventchina.com/${record.slug}`,
+                    '_blank',
+                  );
+                }}
+              >
+                去国际站查看
+              </Menu.Item>
+              <Menu.Item
+                leftSection={
+                  <IconLink style={{ width: rem(14), height: rem(14) }} />
+                }
+                rightSection={
+                  <Tooltip label="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
+                    <IconInfoCircle size={14} />
+                  </Tooltip>
+                }
+                onClick={() => {
+                  window.open(
+                    `https://www.furrycons.cn/${record.slug}`,
+                    '_blank',
+                  );
+                }}
+              >
+                去国内站查看
               </Menu.Item>
 
               <Menu.Divider />

@@ -1,4 +1,4 @@
-import { uploadStatic } from "@/api/dashboard/upload";
+import { uploadStatic } from '@/api/dashboard/upload';
 import {
   Button,
   Card,
@@ -10,13 +10,19 @@ import {
   Stack,
   TextInput,
   Image,
-} from "@mantine/core";
-import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
-import { useDisclosure } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
-import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
-import { nanoid } from "nanoid";
-import { useState } from "react";
+  Text,
+  Alert,
+} from '@mantine/core';
+import {
+  Dropzone,
+  type FileWithPath,
+  IMAGE_MIME_TYPE,
+} from '@mantine/dropzone';
+import { useDisclosure } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
+import { IconPhoto, IconUpload, IconX } from '@tabler/icons-react';
+import { nanoid } from 'nanoid';
+import { useState } from 'react';
 
 export default function UploadImage({
   pathPrefix,
@@ -39,7 +45,7 @@ export default function UploadImage({
     }
     return nanoid();
   });
-  const [imageMIME, setImageMINE] = useState("");
+  const [imageMIME, setImageMINE] = useState('');
 
   const previews = images.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
@@ -53,29 +59,45 @@ export default function UploadImage({
     );
   });
 
+  const reset = () => {
+    setImages([]);
+    setImageName(() => {
+      if (defaultImageName) {
+        return `${defaultImageName}-${nanoid()}`;
+      }
+      return nanoid();
+    });
+    setImageMINE('');
+  };
+
+  const onClose = () => {
+    reset();
+    close();
+  };
+
   const onUpload = async () => {
     try {
       setLoading(true);
       if (!images[0]) {
         setLoading(false);
         return notifications.show({
-          message: "没有图片",
+          message: '没有图片',
         });
       }
 
       let formData = new FormData();
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
-      formData.append("imageKey", `${pathPrefix}${imageName}.${imageMIME}`);
-      formData.append("image", images[0], images[0].name);
+      formData.append('imageKey', `${pathPrefix}${imageName}.${imageMIME}`);
+      formData.append('image', images[0], images[0].name);
       const uploadRes = await uploadStatic(formData);
-      console.log("uploadRes", uploadRes);
+      console.log('uploadRes', uploadRes);
       if (uploadRes?.S3UploadRes?.ETag) {
         setLoading(false);
         onUploadSuccess(imagePath);
         notifications.show({
-          message: "图片上传成功",
+          message: '图片上传成功',
         });
-        close();
+        onClose();
       }
     } catch (error) {
     } finally {
@@ -90,13 +112,13 @@ export default function UploadImage({
       </Button>
       <Modal
         opened={opened}
-        onClose={close}
+        onClose={onClose}
         title="上传图片"
         centered
         size="xl"
       >
-        <Group wrap={"nowrap"} justify="flex-start" align="flex-start" gap="xl">
-          <Stack style={{ width: "50%" }}>
+        <Group wrap={'nowrap'} justify="flex-start" align="flex-start" gap="xl">
+          <Stack style={{ width: '50%' }}>
             <Card
               shadow="sm"
               padding="lg"
@@ -107,35 +129,36 @@ export default function UploadImage({
                   setImages([e.clipboardData.files[0]]);
                   if (e.clipboardData.files[0]) {
                     setImageMINE(
-                      e.clipboardData.files[0].type.replace("image/", "")
+                      e.clipboardData.files[0].type.replace('image/', ''),
                     );
                   }
                 }
               }}
             >
-              <Center>在这里粘贴</Center>
+              <Center>可以在这里粘贴</Center>
             </Card>
             <Dropzone
               onDrop={(files) => {
                 setImages(files);
                 if (files[0]) {
-                  setImageMINE(files[0].type.replace("image/", ""));
+                  setImageMINE(files[0].type.replace('image/', ''));
                 }
               }}
               onReject={(files) => {
                 notifications.show({
-                  title: "不受支持的文件",
+                  title: '不受支持的文件',
                   message: JSON.stringify(files[0].errors),
                 });
               }}
               maxSize={20 * 1024 ** 2}
               accept={IMAGE_MIME_TYPE}
               multiple={false}
+              className="cursor-pointer border-dashed border-2 border-gray-300 rounded"
             >
               <Group
                 justify="center"
                 gap="xl"
-                style={{ pointerEvents: "none" }}
+                style={{ pointerEvents: 'none' }}
               >
                 {images.length ? (
                   <SimpleGrid
@@ -151,7 +174,7 @@ export default function UploadImage({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-blue-6)",
+                          color: 'var(--mantine-color-blue-6)',
                         }}
                         stroke={1.5}
                       />
@@ -161,7 +184,7 @@ export default function UploadImage({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-red-6)",
+                          color: 'var(--mantine-color-red-6)',
                         }}
                         stroke={1.5}
                       />
@@ -171,7 +194,7 @@ export default function UploadImage({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-dimmed)",
+                          color: 'var(--mantine-color-dimmed)',
                         }}
                         stroke={1.5}
                       />
@@ -181,7 +204,16 @@ export default function UploadImage({
               </Group>
             </Dropzone>
           </Stack>
-          <Stack style={{ flexShrink: 0, width: "50%" }}>
+          <Stack style={{ flexShrink: 0, width: '50%' }}>
+            {images[0] && (
+              <Alert variant="light" color="blue" title="图片信息">
+                图片大小:{' '}
+                {images[0]?.size
+                  ? `${(images[0].size / (1024 * 1024)).toFixed(2)}MB`
+                  : '0MB'}
+                , 图片后缀: {imageMIME}
+              </Alert>
+            )}
             <TextInput
               description={`${pathPrefix}${imageName}.${imageMIME}`}
               value={imageName}
