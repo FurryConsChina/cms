@@ -1,10 +1,7 @@
 import axios from "axios";
 
-// export const BASEURL = "https://api.furryeventchina.com";
-export const BASEURL = "http://localhost:8787";
-
 const Axios = axios.create({
-  baseURL: BASEURL,
+  baseURL: import.meta.env.PUBLIC_API_URL,
 });
 
 Axios.interceptors.request.use(

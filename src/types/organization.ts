@@ -5,6 +5,21 @@ export const OrganizationStatus = {
   InActive: "inactive",
 };
 
+export const OrganizationType = {
+  Personal: "personal",
+  Agency: "agency",
+};
+
+export const OrganizationStatusLabel = {
+  [OrganizationStatus.Active]: "正常运营",
+  [OrganizationStatus.InActive]: "终止活动",
+};
+
+export const OrganizationTypeLabel = {
+  [OrganizationType.Personal]: "个人",
+  [OrganizationType.Agency]: "团体",
+};
+
 export const OrganizationSchema = z.object({
   id: z.string().uuid(),
   slug: z.string().min(1),
@@ -23,7 +38,7 @@ export const OrganizationSchema = z.object({
   wikifur: z.string().url().nullish(),
   creationTime: z
     .string()
-    .refine((date) => !isNaN(Date.parse(date)), {
+    .refine((date) => !Number.isNaN(Date.parse(date)), {
       message: "Invalid date format",
     })
     .nullish(),

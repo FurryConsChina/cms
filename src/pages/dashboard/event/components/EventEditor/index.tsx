@@ -1,15 +1,15 @@
-import { EventScaleLabel, EventStatusLabel } from "@/consts/event";
-import "dayjs/locale/zh-cn";
+import { EventScaleLabel, EventStatusLabel } from '@/consts/event';
+import 'dayjs/locale/zh-cn';
 
 import {
   EditableEventSchema,
-  EditableEventType,
+  type EditableEventType,
   EventScale,
-  EventScaleKeyType,
+  type EventScaleKeyType,
   EventStatus,
-  EventStatusKeyType,
-  EventType,
-} from "@/types/event";
+  type EventStatusKeyType,
+  type EventType,
+} from '@/types/event';
 import {
   ActionIcon,
   Box,
@@ -31,28 +31,31 @@ import {
   Textarea,
   Title,
   rem,
-} from "@mantine/core";
-import { DateTimePicker } from "@mantine/dates";
-import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from "@mantine/dropzone";
-import { useForm, zodResolver } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
+} from '@mantine/core';
+import { DateTimePicker } from '@mantine/dates';
+import {
+  Dropzone,
+  type FileWithPath,
+  IMAGE_MIME_TYPE,
+} from '@mantine/dropzone';
+import { useForm, zodResolver } from '@mantine/form';
+import { useDisclosure } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 import {
   IconPhoto,
   IconPlus,
   IconTrash,
   IconUpload,
   IconX,
-} from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { nanoid } from "nanoid";
-import { OrganizationType } from "@/types/organization";
-import { useQuery } from "@tanstack/react-query";
-import { getAllOrganizations } from "@/api/dashboard/organization";
-import { createEvent, updateEvent } from "@/api/dashboard/event";
-import { uploadStatic } from "@/api/dashboard/upload";
-import { z } from "zod";
-import { start } from "repl";
+} from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { nanoid } from 'nanoid';
+import { OrganizationType } from '@/types/organization';
+import { useQuery } from '@tanstack/react-query';
+import { getAllOrganizations } from '@/api/dashboard/organization';
+import { createEvent, updateEvent } from '@/api/dashboard/event';
+import { uploadStatic } from '@/api/dashboard/upload';
+import { z } from 'zod';
 
 function EventEditor({
   event,
@@ -67,7 +70,7 @@ function EventEditor({
     <Modal
       opened={opened}
       onClose={onClose}
-      title={event ? "编辑展会" : "新建展会"}
+      title={event ? '编辑展会' : '新建展会'}
       centered
       size="xl"
     >
@@ -83,27 +86,26 @@ function EventEditorContent({
   event?: EventType;
   onClose: () => void;
 }) {
-  console.log(event?.startAt);
   const form = useForm({
     initialValues: {
-      name: event?.name || "",
+      name: event?.name || '',
       startAt: event?.startAt ? new Date(event?.startAt) : new Date(),
       endAt: event?.endAt ? new Date(event?.endAt) : new Date(),
-      city: event?.addressExtra?.city || "",
-      citySlug: event?.addressExtra?.citySlug || "",
-      address: event?.address || "",
+      city: event?.addressExtra?.city || '',
+      citySlug: event?.addressExtra?.citySlug || '',
+      address: event?.address || '',
       addressExtra: event?.addressExtra || { city: null },
       features: event?.features || {},
-      source: event?.source || "",
-      thumbnail: event?.thumbnail || "fec-event-default-cover.png",
+      source: event?.source || '',
+      thumbnail: event?.thumbnail || 'fec-event-default-cover.png',
       poster: event?.poster?.all || [],
-      organization: event?.organization?.id || "",
-      slug: event?.slug || "",
-      detail: event?.detail || "",
+      organization: event?.organization?.id || '',
+      slug: event?.slug || '',
+      detail: event?.detail || '',
       status: event?.status || EventStatus.EventScheduled,
       scale: event?.scale || EventScale.Cosy,
-      addressLat: event?.addressLat || "",
-      addressLon: event?.addressLon || "",
+      addressLat: event?.addressLat || '',
+      addressLon: event?.addressLon || '',
     },
     validate: zodResolver(
       z.object({
@@ -112,7 +114,7 @@ function EventEditorContent({
         endAt: z.date().nullable(),
         city: z.string(),
         citySlug: z.string(),
-      })
+      }),
     ),
     // validate: zodResolver(EditableEventSchema),
   });
@@ -120,8 +122,8 @@ function EventEditorContent({
   type formType = typeof form.values;
 
   const { data: organizationList } = useQuery({
-    queryKey: ["organization-list"],
-    queryFn: () => getAllOrganizations({ search: "" }),
+    queryKey: ['organization-list'],
+    queryFn: () => getAllOrganizations({ search: '' }),
   });
 
   const organizationSelectOptions = organizationList?.map((item) => ({
@@ -130,13 +132,13 @@ function EventEditorContent({
   }));
 
   const selectedOrganization = organizationList?.find(
-    (item) => item.id == form.values.organization
+    (item) => item.id === form.values.organization,
   );
 
   const generateEventSlug = () => {
     const selectedYear = form.values.startAt?.getFullYear();
     const selectedMonth = form.values.startAt
-      ?.toLocaleString("en-us", { month: "short" })
+      ?.toLocaleString('en-us', { month: 'short' })
       .toLocaleLowerCase();
     const city = form.values.city;
     if (!selectedYear || !selectedMonth || !city) {
@@ -147,8 +149,6 @@ function EventEditorContent({
   };
 
   const handleSubmit = async (formData: formType) => {
-    console.log(formData);
-
     const transFormData: EditableEventType = {
       ...formData,
       startAt: formData.startAt.toISOString(),
@@ -168,21 +168,19 @@ function EventEditorContent({
       if (res) {
         onClose();
         notifications.show({
-          title: "更新成功",
-          message: "更新展会数据成功",
-          color: "teal",
+          title: '更新成功',
+          message: '更新展会数据成功',
+          color: 'teal',
         });
       }
-      console.log("update res", res);
     } else {
       const res = await createEvent(transFormData);
-      console.log("create res", res);
       if (res) {
         onClose();
         notifications.show({
-          title: "更新成功",
-          message: "创建展会数据成功",
-          color: "teal",
+          title: '更新成功',
+          message: '创建展会数据成功',
+          color: 'teal',
         });
       }
     }
@@ -199,13 +197,13 @@ function EventEditorContent({
             <TextInput
               withAsterisk
               label="展会名称"
-              {...form.getInputProps("name")}
+              {...form.getInputProps('name')}
             />
 
             <Select
               label="展会展方"
               data={organizationSelectOptions}
-              {...form.getInputProps("organization")}
+              {...form.getInputProps('organization')}
             />
 
             <Group gap="xs" grow>
@@ -215,7 +213,7 @@ function EventEditorContent({
                 locale="zh-cn"
                 label="开始日期"
                 placeholder="Pick date"
-                {...form.getInputProps("startAt")}
+                {...form.getInputProps('startAt')}
               />
               <DateTimePicker
                 withAsterisk
@@ -223,7 +221,7 @@ function EventEditorContent({
                 locale="zh-cn"
                 placeholder="Pick date"
                 valueFormat="YYYY年MM月DD日 hh:mm A"
-                {...form.getInputProps("endAt")}
+                {...form.getInputProps('endAt')}
               />
             </Group>
           </Stack>
@@ -238,20 +236,20 @@ function EventEditorContent({
               <TextInput
                 withAsterisk
                 label="展会城市"
-                {...form.getInputProps("city")}
+                {...form.getInputProps('city')}
               />
 
               <TextInput
                 withAsterisk
                 label="城市Slug"
-                {...form.getInputProps("citySlug")}
+                {...form.getInputProps('citySlug')}
               />
             </Group>
 
             <TextInput
               // withAsterisk
               label="展会地址"
-              {...form.getInputProps("address")}
+              {...form.getInputProps('address')}
             />
 
             <Group gap="xs" grow>
@@ -259,14 +257,14 @@ function EventEditorContent({
                 label="经度"
                 placeholder="一般是三位整数"
                 hideControls
-                {...form.getInputProps("addressLon")}
+                {...form.getInputProps('addressLon')}
               />
 
               <NumberInput
                 label="纬度"
                 placeholder="一般是两位整数"
                 hideControls
-                {...form.getInputProps("addressLat")}
+                {...form.getInputProps('addressLat')}
               />
             </Group>
           </Stack>
@@ -280,7 +278,7 @@ function EventEditorContent({
             <TextInput
               withAsterisk
               label="展会Slug"
-              {...form.getInputProps("slug")}
+              {...form.getInputProps('slug')}
             />
             <Button
               onClick={() => {
@@ -288,7 +286,7 @@ function EventEditorContent({
                 if (!slug) {
                   return;
                 }
-                form.setFieldValue("slug", slug);
+                form.setFieldValue('slug', slug);
               }}
             >
               生成Slug
@@ -308,7 +306,7 @@ function EventEditorContent({
                 label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
                 value: EventStatus[key as EventStatusKeyType],
               }))}
-              {...form.getInputProps("status")}
+              {...form.getInputProps('status')}
             />
 
             <Select
@@ -318,13 +316,13 @@ function EventEditorContent({
                 label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
                 value: EventScale[key as EventScaleKeyType],
               }))}
-              {...form.getInputProps("scale")}
+              {...form.getInputProps('scale')}
             />
 
             <TextInput
               // withAsterisk
               label="展会信源"
-              {...form.getInputProps("source")}
+              {...form.getInputProps('source')}
             />
 
             <Textarea
@@ -332,7 +330,7 @@ function EventEditorContent({
               autosize
               minRows={5}
               maxRows={20}
-              {...form.getInputProps("detail")}
+              {...form.getInputProps('detail')}
             />
           </Stack>
         </Container>
@@ -346,7 +344,7 @@ function EventEditorContent({
             <TextInput
               label="封面图片"
               withAsterisk
-              {...form.getInputProps("thumbnail")}
+              {...form.getInputProps('thumbnail')}
             />
             <Group>
               <Chip
@@ -354,11 +352,11 @@ function EventEditorContent({
                 variant="filled"
                 onClick={() => {
                   const organizationSlug = organizationList?.find(
-                    (item) => item.id === form.values.organization
+                    (item) => item.id === form.values.organization,
                   )?.slug;
                   form.setFieldValue(
-                    "thumbnail",
-                    `organizations/${organizationSlug}/${form.values.slug}/cover.webp`
+                    'thumbnail',
+                    `organizations/${organizationSlug}/${form.values.slug}/cover.webp`,
                   );
                 }}
               >
@@ -368,7 +366,7 @@ function EventEditorContent({
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue("thumbnail", "fec-event-default-cover.png")
+                  form.setFieldValue('thumbnail', 'fec-event-default-cover.png')
                 }
               >
                 默认图片
@@ -377,7 +375,7 @@ function EventEditorContent({
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue("thumbnail", "fec-event-blank-cover.png")
+                  form.setFieldValue('thumbnail', 'fec-event-blank-cover.png')
                 }
               >
                 待揭晓图片
@@ -387,7 +385,7 @@ function EventEditorContent({
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue("thumbnail", "fec-event-cancel-cover.png")
+                  form.setFieldValue('thumbnail', 'fec-event-cancel-cover.png')
                 }
               >
                 取消图片
@@ -396,18 +394,18 @@ function EventEditorContent({
               <UploadImgae
                 pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
                 defaultImageName="cover"
-                onUploadSuccess={(s) => form.setFieldValue("thumbnail", s)}
+                onUploadSuccess={(s) => form.setFieldValue('thumbnail', s)}
               />
             </Group>
 
             <Group>
               <Fieldset w="100%" legend="展会详情图片">
                 <ActionIcon
-                  size={"sm"}
+                  size={'sm'}
                   onClick={() =>
                     form.setFieldValue(
-                      "poster",
-                      form.values.poster.concat([""])
+                      'poster',
+                      form.values.poster.concat(['']),
                     )
                   }
                 >
@@ -429,11 +427,11 @@ function EventEditorContent({
                     />
                     <Button
                       color="red"
-                      size={"sm"}
+                      size={'sm'}
                       onClick={() =>
                         form.setFieldValue(
-                          "poster",
-                          form.values.poster.filter((_, i) => i !== index)
+                          'poster',
+                          form.values.poster.filter((_, i) => i !== index),
                         )
                       }
                     >
@@ -473,7 +471,7 @@ function UploadImgae({
     }
     return nanoid();
   });
-  const [imageMIME, setImageMINE] = useState("");
+  const [imageMIME, setImageMINE] = useState('');
 
   const previews = images.map((file, index) => {
     const imageUrl = URL.createObjectURL(file);
@@ -493,26 +491,26 @@ function UploadImgae({
       if (!images[0]) {
         setLoading(false);
         return notifications.show({
-          message: "没有图片",
+          message: '没有图片',
         });
       }
 
       let formData = new FormData();
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
-      formData.append("imageKey", `${pathPrefix}${imageName}.${imageMIME}`);
-      formData.append("image", images[0], images[0].name);
+      formData.append('imageKey', `${pathPrefix}${imageName}.${imageMIME}`);
+      formData.append('image', images[0], images[0].name);
       const uploadRes = await uploadStatic(formData);
       // const uploadRes = await fetch("/api/upload-image", {
       //   cache: "no-cache",
       //   method: "POST",
       //   body: formData,
       // }).then((res) => res.json());
-      console.log("uploadRes", uploadRes);
+      console.log('uploadRes', uploadRes);
       if (uploadRes?.S3UploadRes?.ETag) {
         setLoading(false);
         onUploadSuccess(imagePath);
         notifications.show({
-          message: "图片上传成功",
+          message: '图片上传成功',
         });
         close();
       }
@@ -532,17 +530,17 @@ function UploadImgae({
         centered
         size="xl"
       >
-        <Group wrap={"nowrap"} justify="flex-start" align="flex-start" gap="xl">
-          <Stack style={{ width: "50%" }}>
+        <Group wrap={'nowrap'} justify="flex-start" align="flex-start" gap="xl">
+          <Stack style={{ width: '50%' }}>
             <Dropzone
               onDrop={(files) => {
-                console.log("accepted files", files);
+                console.log('accepted files', files);
                 setImages(files);
                 if (files[0]) {
-                  setImageMINE(files[0].type.replace("image/", ""));
+                  setImageMINE(files[0].type.replace('image/', ''));
                 }
               }}
-              onReject={(files) => console.log("rejected files", files)}
+              onReject={(files) => console.log('rejected files', files)}
               maxSize={3 * 1024 ** 2}
               accept={IMAGE_MIME_TYPE}
               multiple={false}
@@ -551,7 +549,7 @@ function UploadImgae({
                 justify="center"
                 gap="xl"
                 // mih={220}
-                style={{ pointerEvents: "none" }}
+                style={{ pointerEvents: 'none' }}
               >
                 {images.length ? (
                   <SimpleGrid
@@ -567,7 +565,7 @@ function UploadImgae({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-blue-6)",
+                          color: 'var(--mantine-color-blue-6)',
                         }}
                         stroke={1.5}
                       />
@@ -577,7 +575,7 @@ function UploadImgae({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-red-6)",
+                          color: 'var(--mantine-color-red-6)',
                         }}
                         stroke={1.5}
                       />
@@ -587,7 +585,7 @@ function UploadImgae({
                         style={{
                           width: rem(52),
                           height: rem(52),
-                          color: "var(--mantine-color-dimmed)",
+                          color: 'var(--mantine-color-dimmed)',
                         }}
                         stroke={1.5}
                       />
@@ -606,7 +604,7 @@ function UploadImgae({
                   setImages([e.clipboardData.files[0]]);
                   if (e.clipboardData.files[0]) {
                     setImageMINE(
-                      e.clipboardData.files[0].type.replace("image/", "")
+                      e.clipboardData.files[0].type.replace('image/', ''),
                     );
                   }
                 }
@@ -615,7 +613,7 @@ function UploadImgae({
               <Center>在这里粘贴</Center>
             </Card>
           </Stack>
-          <Stack style={{ flexShrink: 0, width: "50%" }}>
+          <Stack style={{ flexShrink: 0, width: '50%' }}>
             <TextInput
               description={`${pathPrefix}${imageName}.${imageMIME}`}
               value={imageName}
