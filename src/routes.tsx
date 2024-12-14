@@ -66,12 +66,16 @@ const router = createBrowserRouter([
     path: "auth",
     loader: () => {
       const user = useAuthStore.getState().user;
-      // if (user) {
-      //   return redirect("/dashboard");
-      // }
+      if (user) {
+        return redirect("/dashboard");
+      }
       return null;
     },
     Component: Auth,
+  },
+  {
+    path: "/",
+    Component: App,
   },
 ]);
 

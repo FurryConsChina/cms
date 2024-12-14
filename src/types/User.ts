@@ -1,4 +1,7 @@
 export type User = {
   email: string;
-  id: number;
+  id: string;
+  name: string;
+  role: string;
+  manageScope: { organizations?: string[] };
 };
