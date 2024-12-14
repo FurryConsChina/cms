@@ -1,7 +1,8 @@
-import Axios from '@/api';
-import { User } from '@/types/User';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import Axios from "@/api";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+import type { User } from "@/types/User";
 
 interface UserStore {
   _hasHydrated: boolean;
@@ -33,26 +34,26 @@ const useAuthStore = create<UserStore>()(
         set({
           token,
         });
-        Axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+        Axios.defaults.headers.common.Authorization = `${token}`;
       },
       logout: () => {
         set({
           user: null,
         });
-        Axios.defaults.headers.common['Authorization'] = null;
+        Axios.defaults.headers.common.Authorization = null;
+        window.location.href = "/auth";
       },
     }),
     {
-      name: 'auth',
+      name: "fcc-auth",
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
         if (state?.token) {
-          Axios.defaults.headers.common['Authorization'] =
-            `Token ${state.token}`;
+          Axios.defaults.headers.common.Authorization = `${state.token}`;
         }
       },
-    },
-  ),
+    }
+  )
 );
 
 export default useAuthStore;

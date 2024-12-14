@@ -9,7 +9,7 @@ import DashboardLayout from "@/pages/dashboard/layout";
 import "@/styles/global.css";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
-import '@mantine/notifications/styles.css';
+import "@mantine/notifications/styles.css";
 
 const App = () => {
   const { user, _hasHydrated } = useAuthStore();
@@ -18,7 +18,7 @@ const App = () => {
     return <FullScreenLoading />;
   }
 
-  return user ? <DashboardLayout /> : <Navigate to="/login" />;
+  return user ? <DashboardLayout /> : <Navigate to="/auth" />;
 };
 
 export default App;

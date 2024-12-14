@@ -1,3 +1,11 @@
+import useAuthStore from "@/stores/auth";
+import { Title } from "@mantine/core";
+
 export default function Dashboard() {
-    return <div>WIP 统计页面</div>;
-  }
+  const { user } = useAuthStore();
+  return (
+    <div>
+      <Title order={2}>欢迎回来，{user?.name || user?.email}</Title>
+    </div>
+  );
+}
