@@ -16,13 +16,15 @@ jobs:
       # Run your project's build step
       - name: Use Yarn 4
         run: corepack enable
+      - name: Inject Environment Variables
+        run: |
+          echo "PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}" >> .env
       - name: Build
         run: yarn install --immutable && yarn build
       - name: Publish
-        uses: cloudflare/pages-action@v1
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: fcc-cms-6b4t # e.g. 'my-project'
-          directory: dist # e.g. 'dist'
+          command: pages deploy dist --project-name=fcc-cms-6b4t
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
