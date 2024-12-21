@@ -6,13 +6,13 @@ import { IconRefresh } from '@tabler/icons-react';
 export default function CacheManager() {
   return (
     <>
-      <DefaultContainer className="shadow sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-10">
         <Group justify="space-between">
           <Title order={2}>缓存刷新控制台</Title>
         </Group>
       </DefaultContainer>
 
-      <DefaultContainer className="mt-4 shadow">
+      <DefaultContainer className="mt-4">
         <SimpleGrid cols={4}>
           <Button
             leftSection={<IconRefresh size={16} stroke={1.5} />}

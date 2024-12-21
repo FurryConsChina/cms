@@ -56,7 +56,7 @@ export default function OrganizationEditPage() {
   }
   return (
     <div className="relative">
-      <DefaultContainer className="shadow sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-10">
         <Title order={2}>{organizationId ? '编辑展商' : '新建展商'}</Title>
       </DefaultContainer>
 
@@ -134,7 +134,7 @@ function OrganizationEditorContent({
             message: '更新展商数据成功',
             color: 'teal',
           });
-          navigate(-1);
+          navigate('/dashboard/organization');
         }
         console.log('update res', res);
       } else {
@@ -146,7 +146,7 @@ function OrganizationEditorContent({
             message: '创建展商数据成功',
             color: 'teal',
           });
-          navigate(-1);
+          navigate('/dashboard/organization');
         }
       }
     } else {
@@ -161,7 +161,7 @@ function OrganizationEditorContent({
   return (
     <Box mx="auto">
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Container my="md">
+        <Container fluid>
           <Title order={5} my="sm">
             基础信息
           </Title>
@@ -205,29 +205,30 @@ function OrganizationEditorContent({
               />
             </Group>
 
-            <TextInput
-              withAsterisk
-              label="展商Slug"
-              disabled={!!organization?.id}
-              description={
-                <Flex direction="row" gap="xs">
-                  <Alert variant="light" color="blue" radius="lg">
-                    Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。
-                  </Alert>
-                  <Alert variant="light" color="red" radius="lg">
-                    不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。
-                  </Alert>
-                </Flex>
-              }
-              placeholder="请输入展商Slug"
-              {...form.getInputProps('slug')}
-            />
+            <Group justify="space-between" align="flex-start" grow>
+              <TextInput
+                withAsterisk
+                label="展商Slug"
+                disabled={!!organization?.id}
+                placeholder="请输入展商Slug"
+                {...form.getInputProps('slug')}
+              />
+            </Group>
+
+            <Flex direction="row" gap="xs">
+              <Alert variant="light" color="blue" radius="lg">
+                Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。
+              </Alert>
+              <Alert variant="light" color="red" radius="lg">
+                不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。
+              </Alert>
+            </Flex>
           </Stack>
         </Container>
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container fluid>
           <Title order={5}>媒体信息</Title>
           <Stack>
             <Group grow>
@@ -282,7 +283,7 @@ function OrganizationEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container fluid>
           <Title order={5}>展会附加信息</Title>
           <Stack>
             <Textarea
@@ -299,7 +300,7 @@ function OrganizationEditorContent({
 
         <Divider my="sm" variant="dotted" />
 
-        <Container my="md">
+        <Container fluid>
           <Title order={5}>展会媒体资源</Title>
 
           <Stack justify="flex-start" gap="xs">
@@ -319,9 +320,11 @@ function OrganizationEditorContent({
           </Stack>
         </Container>
 
-        <Group justify="flex-end" mt="md">
-          <Button type="submit">保存</Button>
-        </Group>
+        <Container fluid>
+          <Group justify="flex-end" mt="md">
+            <Button type="submit">保存</Button>
+          </Group>
+        </Container>
       </form>
     </Box>
   );

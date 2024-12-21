@@ -1,6 +1,6 @@
 import Axios from "@/api";
-import { EditableEventType, EventType } from "@/types/event";
-import { List } from "@/types/Request";
+import type { EditableEventType, EventType } from "@/types/event";
+import type { List } from "@/types/Request";
 
 export async function getEventList(params: {
   pageSize: number;

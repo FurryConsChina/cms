@@ -1,3 +1,4 @@
+import { FeatureSchema } from "@/types/feature";
 import { OrganizationSchema } from "@/types/organization";
 import z from "zod";
 
@@ -63,6 +64,7 @@ export const EventSchema = z.object({
     .nullable(),
   detail: z.string().nullable(),
   features: z.object({}).nullable(),
+  commonFeatures: z.array(FeatureSchema).nullable(),
 
   organization: OrganizationSchema,
 });
@@ -70,6 +72,7 @@ export const EventSchema = z.object({
 export const EditableEventSchema = EventSchema.omit({
   id: true,
   organization: true,
+  commonFeatures: true,
 }).merge(
   z.object({
     id: z.string().optional(),
@@ -79,6 +82,7 @@ export const EditableEventSchema = EventSchema.omit({
         isPrimary: z.boolean(),
       })
     ),
+    commonFeatures: z.array(z.string()).nullable(),
   })
 );
 

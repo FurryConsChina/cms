@@ -27,6 +27,8 @@ import {
   Title,
   Text,
   Center,
+  TagsInput,
+  MultiSelect,
 } from '@mantine/core';
 import { DateTimePicker } from '@mantine/dates';
 import { useForm, zodResolver } from '@mantine/form';
@@ -49,6 +51,7 @@ import { Spin } from 'antd';
 import UploadImage from '@/components/UploadImage';
 import DefaultContainer from '@/components/Container';
 import LoadError from '@/components/Error';
+import { getFeatureList } from '@/api/dashboard/feature';
 
 export default function EventEditPage() {
   const { eventId } = useParams();
@@ -61,6 +64,7 @@ export default function EventEditPage() {
     queryFn: () => getEventDetail({ id: eventId as string }),
     refetchOnWindowFocus: false,
     enabled: !!eventId,
+    gcTime: 0,
   });
 
   if (isError) {
@@ -108,7 +112,8 @@ function EventEditorContent({ event }: { event?: EventType }) {
       citySlug: event?.addressExtra?.citySlug || '',
       address: event?.address || '',
       addressExtra: event?.addressExtra || { city: null },
-      features: event?.features || {},
+      features: event?.features || { self: [] },
+      commonFeatures: event?.commonFeatures?.map((f) => f.id) || [],
       source: event?.source || '',
       thumbnail: event?.thumbnail || 'fec-event-default-cover.png',
       poster: event?.poster?.all || [],
@@ -139,14 +144,26 @@ function EventEditorContent({ event }: { event?: EventType }) {
     queryFn: () => getAllOrganizations({ search: '' }),
   });
 
-  const organizationSelectOptions = organizationList?.map((item) => ({
-    label: item.name,
-    value: item.id,
-  }));
+  const { data: featureList } = useQuery({
+    queryKey: ['feature-list'],
+    queryFn: () => getFeatureList({ pageSize: 100, current: 1 }),
+  });
+
+  const organizationSelectOptions =
+    organizationList?.map((item) => ({
+      label: item.name,
+      value: item.id,
+    })) || [];
 
   const selectedOrganization = organizationList?.find(
     (item) => item.id === form.values.organization,
   );
+
+  const featureSelectOptions =
+    featureList?.records.map((item) => ({
+      label: item.name,
+      value: item.id,
+    })) || [];
 
   const generateEventSlug = () => {
     const selectedYear = form.values.startAt?.getFullYear();
@@ -186,7 +203,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
           message: '更新展会数据成功',
           color: 'teal',
         });
-        navigate(-1);
+        navigate('/dashboard/event');
       }
       console.log('update res', res);
     } else {
@@ -198,10 +215,12 @@ function EventEditorContent({ event }: { event?: EventType }) {
           message: '创建展会数据成功',
           color: 'teal',
         });
-        navigate(-1);
+        navigate('/dashboard/event');
       }
     }
   };
+
+  console.log(form.values);
 
   return (
     <Box mx="auto">
@@ -304,17 +323,15 @@ function EventEditorContent({ event }: { event?: EventType }) {
             </Group>
 
             <Group gap="xs" grow>
-              <NumberInput
+              <TextInput
                 label="经度"
                 placeholder="一般是三位整数"
-                hideControls
                 {...form.getInputProps('addressLon')}
               />
 
-              <NumberInput
+              <TextInput
                 label="纬度"
                 placeholder="一般是两位整数"
-                hideControls
                 {...form.getInputProps('addressLat')}
               />
             </Group>
@@ -371,6 +388,19 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 value: EventScale[key as EventScaleKeyType],
               }))}
               {...form.getInputProps('scale')}
+            />
+
+            <TagsInput
+              label="展会专属标签"
+              placeholder="请输入展会专属的标签"
+              {...form.getInputProps('features.self')}
+            />
+
+            <MultiSelect
+              label="展会公共标签"
+              placeholder="请选择展会共有的标签"
+              data={featureSelectOptions}
+              {...form.getInputProps('commonFeatures')}
             />
 
             <TextInput
@@ -502,7 +532,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
           </Stack>
         </Container>
 
-        <Container>
+        <Container fluid>
           <Group justify="flex-end" mt="md">
             <Button type="submit">提交</Button>
           </Group>

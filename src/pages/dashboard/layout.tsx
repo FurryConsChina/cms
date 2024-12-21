@@ -20,6 +20,7 @@ const linksData = [
   { link: "/dashboard", label: "首页", icon: IconHome },
   { link: "/dashboard/event", label: "展会", icon: IconTicket },
   { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
+  { link: "/dashboard/feature", label: "展会标签", icon: IconTrademark },
   {
     link: "/dashboard/cache-manager",
     label: "缓存管理",
