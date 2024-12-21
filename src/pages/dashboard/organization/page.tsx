@@ -22,7 +22,7 @@ export default function OrganizationPage() {
 
   return (
     <>
-      <DefaultContainer className="shadow sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-10">
         <Group justify="space-between">
           <Title order={2}>展商列表</Title>
 
@@ -37,7 +37,7 @@ export default function OrganizationPage() {
         </Group>
       </DefaultContainer>
 
-      <div className="shadow-xl mt-4 p-4 rounded-xl bg-white">
+      <div className="shadow mt-4 p-4 rounded-xl bg-white">
         <OrganizationList
           data={data || { total: 0, records: [] }}
           isPending={isPending}

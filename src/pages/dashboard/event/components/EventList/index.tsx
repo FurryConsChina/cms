@@ -1,10 +1,14 @@
 import { Space, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { ActionIcon, Button, Menu, rem, Tooltip } from '@mantine/core';
+import { ActionIcon, Badge, Button, Menu, rem, Tooltip } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 import type { ColumnsType } from 'antd/es/table';
-import { EventScaleLabel, EventStatusLabel } from '@/consts/event';
+import {
+  EventScaleLabel,
+  EventStatusColor,
+  EventStatusLabel,
+} from '@/consts/event';
 import type { EventType } from '@/types/event';
 import { useMutation } from '@tanstack/react-query';
 import { cleanPageCache } from '@/api/dashboard/cache';
@@ -50,6 +54,11 @@ function EventList({
 
   const columns: ColumnsType<EventType> = [
     {
+      title: '展商',
+      dataIndex: ['organization', 'name'],
+      key: 'organizationName',
+    },
+    {
       title: '展会名称',
       dataIndex: 'name',
       key: 'name',
@@ -62,7 +71,7 @@ function EventList({
         <Space>
           <Tag>
             {dayjs(record.startAt).format('YYYY/MM/DD')}-
-            {dayjs(record.endAt).format('YYYY/MM/DD')}
+            {dayjs(record.endAt).format('MM/DD')}
           </Tag>
         </Space>
       ),
@@ -70,9 +79,14 @@ function EventList({
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
       key: 'status',
-      render: (status) => EventStatusLabel[status],
+      render: (status) => (
+        <Tooltip label={EventStatusLabel[status]}>
+          <Badge color={EventStatusColor[status]}>
+            {EventStatusLabel[status]}
+          </Badge>
+        </Tooltip>
+      ),
     },
     {
       title: '规模',
@@ -85,11 +99,7 @@ function EventList({
       dataIndex: ['addressExtra', 'city'],
       key: 'city',
     },
-    {
-      title: '展商',
-      dataIndex: ['organization', 'name'],
-      key: 'organizationName',
-    },
+
     {
       title: '地址',
       dataIndex: 'address',

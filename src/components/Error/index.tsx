@@ -6,7 +6,7 @@ export default function LoadError() {
   const navigate = useNavigate();
 
   return (
-    <DefaultContainer className="shadow sticky top-0 z-10">
+    <DefaultContainer className="sticky top-0 z-10">
       <Container className="flex flex-col items-center justify-center">
         <Title className="text-slate-700">发生了错误...</Title>
         <Text c="dimmed" size="lg" ta="center">

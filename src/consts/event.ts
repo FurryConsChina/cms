@@ -15,3 +15,11 @@ export const EventScaleLabel = {
   [EventScale.Large]: "大型(Large)",
   [EventScale.Mega]: "超大型(Mega)",
 };
+
+export const EventStatusColor = {
+  [EventStatus.EventScheduled]: "blue",
+  [EventStatus.EventPostponed]: "gray",
+  [EventStatus.EventRescheduled]: "orange",
+  [EventStatus.EventMovedOnline]: "green",
+  [EventStatus.EventCancelled]: "red",
+};
