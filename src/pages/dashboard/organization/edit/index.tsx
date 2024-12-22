@@ -133,8 +133,8 @@ function OrganizationEditorContent({
             title: '更新成功',
             message: '更新展商数据成功',
             color: 'teal',
+            autoClose: false,
           });
-          navigate('/dashboard/organization');
         }
         console.log('update res', res);
       } else {
@@ -145,8 +145,8 @@ function OrganizationEditorContent({
             title: '创建成功',
             message: '创建展商数据成功',
             color: 'teal',
+            autoClose: false,
           });
-          navigate('/dashboard/organization');
         }
       }
     } else {

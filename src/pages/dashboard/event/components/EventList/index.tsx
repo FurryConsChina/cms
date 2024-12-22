@@ -222,7 +222,6 @@ function EventList({
             color="green"
             onClick={() => {
               window.open(`/dashboard/event/${record.id}/edit`);
-              // navigate(`/dashboard/event/${record.id}/edit`);
             }}
             leftSection={<IconEdit size={14} />}
           >
