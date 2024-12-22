@@ -98,7 +98,7 @@ export default function OrganizationList({
             color="green"
             aria-label="view"
             onClick={() => {
-              navigate(`/dashboard/organization/${record.id}/edit`);
+              window.open(`/dashboard/organization/${record.id}/edit`);
             }}
             leftSection={<IconEdit size={14} />}
           >

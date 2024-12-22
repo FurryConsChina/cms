@@ -202,8 +202,8 @@ function EventEditorContent({ event }: { event?: EventType }) {
           title: '更新成功',
           message: '更新展会数据成功',
           color: 'teal',
+          autoClose: false,
         });
-        navigate('/dashboard/event');
       }
       console.log('update res', res);
     } else {
@@ -214,8 +214,8 @@ function EventEditorContent({ event }: { event?: EventType }) {
           title: '创建成功',
           message: '创建展会数据成功',
           color: 'teal',
+          autoClose: false,
         });
-        navigate('/dashboard/event');
       }
     }
   };

@@ -5,6 +5,7 @@ import type { List } from "@/types/Request";
 export async function getEventList(params: {
   pageSize: number;
   current: number;
+  search?: string;
 }) {
   const res = await Axios.get<List<EventType>>("/event/list", {
     params,

@@ -1,6 +1,15 @@
-import { Space, Table, Tag } from 'antd';
+import { Input, Space, Table, TableColumnType, Tag } from 'antd';
 import dayjs from 'dayjs';
-import { ActionIcon, Badge, Button, Menu, rem, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Menu,
+  rem,
+  TextInput,
+  Tooltip,
+  UnstyledButton,
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 import type { ColumnsType } from 'antd/es/table';
@@ -18,11 +27,13 @@ import {
   IconLink,
   IconMenu,
   IconRefresh,
+  IconSearch,
   IconTrash,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { List } from '@/types/Request';
+import type { FilterDropdownProps } from 'antd/es/table/interface';
 
 function EventList({
   data,
@@ -31,12 +42,13 @@ function EventList({
   updatePagination,
 }: {
   data: List<EventType>;
-  pagination: { current: number; pageSize: number };
+  pagination: { current: number; pageSize: number; search?: string };
   isPending: boolean;
   updatePagination: React.Dispatch<
     React.SetStateAction<{
       current: number;
       pageSize: number;
+      search?: string;
     }>
   >;
 }) {
@@ -52,17 +64,111 @@ function EventList({
 
   const navigate = useNavigate();
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps['confirm'],
+    dataIndex: keyof EventType,
+  ) => {
+    confirm();
+    // setSearchText(selectedKeys[0]);
+    updatePagination((exist) => ({
+      ...exist,
+      search: selectedKeys[0],
+      current: 1,
+    }));
+  };
+
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: FilterDropdownProps['confirm'],
+  ) => {
+    clearFilters();
+    confirm();
+    updatePagination((exist) => ({
+      ...exist,
+      search: undefined,
+      current: 1,
+    }));
+  };
+
+  const getColumnSearchProps = (
+    dataIndex: keyof EventType,
+  ): TableColumnType<EventType> => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
+      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+        <Space direction="vertical">
+          <Input
+            placeholder={`搜索列 ${dataIndex}`}
+            value={selectedKeys[0]}
+            allowClear
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
+            onPressEnter={() =>
+              handleSearch(selectedKeys as string[], confirm, dataIndex)
+            }
+          />
+          <Space>
+            <Button
+              onClick={() =>
+                handleSearch(selectedKeys as string[], confirm, dataIndex)
+              }
+              leftSection={<IconSearch size={14} />}
+              size="xs"
+              variant="light"
+              style={{ width: 90 }}
+            >
+              搜索
+            </Button>
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters, confirm)}
+              size="xs"
+              variant="white"
+              color="gray"
+            >
+              重置
+            </Button>
+            <Button
+              size="xs"
+              variant="white"
+              color="gray"
+              onClick={() => {
+                close();
+              }}
+            >
+              关闭
+            </Button>
+          </Space>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered: boolean) => (
+      <IconSearch
+        size={14}
+        style={{ color: filtered ? '#1677ff' : undefined }}
+      />
+    ),
+  });
+
   const columns: ColumnsType<EventType> = [
     {
       title: '展商',
       dataIndex: ['organization', 'name'],
       key: 'organizationName',
+      fixed: 'left',
     },
     {
       title: '展会名称',
       dataIndex: 'name',
       key: 'name',
       fixed: 'left',
+      ...getColumnSearchProps('name'),
     },
     {
       title: '日期',
@@ -115,7 +221,7 @@ function EventList({
             variant="light"
             color="green"
             onClick={() => {
-              navigate(`/dashboard/event/${record.id}/edit`);
+              window.open(`/dashboard/event/${record.id}/edit`);
             }}
             leftSection={<IconEdit size={14} />}
           >
@@ -213,6 +319,7 @@ function EventList({
       }}
       onChange={(pagination) => {
         updatePagination((exist) => ({
+          ...exist,
           pageSize: pagination.pageSize || exist.pageSize,
           current: pagination.current || exist.current,
         }));
