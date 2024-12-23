@@ -34,6 +34,7 @@ export async function uploadToCOS({
     Region: region,
     Key: key,
     Body: file, // 要上传的文件对象。
+    SliceSize: 1024 * 1024 * 50, // 分片大小，单位 B，默认 1MB。
     onProgress: (progressData) => {
       console.log("上传进度：", progressData);
     },

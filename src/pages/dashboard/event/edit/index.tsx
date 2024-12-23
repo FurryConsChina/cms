@@ -220,8 +220,6 @@ function EventEditorContent({ event }: { event?: EventType }) {
     }
   };
 
-  console.log(form.values);
-
   return (
     <Box mx="auto">
       <form onSubmit={form.onSubmit(handleSubmit)}>
