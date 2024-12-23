@@ -6,6 +6,7 @@ export async function getEventList(params: {
   pageSize: number;
   current: number;
   search?: string;
+  orgSearch?: string;
 }) {
   const res = await Axios.get<List<EventType>>("/event/list", {
     params,
