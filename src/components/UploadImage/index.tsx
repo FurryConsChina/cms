@@ -86,11 +86,8 @@ export default function UploadImage({
         });
       }
 
-      // let formData = new FormData();
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
-      // formData.append('imageKey', `${pathPrefix}${imageName}.${imageMIME}`);
-      // formData.append('image', images[0], images[0].name);
-      // const uploadRes = await uploadStatic(formData);
+
       const uploadRes = await uploadToCOS({
         pathKey: imagePath,
         file: images[0],

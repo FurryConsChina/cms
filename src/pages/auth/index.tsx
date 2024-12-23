@@ -1,26 +1,26 @@
-import useAuthStore from "@/stores/auth";
-import { useMutation } from "@tanstack/react-query";
-import { useForm } from "@mantine/form";
+import useAuthStore from '@/stores/auth';
+import { useMutation } from '@tanstack/react-query';
+import { useForm } from '@mantine/form';
 
-import { login as loginFn } from "@/api/auth";
-import { notifications } from "@mantine/notifications";
-import { useNavigate } from "react-router-dom";
-import { Button, TextInput } from "@mantine/core";
+import { login as loginFn } from '@/api/auth';
+import { notifications } from '@mantine/notifications';
+import { useNavigate } from 'react-router-dom';
+import { Button, TextInput } from '@mantine/core';
 
 export default function Auth() {
   const { login, refreshToken } = useAuthStore();
   const navigate = useNavigate();
 
   const form = useForm({
-    mode: "uncontrolled",
+    mode: 'uncontrolled',
     initialValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
 
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-      password: (value) => (value.length < 6 ? "密码长度至少为6位" : null),
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      password: (value) => (value.length < 6 ? '密码长度至少为6位' : null),
     },
   });
 
@@ -29,9 +29,9 @@ export default function Auth() {
     onSuccess: (data) => {
       login(data.user);
       refreshToken(data.token);
-      navigate("/dashboard");
+      navigate('/dashboard');
       notifications.show({
-        message: "登录成功",
+        message: '登录成功',
       });
     },
   });
@@ -54,7 +54,6 @@ export default function Auth() {
           <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
             <form
               onSubmit={form.onSubmit((values) => {
-                console.log(values);
                 mutate(values);
               })}
               className="space-y-6"
@@ -73,8 +72,8 @@ export default function Auth() {
                     type="email"
                     required
                     autoComplete="email"
-                    key={form.key("email")}
-                    {...form.getInputProps("email")}
+                    key={form.key('email')}
+                    {...form.getInputProps('email')}
                   />
                 </div>
               </div>
@@ -93,8 +92,8 @@ export default function Auth() {
                     type="password"
                     required
                     autoComplete="current-password"
-                    key={form.key("password")}
-                    {...form.getInputProps("password")}
+                    key={form.key('password')}
+                    {...form.getInputProps('password')}
                   />
                 </div>
               </div>
