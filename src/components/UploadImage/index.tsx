@@ -1,4 +1,5 @@
 import { uploadStatic } from '@/api/dashboard/upload';
+import { uploadToCOS } from '@/utils/cos';
 import {
   Button,
   Card,
@@ -85,13 +86,17 @@ export default function UploadImage({
         });
       }
 
-      let formData = new FormData();
+      // let formData = new FormData();
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
-      formData.append('imageKey', `${pathPrefix}${imageName}.${imageMIME}`);
-      formData.append('image', images[0], images[0].name);
-      const uploadRes = await uploadStatic(formData);
+      // formData.append('imageKey', `${pathPrefix}${imageName}.${imageMIME}`);
+      // formData.append('image', images[0], images[0].name);
+      // const uploadRes = await uploadStatic(formData);
+      const uploadRes = await uploadToCOS({
+        pathKey: imagePath,
+        file: images[0],
+      });
       console.log('uploadRes', uploadRes);
-      if (uploadRes?.S3UploadRes?.ETag) {
+      if (uploadRes?.ETag) {
         setLoading(false);
         onUploadSuccess(imagePath);
         notifications.show({
