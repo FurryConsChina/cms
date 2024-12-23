@@ -35,3 +35,11 @@ export async function updateEvent(event: EditableEventType) {
 
   return res.data;
 }
+
+export async function deleteEvent(id: string) {
+  const res = await Axios.post<{ success: boolean }>("/event/delete", {
+    id,
+  });
+
+  return res.data;
+}
