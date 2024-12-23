@@ -23,6 +23,7 @@
     "antd": "^5.22.4",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
+    "cos-js-sdk-v5": "^1.8.7",
     "dayjs": "^1.11.13",
     "lodash": "^4.17.21",
     "mantine-form-zod-resolver": "^1.1.0",

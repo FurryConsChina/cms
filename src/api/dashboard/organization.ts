@@ -26,7 +26,9 @@ export async function getAllOrganizations(params: { search?: string }) {
 }
 
 export async function getOrganizationDetail(params: { id: string }) {
-  const res = await Axios.get<OrganizationType>(`/organization/detail/${params.id}`);
+  const res = await Axios.get<OrganizationType>(
+    `/organization/detail/${params.id}`
+  );
 
   return res.data;
 }
@@ -46,6 +48,14 @@ export async function updateOrganization(
 ) {
   const res = await Axios.post<OrganizationType>("/organization/update", {
     organization,
+  });
+
+  return res.data;
+}
+
+export async function deleteOrganization(id: string) {
+  const res = await Axios.post<{ success: boolean }>("/organization/delete", {
+    id,
   });
 
   return res.data;

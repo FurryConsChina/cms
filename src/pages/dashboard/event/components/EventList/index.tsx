@@ -1,26 +1,22 @@
-import { Input, Space, Table, TableColumnType, Tag } from 'antd';
-import dayjs from 'dayjs';
 import {
   ActionIcon,
   Badge,
   Button,
   Menu,
-  rem,
-  TextInput,
   Tooltip,
-  UnstyledButton,
+  rem
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { Input, Space, Table, type TableColumnType, Tag } from 'antd';
+import dayjs from 'dayjs';
 
-import type { ColumnsType } from 'antd/es/table';
+import { cleanPageCache } from '@/api/dashboard/cache';
 import {
   EventScaleLabel,
   EventStatusColor,
   EventStatusLabel,
 } from '@/consts/event';
 import type { EventType } from '@/types/event';
-import { useMutation } from '@tanstack/react-query';
-import { cleanPageCache } from '@/api/dashboard/cache';
 import {
   IconEdit,
   IconInfoCircle,
@@ -30,6 +26,8 @@ import {
   IconSearch,
   IconTrash,
 } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from 'react-router-dom';
 
 import type { List } from '@/types/Request';
@@ -40,17 +38,25 @@ function EventList({
   pagination,
   isPending,
   updatePagination,
+  onDeleteEvent,
 }: {
   data: List<EventType>;
-  pagination: { current: number; pageSize: number; search?: string };
+  pagination: {
+    current: number;
+    pageSize: number;
+    search?: string;
+    orgSearch?: string;
+  };
   isPending: boolean;
   updatePagination: React.Dispatch<
     React.SetStateAction<{
       current: number;
       pageSize: number;
       search?: string;
+      orgSearch?: string;
     }>
   >;
+  onDeleteEvent: (id: string) => void;
 }) {
   const { mutate: refreshPage } = useMutation({
     mutationFn: cleanPageCache,
@@ -292,7 +298,9 @@ function EventList({
               <Menu.Label>危险</Menu.Label>
               <Menu.Item
                 color="red"
-                disabled
+                onClick={() => {
+                  onDeleteEvent(record.id);
+                }}
                 leftSection={
                   <IconTrash style={{ width: rem(14), height: rem(14) }} />
                 }
