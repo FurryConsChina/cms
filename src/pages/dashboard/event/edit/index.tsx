@@ -175,7 +175,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
       return;
     }
 
-    return `${selectedYear}-${selectedMonth}-${city}-con`;
+    return `${selectedYear}-${selectedMonth}-${city.toLowerCase()}-con`;
   };
 
   const handleSubmit = async (formData: formType) => {
@@ -318,6 +318,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 withAsterisk
                 label="城市Slug"
                 placeholder="请填写城市的拼音"
+                description="请使用城市的完整拼音，比如：guangzhou，不要使用缩写和大写。"
                 {...form.getInputProps('citySlug')}
               />
             </Group>

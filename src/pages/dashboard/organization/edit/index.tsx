@@ -211,6 +211,7 @@ function OrganizationEditorContent({
                 label="展商Slug"
                 disabled={!!organization?.id}
                 placeholder="请输入展商Slug"
+                description="请不要使用大写"
                 {...form.getInputProps('slug')}
               />
             </Group>
