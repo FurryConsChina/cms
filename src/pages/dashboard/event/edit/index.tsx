@@ -216,6 +216,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
           color: 'teal',
           autoClose: false,
         });
+        navigate(`/dashboard/event/${res.id}/edit`);
       }
     }
   };

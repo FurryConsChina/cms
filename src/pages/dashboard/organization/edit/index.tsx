@@ -147,6 +147,7 @@ function OrganizationEditorContent({
             color: 'teal',
             autoClose: false,
           });
+          navigate(`/dashboard/organization/${res.id}/edit`);
         }
       }
     } else {
