@@ -1,11 +1,4 @@
-import {
-  ActionIcon,
-  Badge,
-  Button,
-  Menu,
-  Tooltip,
-  rem
-} from '@mantine/core';
+import { ActionIcon, Badge, Button, Menu, Tooltip, rem } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Input, Space, Table, type TableColumnType, Tag } from 'antd';
 import dayjs from 'dayjs';
@@ -75,11 +68,20 @@ function EventList({
     confirm: FilterDropdownProps['confirm'],
     dataIndex: keyof EventType,
   ) => {
+    console.log(selectedKeys);
     confirm();
-    // setSearchText(selectedKeys[0]);
     updatePagination((exist) => ({
       ...exist,
-      search: selectedKeys[0],
+      ...(dataIndex === 'name'
+        ? {
+            search: selectedKeys[0],
+          }
+        : {}),
+      ...(dataIndex === 'organization'
+        ? {
+            orgSearch: selectedKeys[0],
+          }
+        : {}),
       current: 1,
     }));
   };
@@ -87,12 +89,22 @@ function EventList({
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps['confirm'],
+    dataIndex: keyof EventType,
   ) => {
     clearFilters();
     confirm();
     updatePagination((exist) => ({
       ...exist,
-      search: undefined,
+      ...(dataIndex === 'name'
+        ? {
+            search: undefined,
+          }
+        : {}),
+      ...(dataIndex === 'organization'
+        ? {
+          orgSearch: undefined,
+          }
+        : {}),
       current: 1,
     }));
   };
@@ -133,7 +145,9 @@ function EventList({
               搜索
             </Button>
             <Button
-              onClick={() => clearFilters && handleReset(clearFilters, confirm)}
+              onClick={() =>
+                clearFilters && handleReset(clearFilters, confirm, dataIndex)
+              }
               size="xs"
               variant="white"
               color="gray"
@@ -168,6 +182,7 @@ function EventList({
       dataIndex: ['organization', 'name'],
       key: 'organizationName',
       fixed: 'left',
+      ...getColumnSearchProps('organization'),
     },
     {
       title: '展会名称',
