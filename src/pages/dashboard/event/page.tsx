@@ -1,5 +1,5 @@
 import { Button, Group, Title } from '@mantine/core';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteEvent, getEventList } from '@/api/dashboard/event';
 import DefaultContainer from '@/components/Container';
@@ -7,21 +7,33 @@ import EventList from '@/pages/dashboard/event/components/EventList';
 import { IconCirclePlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
+import { useQueryState, parseAsInteger } from 'nuqs';
 
 export default function EventPage() {
   const navigate = useNavigate();
 
-  const [pagination, setPagination] = useState<{
-    current: number;
-    pageSize: number;
-    search?: string;
-    orgSearch?: string;
-  }>({
-    current: 1,
-    pageSize: 20,
-    search: undefined,
-    orgSearch: undefined,
-  });
+  const [search, setSearch] = useQueryState('search');
+  const [orgSearch, setOrgSearch] = useQueryState('orgSearch');
+  const [currentPage, setCurrentPage] = useQueryState(
+    'currentPage',
+    parseAsInteger.withDefault(1)
+  );
+  const [pageSize, setPageSize] = useState(20);
+
+  const pagination = {
+    search,
+    orgSearch,
+    current: currentPage,
+    pageSize,
+  };
+
+  const setPagination = {
+    search: setSearch,
+    orgSearch: setOrgSearch,
+    current: setCurrentPage,
+    pageSize: setPageSize,
+  };
+
 
   const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ['event-list', pagination],
@@ -61,7 +73,7 @@ export default function EventPage() {
           data={data || { total: 0, records: [] }}
           isPending={isPending}
           pagination={pagination}
-          updatePagination={setPagination}
+          setPagination={setPagination}
           onDeleteEvent={onDeleteEvent}
         />
       </div>

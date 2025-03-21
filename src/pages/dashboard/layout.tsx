@@ -1,11 +1,11 @@
-import useAuthStore from "@/stores/auth";
+import useAuthStore from '@/stores/auth';
 import {
   AppShell,
   AppShellMain,
   AppShellNavbar,
   AppShellSection,
   NavLink,
-} from "@mantine/core";
+} from '@mantine/core';
 import {
   IconCloudStorm,
   IconHome,
@@ -13,18 +13,19 @@ import {
   IconTag,
   IconTicket,
   IconTrademark,
-} from "@tabler/icons-react";
-import clsx from "clsx";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+} from '@tabler/icons-react';
+import clsx from 'clsx';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v7';
 
 const linksData = [
-  { link: "/dashboard", label: "首页", icon: IconHome },
-  { link: "/dashboard/event", label: "展会", icon: IconTicket },
-  { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
-  { link: "/dashboard/feature", label: "展会标签", icon: IconTag },
+  { link: '/dashboard', label: '首页', icon: IconHome },
+  { link: '/dashboard/event', label: '展会', icon: IconTicket },
+  { link: '/dashboard/organization', label: '展商', icon: IconTrademark },
+  { link: '/dashboard/feature', label: '展会标签', icon: IconTag },
   {
-    link: "/dashboard/cache-manager",
-    label: "缓存管理",
+    link: '/dashboard/cache-manager',
+    label: '缓存管理',
     icon: IconCloudStorm,
   },
 ];
@@ -36,8 +37,8 @@ export default function DashboardLayout() {
   const { logout } = useAuthStore();
 
   const isLinkActive = (linkPath: string) => {
-    if (linkPath === "/dashboard") {
-      return location.pathname === "/dashboard";
+    if (linkPath === '/dashboard') {
+      return location.pathname === '/dashboard';
     }
     return (
       location.pathname === linkPath ||
@@ -46,7 +47,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <AppShell navbar={{ width: 300, breakpoint: "sm" }} padding="xl">
+    <AppShell navbar={{ width: 300, breakpoint: 'sm' }} padding="xl">
       <AppShellNavbar withBorder={false} p="xl" className="bg-slate-100">
         {/* <AppShellSection className="flex items-center gap-2">
           <Image
@@ -68,8 +69,8 @@ export default function DashboardLayout() {
                 label={link.label}
                 leftSection={<link.icon size="1.1rem" stroke={1.5} />}
                 className={clsx(
-                  "rounded",
-                  isLinkActive(link.link) && "shadow shadow-blue-500/20"
+                  'rounded',
+                  isLinkActive(link.link) && 'shadow shadow-blue-500/20'
                 )}
               />
             ))}
@@ -89,7 +90,9 @@ export default function DashboardLayout() {
       </AppShellNavbar>
 
       <AppShellMain className="bg-slate-100">
-        <Outlet />
+        <NuqsAdapter>
+          <Outlet />
+        </NuqsAdapter>
       </AppShellMain>
     </AppShell>
   );
