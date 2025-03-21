@@ -5,8 +5,8 @@ import type { List } from "@/types/Request";
 export async function getEventList(params: {
   pageSize: number;
   current: number;
-  search?: string;
-  orgSearch?: string;
+  search: string | null;
+  orgSearch: string | null;
 }) {
   const res = await Axios.get<List<EventItem>>("/internal/cms/event/list", {
     params,
