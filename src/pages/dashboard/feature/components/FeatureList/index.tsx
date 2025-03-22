@@ -19,18 +19,16 @@ export default function FeatureList({
   data,
   pagination,
   isPending,
-  updatePagination,
+  setPagination,
   onEdit,
 }: {
   data: List<FeatureType>;
   pagination: { current: number; pageSize: number };
   isPending: boolean;
-  updatePagination: React.Dispatch<
-    React.SetStateAction<{
-      current: number;
-      pageSize: number;
-    }>
-  >;
+  setPagination: {
+    current: (current: number) => void;
+    pageSize: (pageSize: number) => void;
+  }
   onEdit: (feature: FeatureType) => void;
 }) {
   const navigate = useNavigate();
@@ -138,10 +136,12 @@ export default function FeatureList({
           current: pagination.current,
         }}
         onChange={(pagination) => {
-          updatePagination((exist) => ({
-            pageSize: pagination.pageSize || exist.pageSize,
-            current: pagination.current || exist.current,
-          }));
+          if (pagination.current) {
+            setPagination.current(pagination.current);
+          }
+          if (pagination.pageSize) {
+            setPagination.pageSize(pagination.pageSize);
+          }
         }}
       />
     </>

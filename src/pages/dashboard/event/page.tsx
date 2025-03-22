@@ -1,5 +1,4 @@
 import { Button, Group, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteEvent, getEventList } from '@/api/dashboard/event';
 import DefaultContainer from '@/components/Container';
@@ -18,7 +17,11 @@ export default function EventPage() {
     'currentPage',
     parseAsInteger.withDefault(1)
   );
-  const [pageSize, setPageSize] = useState(20);
+  // const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useQueryState(
+    'pageSize',
+    parseAsInteger.withDefault(20)
+  );
 
   const pagination = {
     search,
@@ -33,7 +36,6 @@ export default function EventPage() {
     current: setCurrentPage,
     pageSize: setPageSize,
   };
-
 
   const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ['event-list', pagination],

@@ -28,6 +28,7 @@ export default function OrganizationList({
   data,
   pagination,
   isPending,
+  setPagination,
   updatePagination,
 }: {
   data: List<Organization>;
