@@ -29,26 +29,24 @@ import type { FilterDropdownProps } from 'antd/es/table/interface';
 function EventList({
   data,
   pagination,
+  setPagination,
   isPending,
-  updatePagination,
   onDeleteEvent,
 }: {
   data: List<EventType>;
   pagination: {
     current: number;
     pageSize: number;
-    search?: string;
-    orgSearch?: string;
+    search: string | null;
+    orgSearch: string | null;
+  };
+  setPagination: {
+    current: (current: number) => void;
+    pageSize: (pageSize: number) => void;
+    search: (search: string | null) => void;
+    orgSearch: (orgSearch: string | null) => void;
   };
   isPending: boolean;
-  updatePagination: React.Dispatch<
-    React.SetStateAction<{
-      current: number;
-      pageSize: number;
-      search?: string;
-      orgSearch?: string;
-    }>
-  >;
   onDeleteEvent: (id: string) => void;
 }) {
   const { mutate: refreshPage } = useMutation({
@@ -66,51 +64,37 @@ function EventList({
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps['confirm'],
-    dataIndex: keyof EventType,
+    dataIndex: keyof EventType
   ) => {
     console.log(selectedKeys);
     confirm();
-    updatePagination((exist) => ({
-      ...exist,
-      ...(dataIndex === 'name'
-        ? {
-            search: selectedKeys[0],
-          }
-        : {}),
-      ...(dataIndex === 'organization'
-        ? {
-            orgSearch: selectedKeys[0],
-          }
-        : {}),
-      current: 1,
-    }));
+
+    if (dataIndex === 'name') {
+      setPagination.search(selectedKeys[0]);
+    } else if (dataIndex === 'organization') {
+      setPagination.orgSearch(selectedKeys[0]);
+    }
+    setPagination.current(1);
   };
 
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps['confirm'],
-    dataIndex: keyof EventType,
+    dataIndex: keyof EventType
   ) => {
     clearFilters();
     confirm();
-    updatePagination((exist) => ({
-      ...exist,
-      ...(dataIndex === 'name'
-        ? {
-            search: undefined,
-          }
-        : {}),
-      ...(dataIndex === 'organization'
-        ? {
-          orgSearch: undefined,
-          }
-        : {}),
-      current: 1,
-    }));
+
+    if (dataIndex === 'name') {
+      setPagination.search(null);
+    } else if (dataIndex === 'organization') {
+      setPagination.orgSearch(null);
+    }
+    setPagination.current(1);
   };
 
   const getColumnSearchProps = (
-    dataIndex: keyof EventType,
+    dataIndex: keyof EventType
   ): TableColumnType<EventType> => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -283,7 +267,7 @@ function EventList({
                 onClick={() => {
                   window.open(
                     `https://www.furryeventchina.com/${record.organization.slug}/${record.slug}`,
-                    '_blank',
+                    '_blank'
                   );
                 }}
               >
@@ -301,7 +285,7 @@ function EventList({
                 onClick={() => {
                   window.open(
                     `https://www.furrycons.cn/${record.organization.slug}/${record.slug}`,
-                    '_blank',
+                    '_blank'
                   );
                 }}
               >
@@ -340,12 +324,13 @@ function EventList({
         total: data?.total,
         current: pagination.current,
       }}
-      onChange={(pagination) => {
-        updatePagination((exist) => ({
-          ...exist,
-          pageSize: pagination.pageSize || exist.pageSize,
-          current: pagination.current || exist.current,
-        }));
+      onChange={(tablePagination) => {
+        if (tablePagination.current) {
+          setPagination.current(tablePagination.current);
+        }
+        if (tablePagination.pageSize) {
+          setPagination.pageSize(tablePagination.pageSize);
+        }
       }}
     />
   );
