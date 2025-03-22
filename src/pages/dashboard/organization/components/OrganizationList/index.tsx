@@ -26,17 +26,15 @@ export default function OrganizationList({
   data,
   pagination,
   isPending,
-  updatePagination,
+  setPagination,
 }: {
   data: List<OrganizationType>;
   pagination: { current: number; pageSize: number };
   isPending: boolean;
-  updatePagination: React.Dispatch<
-    React.SetStateAction<{
-      current: number;
-      pageSize: number;
-    }>
-  >;
+  setPagination: {
+    current: (current: number) => void;
+    pageSize: (pageSize: number) => void;
+  };
 }) {
   const navigate = useNavigate();
 
@@ -203,10 +201,12 @@ export default function OrganizationList({
           current: pagination.current,
         }}
         onChange={(pagination) => {
-          updatePagination((exist) => ({
-            pageSize: pagination.pageSize || exist.pageSize,
-            current: pagination.current || exist.current,
-          }));
+          if (pagination.pageSize) {
+            setPagination.pageSize(pagination.pageSize);
+          }
+          if (pagination.current) {
+            setPagination.current(pagination.current);
+          }
         }}
       />
     </>

@@ -1,5 +1,5 @@
 import { Button, Group, Title } from '@mantine/core';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DefaultContainer from '@/components/Container';
 import { IconCirclePlus } from '@tabler/icons-react';
@@ -9,6 +9,7 @@ import FeatureList from '@/pages/dashboard/feature/components/FeatureList';
 import { useDisclosure } from '@mantine/hooks';
 import FeatureEditor from '@/pages/dashboard/feature/components/FeatureEditor';
 import type { FeatureType } from '@/types/feature';
+import { useQueryState, parseAsInteger } from 'nuqs';
 
 export default function FeaturePage() {
   const navigate = useNavigate();
@@ -16,10 +17,23 @@ export default function FeaturePage() {
 
   const [opened, { open, close }] = useDisclosure(false);
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 20,
-  });
+  const [currentPage, setCurrentPage] = useQueryState(
+    'currentPage',
+    parseAsInteger.withDefault(1)
+  );
+  const [pageSize, setPageSize] = useQueryState(
+    'pageSize',
+    parseAsInteger.withDefault(20)
+  );
+  const setPagination = {
+    current: setCurrentPage,
+    pageSize: setPageSize,
+  };
+
+  const pagination = {
+    current: currentPage,
+    pageSize,
+  };
 
   const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ['feature-list', pagination],
@@ -49,7 +63,7 @@ export default function FeaturePage() {
           data={data || { total: 0, records: [] }}
           isPending={isPending}
           pagination={pagination}
-          updatePagination={setPagination}
+          setPagination={setPagination}
           onEdit={(feature) => {
             editingFeature.current = feature;
             open();

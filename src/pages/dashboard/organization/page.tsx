@@ -4,16 +4,29 @@ import OrganizationList from '@/pages/dashboard/organization/components/Organiza
 import { Button, Group, Title } from '@mantine/core';
 import { IconCirclePlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryState, parseAsInteger } from 'nuqs';
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
+  
+  const [currentPage, setCurrentPage] = useQueryState(
+    'currentPage',
+    parseAsInteger.withDefault(1)
+  );
+  const [pageSize, setPageSize] = useQueryState(
+    'pageSize',
+    parseAsInteger.withDefault(20)
+  );
+  const setPagination = {
+    current: setCurrentPage,
+    pageSize: setPageSize,
+  }
 
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 20,
-  });
+  const pagination = {
+    current: currentPage,
+    pageSize,
+  };
 
   const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ['organization-list', pagination],
@@ -42,7 +55,7 @@ export default function OrganizationPage() {
           data={data || { total: 0, records: [] }}
           isPending={isPending}
           pagination={pagination}
-          updatePagination={setPagination}
+          setPagination={setPagination}
         />
       </div>
     </>

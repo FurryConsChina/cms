@@ -25,7 +25,6 @@ import { useNavigate } from 'react-router-dom';
 
 import type { List } from '@/types/Request';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
-import { useEffect } from 'react';
 
 function EventList({
   data,
