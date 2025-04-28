@@ -1,14 +1,16 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   EditableEventSchema,
-  type EditableEventType,
+  type EditableEvent,
+  EventItem,
+  EventLocationType,
   EventScale,
   type EventScaleKeyType,
   EventStatus,
   type EventStatusKeyType,
-  type EventType,
-} from '@/types/event';
+  EventType,
+} from "@/types/event";
 import {
   ActionIcon,
   Autocomplete,
@@ -29,29 +31,34 @@ import {
   Center,
   TagsInput,
   MultiSelect,
-} from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates';
-import { useForm, zodResolver } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { IconPlus, IconSearch, IconTrash } from '@tabler/icons-react';
-import { OrganizationType } from '@/types/organization';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { getAllOrganizations } from '@/api/dashboard/organization';
+} from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
+import { useForm, zodResolver } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { OrganizationType } from "@/types/organization";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getAllOrganizations } from "@/api/dashboard/organization";
 import {
   createEvent,
   getEventDetail,
   updateEvent,
-} from '@/api/dashboard/event';
-import { z } from 'zod';
-import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
+} from "@/api/dashboard/event";
+import { z } from "zod";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 
-import 'dayjs/locale/zh-cn';
-import { EventScaleLabel, EventStatusLabel } from '@/consts/event';
-import { Spin } from 'antd';
-import UploadImage from '@/components/UploadImage';
-import DefaultContainer from '@/components/Container';
-import LoadError from '@/components/Error';
-import { getFeatureList } from '@/api/dashboard/feature';
+import "dayjs/locale/zh-cn";
+import {
+  EventLocationTypeLabel,
+  EventScaleLabel,
+  EventStatusLabel,
+  EventTypeLabel,
+} from "@/consts/event";
+import { Spin } from "antd";
+import UploadImage from "@/components/UploadImage";
+import DefaultContainer from "@/components/Container";
+import LoadError from "@/components/Error";
+import { getFeatureList } from "@/api/dashboard/feature";
 
 export default function EventEditPage() {
   const { eventId } = useParams();
@@ -60,7 +67,7 @@ export default function EventEditPage() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['event-detail', eventId],
+    queryKey: ["event-detail", eventId],
     queryFn: () => getEventDetail({ id: eventId as string }),
     refetchOnWindowFocus: false,
     enabled: !!eventId,
@@ -74,7 +81,7 @@ export default function EventEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-10">
-        <Title order={2}>{eventId ? '编辑展会' : '新建展会'}</Title>
+        <Title order={2}>{eventId ? "编辑展会" : "新建展会"}</Title>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
@@ -90,40 +97,41 @@ export default function EventEditPage() {
   );
 }
 
-function EventEditorContent({ event }: { event?: EventType }) {
+function EventEditorContent({ event }: { event?: EventItem }) {
   const navigate = useNavigate();
 
   const { data: addressSearchResult, mutate } = useMutation({
     mutationFn: (params: { address: string; city: string }) =>
       fetch(
-        `https://apis.map.qq.com/ws/place/v1/search?key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&keyword=${params.address}&boundary=region(${params.city},2)&page_size=10&page_index=1`,
+        `https://apis.map.qq.com/ws/place/v1/search?key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&keyword=${params.address}&boundary=region(${params.city},2)&page_size=10&page_index=1`
       ),
   });
   const form = useForm({
     initialValues: {
-      name: event?.name || '',
+      name: event?.name || "",
       startAt: event?.startAt
         ? new Date(event?.startAt)
         : new Date(new Date().setHours(10, 0, 0, 0)),
       endAt: event?.endAt
         ? new Date(event?.endAt)
         : new Date(new Date().setHours(18, 0, 0, 0)),
-      //   city: event?.addressExtra?.city || "",
-      citySlug: event?.addressExtra?.citySlug || '',
-      address: event?.address || '',
+      address: event?.address || "",
+      citySlug: event?.addressExtra?.citySlug || "",
       addressExtra: event?.addressExtra || { city: null },
       features: event?.features || { self: [] },
       commonFeatures: event?.commonFeatures?.map((f) => f.id) || [],
-      source: event?.source || '',
-      thumbnail: event?.thumbnail || 'fec-event-default-cover.png',
+      source: event?.source || "",
+      thumbnail: event?.thumbnail || "fec-event-default-cover.png",
       poster: event?.poster?.all || [],
-      organization: event?.organization?.id || '',
-      slug: event?.slug || '',
-      detail: event?.detail || '',
+      organization: event?.organization?.id || "",
+      slug: event?.slug || "",
+      detail: event?.detail || "",
       status: event?.status || EventStatus.EventScheduled,
+      type: event?.type || EventType.AllInCon,
       scale: event?.scale || EventScale.Cosy,
-      addressLat: event?.addressLat || '',
-      addressLon: event?.addressLon || '',
+      locationType: event?.locationType || EventLocationType.Hotel,
+      addressLat: event?.addressLat || "",
+      addressLon: event?.addressLon || "",
     },
     // validate: zodResolver(
     //   z.object({
@@ -140,12 +148,12 @@ function EventEditorContent({ event }: { event?: EventType }) {
   type formType = typeof form.values;
 
   const { data: organizationList } = useQuery({
-    queryKey: ['organization-list'],
-    queryFn: () => getAllOrganizations({ search: '' }),
+    queryKey: ["organization-list"],
+    queryFn: () => getAllOrganizations({ search: "" }),
   });
 
   const { data: featureList } = useQuery({
-    queryKey: ['feature-list'],
+    queryKey: ["feature-list"],
     queryFn: () => getFeatureList({ pageSize: 100, current: 1 }),
   });
 
@@ -156,7 +164,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
     })) || [];
 
   const selectedOrganization = organizationList?.find(
-    (item) => item.id === form.values.organization,
+    (item) => item.id === form.values.organization
   );
 
   const featureSelectOptions =
@@ -168,7 +176,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
   const generateEventSlug = () => {
     const selectedYear = form.values.startAt?.getFullYear();
     const selectedMonth = form.values.startAt
-      ?.toLocaleString('en-us', { month: 'short' })
+      ?.toLocaleString("en-us", { month: "short" })
       .toLocaleLowerCase();
     const city = form.values.citySlug;
     if (!selectedYear || !selectedMonth || !city) {
@@ -181,7 +189,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
   const handleSubmit = async (formData: formType) => {
     console.log(formData);
 
-    const transFormData: EditableEventType = {
+    const transFormData: EditableEvent = {
       ...formData,
       startAt: formData.startAt.toISOString(),
       endAt: formData.endAt.toISOString(),
@@ -199,21 +207,21 @@ function EventEditorContent({ event }: { event?: EventType }) {
       });
       if (res) {
         notifications.show({
-          title: '更新成功',
-          message: '更新展会数据成功',
-          color: 'teal',
+          title: "更新成功",
+          message: "更新展会数据成功",
+          color: "teal",
           autoClose: false,
         });
       }
-      console.log('update res', res);
+      console.log("update res", res);
     } else {
       const res = await createEvent(transFormData);
-      console.log('create res', res);
+      console.log("create res", res);
       if (res) {
         notifications.show({
-          title: '创建成功',
-          message: '创建展会数据成功',
-          color: 'teal',
+          title: "创建成功",
+          message: "创建展会数据成功",
+          color: "teal",
           autoClose: false,
         });
         navigate(`/dashboard/event/${res.id}/edit`);
@@ -232,14 +240,14 @@ function EventEditorContent({ event }: { event?: EventType }) {
             <TextInput
               withAsterisk
               label="展会名称"
-              {...form.getInputProps('name')}
+              {...form.getInputProps("name")}
             />
 
             <Select
               withAsterisk
               label="展会展方"
               data={organizationSelectOptions}
-              {...form.getInputProps('organization')}
+              {...form.getInputProps("organization")}
             />
 
             <Group gap="xs" grow>
@@ -251,7 +259,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 description="除非明确知晓展会开始时间，否则请保持默认上午10点"
                 placeholder="选一个日期"
                 clearable
-                {...form.getInputProps('startAt')}
+                {...form.getInputProps("startAt")}
               />
               <DateTimePicker
                 withAsterisk
@@ -261,7 +269,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 placeholder="选一个日期"
                 valueFormat="YYYY年MM月DD日 hh:mm A"
                 clearable
-                {...form.getInputProps('endAt')}
+                {...form.getInputProps("endAt")}
               />
             </Group>
           </Stack>
@@ -291,18 +299,18 @@ function EventEditorContent({ event }: { event?: EventType }) {
                         searchSchema.parse({
                           address: nowValues.address,
                           city: nowValues.addressExtra.city,
-                        }),
+                        })
                       );
                     } catch (error) {
                       notifications.show({
-                        title: '有错误发生',
+                        title: "有错误发生",
                         message: JSON.stringify(error),
                       });
                     }
                   }}
                 />
               }
-              {...form.getInputProps('address')}
+              {...form.getInputProps("address")}
             />
 
             <Group grow>
@@ -310,7 +318,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 withAsterisk
                 label="展会城市"
                 placeholder="请填写后缀（如市）"
-                {...form.getInputProps('addressExtra.city')}
+                {...form.getInputProps("addressExtra.city")}
               />
 
               <TextInput
@@ -318,7 +326,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 label="城市Slug"
                 placeholder="请填写城市的拼音"
                 description="请使用城市的完整拼音，比如：guangzhou，不要使用缩写和大写。"
-                {...form.getInputProps('citySlug')}
+                {...form.getInputProps("citySlug")}
               />
             </Group>
 
@@ -326,13 +334,13 @@ function EventEditorContent({ event }: { event?: EventType }) {
               <TextInput
                 label="经度"
                 placeholder="一般是三位整数"
-                {...form.getInputProps('addressLon')}
+                {...form.getInputProps("addressLon")}
               />
 
               <TextInput
                 label="纬度"
                 placeholder="一般是两位整数"
-                {...form.getInputProps('addressLat')}
+                {...form.getInputProps("addressLat")}
               />
             </Group>
           </Stack>
@@ -347,7 +355,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
               withAsterisk
               label="展会Slug"
               disabled
-              {...form.getInputProps('slug')}
+              {...form.getInputProps("slug")}
             />
             <Button
               onClick={() => {
@@ -355,7 +363,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 if (!slug) {
                   return;
                 }
-                form.setFieldValue('slug', slug);
+                form.setFieldValue("slug", slug);
               }}
             >
               生成Slug
@@ -376,7 +384,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
                 value: EventStatus[key as EventStatusKeyType],
               }))}
-              {...form.getInputProps('status')}
+              {...form.getInputProps("status")}
             />
 
             <Select
@@ -387,26 +395,48 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
                 value: EventScale[key as EventScaleKeyType],
               }))}
-              {...form.getInputProps('scale')}
+              {...form.getInputProps("scale")}
+            />
+
+            <Select
+              label="展会类型"
+              withAsterisk
+              placeholder="选一个"
+              data={Object.keys(EventType).map((key) => ({
+                label: EventTypeLabel[EventType[key as keyof typeof EventType]],
+                value: EventType[key as keyof typeof EventType],
+              }))}
+              {...form.getInputProps("type")}
+            />
+
+            <Select
+              label="展会场地"
+              withAsterisk
+              placeholder="选一个"
+              data={Object.keys(EventLocationType).map((key) => ({
+                label: EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
+                value: EventLocationType[key as keyof typeof EventLocationType],
+              }))}
+              {...form.getInputProps("locationType")}
             />
 
             <TagsInput
               label="展会专属标签"
               placeholder="请输入展会专属的标签"
-              {...form.getInputProps('features.self')}
+              {...form.getInputProps("features.self")}
             />
 
             <MultiSelect
               label="展会公共标签"
               placeholder="请选择展会共有的标签"
               data={featureSelectOptions}
-              {...form.getInputProps('commonFeatures')}
+              {...form.getInputProps("commonFeatures")}
             />
 
             <TextInput
               // withAsterisk
               label="展会信源"
-              {...form.getInputProps('source')}
+              {...form.getInputProps("source")}
             />
 
             <Textarea
@@ -414,7 +444,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
               autosize
               minRows={5}
               maxRows={20}
-              {...form.getInputProps('detail')}
+              {...form.getInputProps("detail")}
             />
           </Stack>
         </Container>
@@ -428,7 +458,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
             <TextInput
               label="封面图片"
               withAsterisk
-              {...form.getInputProps('thumbnail')}
+              {...form.getInputProps("thumbnail")}
             />
             <Group>
               <Chip
@@ -436,11 +466,11 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 variant="filled"
                 onClick={() => {
                   const organizationSlug = organizationList?.find(
-                    (item) => item.id === form.values.organization,
+                    (item) => item.id === form.values.organization
                   )?.slug;
                   form.setFieldValue(
-                    'thumbnail',
-                    `organizations/${organizationSlug}/${form.values.slug}/cover.webp`,
+                    "thumbnail",
+                    `organizations/${organizationSlug}/${form.values.slug}/cover.webp`
                   );
                 }}
               >
@@ -450,7 +480,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue('thumbnail', 'fec-event-default-cover.png')
+                  form.setFieldValue("thumbnail", "fec-event-default-cover.png")
                 }
               >
                 默认图片
@@ -459,7 +489,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue('thumbnail', 'fec-event-blank-cover.png')
+                  form.setFieldValue("thumbnail", "fec-event-blank-cover.png")
                 }
               >
                 待揭晓图片
@@ -469,7 +499,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
                 checked={false}
                 variant="filled"
                 onClick={() =>
-                  form.setFieldValue('thumbnail', 'fec-event-cancel-cover.png')
+                  form.setFieldValue("thumbnail", "fec-event-cancel-cover.png")
                 }
               >
                 取消图片
@@ -478,7 +508,7 @@ function EventEditorContent({ event }: { event?: EventType }) {
               <UploadImage
                 pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
                 defaultImageName="cover"
-                onUploadSuccess={(s) => form.setFieldValue('thumbnail', s)}
+                onUploadSuccess={(s) => form.setFieldValue("thumbnail", s)}
                 disabled={!selectedOrganization?.slug || !form.values.slug}
               />
             </Group>
@@ -486,11 +516,11 @@ function EventEditorContent({ event }: { event?: EventType }) {
             <Group>
               <Fieldset w="100%" legend="展会详情图片">
                 <ActionIcon
-                  size={'sm'}
+                  size={"sm"}
                   onClick={() =>
                     form.setFieldValue(
-                      'poster',
-                      form.values.poster.concat(['']),
+                      "poster",
+                      form.values.poster.concat([""])
                     )
                   }
                 >
@@ -515,11 +545,11 @@ function EventEditorContent({ event }: { event?: EventType }) {
                     />
                     <Button
                       color="red"
-                      size={'sm'}
+                      size={"sm"}
                       onClick={() =>
                         form.setFieldValue(
-                          'poster',
-                          form.values.poster.filter((_, i) => i !== index),
+                          "poster",
+                          form.values.poster.filter((_, i) => i !== index)
                         )
                       }
                     >
