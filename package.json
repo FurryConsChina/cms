@@ -10,7 +10,8 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@hello-pangea/dnd": "^17.0.0",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mantine/core": "^7.17.5",
     "@mantine/dates": "^7.17.5",
     "@mantine/dropzone": "^7.17.5",
