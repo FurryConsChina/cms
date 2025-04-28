@@ -37,6 +37,8 @@ import { IconInfoCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Spin } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
+import { zodResolver } from "mantine-form-zod-resolver";
+import { z } from "zod";
 
 export default function OrganizationEditPage() {
   const { organizationId } = useParams();
@@ -105,10 +107,14 @@ function OrganizationEditorContent({
       richMediaConfig: organization?.richMediaConfig || {},
       type: organization?.type || OrganizationType.Agency,
     },
-
-    validate: {
-      //   email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-    },
+    validate: zodResolver(
+      z.object({
+        name: z.string().min(1, { message: "展商名称不能为空" }),
+        slug: z.string().regex(/^[a-z0-9-]+$/, {
+          message: "只允许小写英文字母、数字和连字符-",
+        }),
+      })
+    ),
   });
 
   type formType = typeof form.values;

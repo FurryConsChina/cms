@@ -117,7 +117,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         : new Date(new Date().setHours(18, 0, 0, 0)),
       address: event?.address || "",
       citySlug: event?.addressExtra?.citySlug || "",
-      addressExtra: event?.addressExtra || { city: null },
+      addressExtra: event?.addressExtra || { city: "" },
       features: event?.features || { self: [] },
       commonFeatures: event?.commonFeatures?.map((f) => f.id) || [],
       source: event?.source || "",
@@ -133,16 +133,27 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       addressLat: event?.addressLat || "",
       addressLon: event?.addressLon || "",
     },
-    // validate: zodResolver(
-    //   z.object({
-    //     name: z.string().min(1, { message: "文本不能为空" }),
-    //     startAt: z.date(),
-    //     endAt: z.date().nullable(),
-    //     city: z.string(),
-    //     citySlug: z.string(),
-    //   })
-    // ),
-    // validate: zodResolver(EditableEventSchema),
+    validate: zodResolver(
+      z.object({
+        name: z.string().min(1, { message: "文本不能为空" }),
+        slug: z
+          .string()
+          .min(1, { message: "Slug不能为空" })
+          .regex(/^[a-z0-9-]+$/, {
+            message: "只允许小写英文字母、数字和连字符-",
+          }),
+        addressExtra: z.object({
+          city: z.string().min(1, { message: "城市不能为空" }),
+        }),
+        citySlug: z
+          .string()
+          .min(1, { message: "城市Slug不能为空" })
+          .regex(/^[a-z]+$/, {
+            message: "只允许小写英文字母",
+          }),
+        poster: z.array(z.string().min(1, { message: "图片地址不能为空" })),
+      })
+    ),
   });
 
   type formType = typeof form.values;
@@ -414,7 +425,10 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               withAsterisk
               placeholder="选一个"
               data={Object.keys(EventLocationType).map((key) => ({
-                label: EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
+                label:
+                  EventLocationTypeLabel[
+                    EventLocationType[key as keyof typeof EventLocationType]
+                  ],
                 value: EventLocationType[key as keyof typeof EventLocationType],
               }))}
               {...form.getInputProps("locationType")}
