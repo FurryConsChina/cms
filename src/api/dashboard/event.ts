@@ -1,5 +1,5 @@
 import Axios from "@/api";
-import type { EditableEventType, EventType } from "@/types/event";
+import type { EditableEvent, EventItem } from "@/types/event";
 import type { List } from "@/types/Request";
 
 export async function getEventList(params: {
@@ -8,7 +8,7 @@ export async function getEventList(params: {
   search?: string;
   orgSearch?: string;
 }) {
-  const res = await Axios.get<List<EventType>>("/event/list", {
+  const res = await Axios.get<List<EventItem>>("/event/list", {
     params,
   });
 
@@ -16,21 +16,21 @@ export async function getEventList(params: {
 }
 
 export async function getEventDetail(params: { id: string }) {
-  const res = await Axios.get<EventType>(`/event/detail/${params.id}`);
+  const res = await Axios.get<EventItem>(`/open/v1/event/detail/${params.id}`);
 
   return res.data;
 }
 
-export async function createEvent(event: EditableEventType) {
-  const res = await Axios.post<EventType>("/event/create", {
+export async function createEvent(event: EditableEvent) {
+  const res = await Axios.post<EventItem>("/internal/cms/event/create", {
     event,
   });
 
   return res.data;
 }
 
-export async function updateEvent(event: EditableEventType) {
-  const res = await Axios.post<EventType>("/event/update", {
+export async function updateEvent(event: EditableEvent) {
+  const res = await Axios.post<EventItem>("/internal/cms/event/update", {
     event,
   });
 
@@ -38,9 +38,12 @@ export async function updateEvent(event: EditableEventType) {
 }
 
 export async function deleteEvent(id: string) {
-  const res = await Axios.post<{ success: boolean }>("/event/delete", {
-    id,
-  });
+  const res = await Axios.post<{ success: boolean }>(
+    "/internal/cms/event/delete",
+    {
+      id,
+    }
+  );
 
   return res.data;
 }

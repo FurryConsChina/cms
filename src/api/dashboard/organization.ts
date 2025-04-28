@@ -1,5 +1,4 @@
 import Axios from "@/api";
-import { EventType } from "@/types/event";
 import {
   OrganizationType,
   EditableOrganizationType,
@@ -27,7 +26,7 @@ export async function getAllOrganizations(params: { search?: string }) {
 
 export async function getOrganizationDetail(params: { id: string }) {
   const res = await Axios.get<OrganizationType>(
-    `/organization/detail/${params.id}`
+    `/open/v1/organization/detail/${params.id}`
   );
 
   return res.data;
@@ -36,9 +35,12 @@ export async function getOrganizationDetail(params: { id: string }) {
 export async function createOrganization(
   organization: EditableOrganizationType
 ) {
-  const res = await Axios.post<OrganizationType>("/organization/create", {
-    organization,
-  });
+  const res = await Axios.post<OrganizationType>(
+    "/internal/cms/organization/create",
+    {
+      organization,
+    }
+  );
 
   return res.data;
 }
@@ -46,17 +48,23 @@ export async function createOrganization(
 export async function updateOrganization(
   organization: EditableOrganizationType
 ) {
-  const res = await Axios.post<OrganizationType>("/organization/update", {
-    organization,
-  });
+  const res = await Axios.post<OrganizationType>(
+    "/internal/cms/organization/update",
+    {
+      organization,
+    }
+  );
 
   return res.data;
 }
 
 export async function deleteOrganization(id: string) {
-  const res = await Axios.post<{ success: boolean }>("/organization/delete", {
-    id,
-  });
+  const res = await Axios.post<{ success: boolean }>(
+    "/internal/cms/organization/delete",
+    {
+      id,
+    }
+  );
 
   return res.data;
 }

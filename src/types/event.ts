@@ -31,12 +31,38 @@ export const EventScale = {
   Cosy: "cosy",
   /** 二三线城市的展会一般用这个。 */
   Small: "small",
-  /** 一线城市的展会一般用这个，比如：极兽聚 */
+  /** 一线城市的展会但是不是很有名一般用这个，比如：上海兽界 */
   Medium: "medium",
-  /** 没有这种规模 */
+  /** 以极兽聚为代表的超过1000人以上的展会 */
   Large: "large",
-  /** 没有这种规模 */
+  /** 特大型展会 */
+  XLarge: "xlarge",
+  /**超特大型展会 */
+  XXLarge: "xxlarge",
+  /** 巨型展会，没有这种规模 */
   Mega: "mega",
+};
+
+export const EventType = {
+  /** 有毛又有销售摊位，比如极兽聚夏聚 */
+  AllInCon: "all-in-con",
+  /** 贩售会，主要在台湾和日本，以卖本子为主 */
+  ComicMarket: "comic-market",
+  /** 纯吸毛展，比如极兽聚冬聚 */
+  SuitOnlyCon: "suit-only-con",
+  /** 主打旅游的展子，行程里包含旅游等安排。 */
+  TravelCon: "travel-con",
+  /** 类似粉丝见面会和同城交友的类型，比如岚兽聚，这种展会的显著特点是：展会主动选择（筛选）访客。 */
+  FandomMeetup: "fandom-meetup",
+};
+
+export const EventLocationType = {
+  /** 在酒店举办的展会 */
+  Hotel: "hotel",
+  /** 在专用活动场地举办的展会 */
+  Venue: "venue",
+  /** 线上活动,除了整活不知道为什么会出现这种情况。 */
+  Online: "online",
 };
 
 export type EventScaleKeyType = keyof typeof EventScale;
@@ -48,7 +74,31 @@ export const EventSchema = z.object({
   startAt: z.string().datetime().nullable(),
   endAt: z.string().datetime().nullable(),
   status: z.string(),
-  scale: z.string(),
+  scale: z.enum([
+    EventScale.Cosy,
+    EventScale.Small,
+    EventScale.Medium,
+    EventScale.Large,
+    EventScale.XLarge,
+    EventScale.XXLarge,
+    EventScale.Mega,
+  ]),
+  type: z
+    .enum([
+      EventType.AllInCon,
+      EventType.ComicMarket,
+      EventType.SuitOnlyCon,
+      EventType.TravelCon,
+      EventType.FandomMeetup,
+    ])
+    .nullable(),
+  locationType: z
+    .enum([
+      EventLocationType.Hotel,
+      EventLocationType.Venue,
+      EventLocationType.Online,
+    ])
+    .nullable(),
   source: z.string().nullable(),
   address: z.string().nullable(),
   addressLat: z.string().nullable(),
@@ -86,5 +136,5 @@ export const EditableEventSchema = EventSchema.omit({
   })
 );
 
-export type EventType = z.infer<typeof EventSchema>;
-export type EditableEventType = z.infer<typeof EditableEventSchema>;
+export type EventItem = z.infer<typeof EventSchema>;
+export type EditableEvent = z.infer<typeof EditableEventSchema>;

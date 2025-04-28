@@ -2,7 +2,7 @@ import Axios from "@/api";
 
 export async function uploadStatic(form: FormData) {
   const res = await Axios.post<{ S3UploadRes: { ETag: string } }>(
-    "/third/upload/static",
+    "/internal/infra/upload/static",
     form
   );
 
@@ -19,7 +19,7 @@ export async function getUploadSignature({ pathKey }: { pathKey: string }) {
     bucket: string;
     region: string;
     key: string;
-  }>("/third/upload/sign", { pathKey });
+  }>("/internal/infra/upload/sign", { pathKey });
 
   return res.data;
 }

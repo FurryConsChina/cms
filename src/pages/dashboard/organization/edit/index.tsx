@@ -2,17 +2,17 @@ import {
   createOrganization,
   getOrganizationDetail,
   updateOrganization,
-} from '@/api/dashboard/organization';
-import DefaultContainer from '@/components/Container';
-import LoadError from '@/components/Error';
-import UploadImage from '@/components/UploadImage';
+} from "@/api/dashboard/organization";
+import DefaultContainer from "@/components/Container";
+import LoadError from "@/components/Error";
+import UploadImage from "@/components/UploadImage";
 import {
   EditableOrganizationSchema,
   OrganizationStatus,
   OrganizationStatusLabel,
   OrganizationType,
   OrganizationTypeLabel,
-} from '@/types/organization';
+} from "@/types/organization";
 import {
   Alert,
   Box,
@@ -29,14 +29,16 @@ import {
   Title,
   Tooltip,
   rem,
-} from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
-import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { IconInfoCircle } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { Spin } from 'antd';
-import { useNavigate, useParams } from 'react-router-dom';
+} from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { IconInfoCircle } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { Spin } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { zodResolver } from "mantine-form-zod-resolver";
+import { z } from "zod";
 
 export default function OrganizationEditPage() {
   const { organizationId } = useParams();
@@ -45,7 +47,7 @@ export default function OrganizationEditPage() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['organization-detail', organizationId],
+    queryKey: ["organization-detail", organizationId],
     queryFn: () => getOrganizationDetail({ id: organizationId as string }),
     refetchOnWindowFocus: false,
     enabled: !!organizationId,
@@ -57,7 +59,7 @@ export default function OrganizationEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-10">
-        <Title order={2}>{organizationId ? '编辑展商' : '新建展商'}</Title>
+        <Title order={2}>{organizationId ? "编辑展商" : "新建展商"}</Title>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
@@ -81,27 +83,38 @@ function OrganizationEditorContent({
   const navigate = useNavigate();
   const form = useForm({
     initialValues: {
-      name: organization?.name || '',
-      slug: organization?.slug || '',
-      description: organization?.description || '',
+      name: organization?.name || "",
+      slug: organization?.slug || "",
+      description: organization?.description || "",
       creationTime: organization?.creationTime
         ? new Date(organization.creationTime)
         : null,
-      logoUrl: organization?.logoUrl || '',
-      website: organization?.website || '',
-      contactMail: organization?.contactMail || '',
+      logoUrl: organization?.logoUrl || "",
+      website: organization?.website || "",
+      contactMail: organization?.contactMail || "",
       status: organization?.status || OrganizationStatus.Active,
-      twitter: organization?.twitter || '',
-      weibo: organization?.weibo || '',
-      bilibili: organization?.bilibili || '',
-      wikifur: organization?.wikifur || '',
-      qqGroup: organization?.qqGroup || '',
+      twitter: organization?.twitter || "",
+      weibo: organization?.weibo || "",
+      bilibili: organization?.bilibili || "",
+      wikifur: organization?.wikifur || "",
+      qqGroup: organization?.qqGroup || "",
+      rednote: organization?.rednote || "",
+      facebook: organization?.facebook || "",
+      plurk: organization?.plurk || "",
+      extraMedia: organization?.extraMedia || {
+        qqGroups: [],
+      },
+      richMediaConfig: organization?.richMediaConfig || {},
       type: organization?.type || OrganizationType.Agency,
     },
-
-    validate: {
-      //   email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-    },
+    validate: zodResolver(
+      z.object({
+        name: z.string().min(1, { message: "展商名称不能为空" }),
+        slug: z.string().regex(/^[a-z0-9-]+$/, {
+          message: "只允许小写英文字母、数字和连字符-",
+        }),
+      })
+    ),
   });
 
   type formType = typeof form.values;
@@ -109,8 +122,8 @@ function OrganizationEditorContent({
   const handleSubmit = async (formData: formType) => {
     const validFormData = Object.fromEntries(
       Object.entries(formData).filter(
-        ([key, value]) => value !== null && value !== '',
-      ),
+        ([key, value]) => value !== null && value !== ""
+      )
     );
     const validResult = EditableOrganizationSchema.safeParse({
       ...validFormData,
@@ -130,21 +143,21 @@ function OrganizationEditorContent({
         });
         if (res) {
           notifications.show({
-            title: '更新成功',
-            message: '更新展商数据成功',
-            color: 'teal',
+            title: "更新成功",
+            message: "更新展商数据成功",
+            color: "teal",
             autoClose: false,
           });
         }
-        console.log('update res', res);
+        console.log("update res", res);
       } else {
         const res = await createOrganization(validPayload);
-        console.log('create res', res);
+        console.log("create res", res);
         if (res) {
           notifications.show({
-            title: '创建成功',
-            message: '创建展商数据成功',
-            color: 'teal',
+            title: "创建成功",
+            message: "创建展商数据成功",
+            color: "teal",
             autoClose: false,
           });
           navigate(`/dashboard/organization/${res.id}/edit`);
@@ -152,9 +165,9 @@ function OrganizationEditorContent({
       }
     } else {
       notifications.show({
-        title: '数据校验不通过',
-        message: '请检查表单',
-        color: 'teal',
+        title: "数据校验不通过",
+        message: "请检查表单",
+        color: "teal",
       });
     }
   };
@@ -171,7 +184,7 @@ function OrganizationEditorContent({
               <TextInput
                 withAsterisk
                 label="展商名称"
-                {...form.getInputProps('name')}
+                {...form.getInputProps("name")}
               />
 
               <DatePickerInput
@@ -180,7 +193,7 @@ function OrganizationEditorContent({
                 placeholder="请选择日期"
                 clearable
                 locale="zh-cn"
-                {...form.getInputProps('creationTime')}
+                {...form.getInputProps("creationTime")}
               />
             </Group>
 
@@ -192,7 +205,7 @@ function OrganizationEditorContent({
                   label: OrganizationStatusLabel[status],
                   value: status,
                 }))}
-                {...form.getInputProps('status')}
+                {...form.getInputProps("status")}
               />
 
               <Select
@@ -202,7 +215,7 @@ function OrganizationEditorContent({
                   label: OrganizationTypeLabel[type],
                   value: type,
                 }))}
-                {...form.getInputProps('type')}
+                {...form.getInputProps("type")}
               />
             </Group>
 
@@ -213,7 +226,7 @@ function OrganizationEditorContent({
                 disabled={!!organization?.id}
                 placeholder="请输入展商Slug"
                 description="请不要使用大写"
-                {...form.getInputProps('slug')}
+                {...form.getInputProps("slug")}
               />
             </Group>
 
@@ -237,19 +250,19 @@ function OrganizationEditorContent({
               <TextInput
                 label="网站"
                 placeholder="请输入网站链接"
-                {...form.getInputProps('website')}
+                {...form.getInputProps("website")}
               />
 
               <TextInput
                 label="联系邮箱"
                 placeholder="请输入邮箱地址"
-                {...form.getInputProps('contactMail')}
+                {...form.getInputProps("contactMail")}
               />
 
               <TextInput
                 label="QQ群"
                 placeholder="请输入QQ群号"
-                {...form.getInputProps('qqGroup')}
+                {...form.getInputProps("qqGroup")}
               />
             </Group>
 
@@ -257,13 +270,13 @@ function OrganizationEditorContent({
               <TextInput
                 label="Twitter"
                 placeholder="请输入Twitter链接"
-                {...form.getInputProps('twitter')}
+                {...form.getInputProps("twitter")}
               />
 
               <TextInput
                 label="Weibo"
                 placeholder="请输入微博链接"
-                {...form.getInputProps('weibo')}
+                {...form.getInputProps("weibo")}
               />
             </Group>
 
@@ -271,13 +284,41 @@ function OrganizationEditorContent({
               <TextInput
                 label="Bilibili"
                 placeholder="请输入B站链接"
-                {...form.getInputProps('bilibili')}
+                {...form.getInputProps("bilibili")}
               />
 
               <TextInput
                 label="Wikifur"
                 placeholder="请输入Wikifur链接"
-                {...form.getInputProps('wikifur')}
+                {...form.getInputProps("wikifur")}
+              />
+            </Group>
+
+            <Group gap="xs" grow>
+              <TextInput
+                label="小红书"
+                placeholder="请输入小红书用户链接"
+                {...form.getInputProps("rednote")}
+              />
+
+              {/* <TextInput
+                label="Wikifur"
+                placeholder="请输入Wikifur链接"
+                {...form.getInputProps("wikifur")}
+              /> */}
+            </Group>
+
+            <Group gap="xs" grow>
+              <TextInput
+                label="Plurk"
+                placeholder="请输入Plurk用户链接"
+                {...form.getInputProps("plurk")}
+              />
+
+              <TextInput
+                label="Facebook"
+                placeholder="请输入Facebook链接"
+                {...form.getInputProps("facebook")}
               />
             </Group>
           </Stack>
@@ -295,7 +336,7 @@ function OrganizationEditorContent({
               autosize
               minRows={5}
               maxRows={20}
-              {...form.getInputProps('description')}
+              {...form.getInputProps("description")}
             />
           </Stack>
         </Container>
@@ -309,13 +350,13 @@ function OrganizationEditorContent({
             <TextInput
               label="展商标志图片"
               description="一般来说无需手动编辑，除非有两个组织的logo一致，可以直接复用另外一个组织的URL。"
-              {...form.getInputProps('logoUrl')}
+              {...form.getInputProps("logoUrl")}
             />
             <Group>
               <UploadImage
                 pathPrefix={`organizations/${form.values.slug}/`}
                 defaultImageName="logo"
-                onUploadSuccess={(s) => form.setFieldValue('logoUrl', s)}
+                onUploadSuccess={(s) => form.setFieldValue("logoUrl", s)}
                 disabled={!form.values.slug}
               />
             </Group>
