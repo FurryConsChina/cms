@@ -10,7 +10,7 @@ export async function getFeatureList(params: {
   pageSize: number;
   current: number;
 }) {
-  const res = await Axios.get<List<FeatureType>>("/event/feature", {
+  const res = await Axios.get<List<FeatureType>>("/internal/cms/event/feature", {
     params,
   });
 
@@ -18,7 +18,7 @@ export async function getFeatureList(params: {
 }
 
 export async function createFeature(feature: CrateFeatureType) {
-  const res = await Axios.post<FeatureType>("/event/feature/create", {
+  const res = await Axios.post<FeatureType>("/internal/cms/event/feature/create", {
     feature,
   });
 
@@ -26,7 +26,7 @@ export async function createFeature(feature: CrateFeatureType) {
 }
 
 export async function updateFeature(feature: EditableFeatureType) {
-  const res = await Axios.post<FeatureType>("/event/feature/update", {
+  const res = await Axios.post<FeatureType>("/internal/cms/event/feature/update", {
     feature,
   });
 

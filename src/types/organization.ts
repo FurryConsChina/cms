@@ -24,24 +24,39 @@ export const OrganizationSchema = z.object({
   id: z.string().uuid(),
   slug: z.string().min(1),
   name: z.string().min(1),
-  description: z.string().nullish(),
+  description: z.string().optional(),
   status: z.enum(["active", "inactive"]),
-  type: z.string().nullish(),
-  logoUrl: z.string().nullish(),
-  richMediaConfig: z.any().nullish(),
-  contactMail: z.string().email().nullish(),
-  website: z.string().url().nullish(),
-  twitter: z.string().url().nullish(),
-  weibo: z.string().url().nullish(),
-  qqGroup: z.string().nullish(),
-  bilibili: z.string().url().nullish(),
-  wikifur: z.string().url().nullish(),
+  type: z.enum(["personal", "agency"]).optional(),
+  logoUrl: z.string().optional(),
+  richMediaConfig: z.any().optional(),
+  contactMail: z.string().email().optional(),
+  website: z.string().url().optional(),
+  twitter: z.string().url().optional(),
+  weibo: z.string().url().optional(),
+  qqGroup: z.string().optional(),
+  bilibili: z.string().url().optional(),
+  rednote: z.string().url().optional(),
+  wikifur: z.string().url().optional(),
+  facebook: z.string().url().optional(),
+  plurk: z.string().url().optional(),
+  extraMedia: z
+    .object({
+      qqGroups: z
+        .array(
+          z.object({
+            label: z.string(),
+            value: z.string(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
   creationTime: z
     .string()
-    .refine((date) => !Number.isNaN(Date.parse(date)), {
+    .refine((date) => !isNaN(Date.parse(date)), {
       message: "Invalid date format",
     })
-    .nullish(),
+    .optional(),
 });
 
 export type OrganizationType = z.infer<typeof OrganizationSchema>;

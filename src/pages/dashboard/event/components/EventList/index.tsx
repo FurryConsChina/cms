@@ -9,7 +9,6 @@ import {
   EventStatusColor,
   EventStatusLabel,
 } from '@/consts/event';
-import type { EventType } from '@/types/event';
 import {
   IconEdit,
   IconInfoCircle,
@@ -25,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 
 import type { List } from '@/types/Request';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
+import { EventItem } from '@/types/event';
 
 function EventList({
   data,
@@ -33,7 +33,7 @@ function EventList({
   updatePagination,
   onDeleteEvent,
 }: {
-  data: List<EventType>;
+  data: List<EventItem>;
   pagination: {
     current: number;
     pageSize: number;
@@ -66,7 +66,7 @@ function EventList({
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps['confirm'],
-    dataIndex: keyof EventType,
+    dataIndex: keyof EventItem,
   ) => {
     console.log(selectedKeys);
     confirm();
@@ -89,7 +89,7 @@ function EventList({
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps['confirm'],
-    dataIndex: keyof EventType,
+    dataIndex: keyof EventItem,
   ) => {
     clearFilters();
     confirm();
@@ -110,8 +110,8 @@ function EventList({
   };
 
   const getColumnSearchProps = (
-    dataIndex: keyof EventType,
-  ): TableColumnType<EventType> => ({
+    dataIndex: keyof EventItem,
+  ): TableColumnType<EventItem> => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -176,7 +176,7 @@ function EventList({
     ),
   });
 
-  const columns: ColumnsType<EventType> = [
+  const columns: ColumnsType<EventItem> = [
     {
       title: '展商',
       dataIndex: ['organization', 'name'],
