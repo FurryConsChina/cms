@@ -129,7 +129,7 @@ function OrganizationEditorContent({
       ...validFormData,
       creationTime: formData.creationTime
         ? formData.creationTime.toISOString()
-        : null,
+        : undefined,
     });
     const validPayload = validResult.data;
 
