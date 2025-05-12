@@ -405,6 +405,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               data={Object.keys(EventScale).map((key) => ({
                 label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
                 value: EventScale[key as EventScaleKeyType],
+                disabled: ["Mega", "XXLarge"].includes(key),
               }))}
               {...form.getInputProps("scale")}
             />

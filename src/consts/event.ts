@@ -14,12 +14,12 @@ export const EventStatusLabel = {
 };
 
 export const EventScaleLabel = {
-  [EventScale.Cosy]: "迷你(50+)",
+  [EventScale.Cosy]: "迷你(0-100)",
   [EventScale.Small]: "小型(100+)",
   [EventScale.Medium]: "中型(500+)",
   [EventScale.Large]: "大型(1000+)",
   [EventScale.XLarge]: "特大型(3000+)",
-  [EventScale.XXLarge]: "超特大型(6000+)",
+  [EventScale.XXLarge]: "超特大型(5000+)",
   [EventScale.Mega]: "巨型(10000+)",
 };
 

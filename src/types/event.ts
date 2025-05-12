@@ -33,9 +33,9 @@ export const EventScale = {
   Small: "small",
   /** 一线城市的展会但是不是很有名一般用这个，比如：上海兽界 */
   Medium: "medium",
-  /** 以极兽聚为代表的超过1000人以上的展会 */
+  /** 大型展会 */
   Large: "large",
-  /** 特大型展会 */
+  /** 特大型展会,以极兽聚为代表的超过3000人以上的展会 */
   XLarge: "xlarge",
   /**超特大型展会 */
   XXLarge: "xxlarge",
