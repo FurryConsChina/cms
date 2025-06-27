@@ -1,30 +1,77 @@
 on: [push]
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    name: Build Project
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      
+      - name: Use Yarn 4
+        run: corepack enable
+      
+      - name: Inject Environment Variables
+        run: |
+          echo "PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}" >> .env
+      
+      - name: Build
+        run: yarn install --immutable && yarn build
+      
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+          retention-days: 1
+
+  deploy-cloudflare:
+    runs-on: ubuntu-latest
+    needs: build
     permissions:
       contents: read
       deployments: write
     name: Deploy to Cloudflare Pages
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
         with:
-          node-version-file: .nvmrc
-      # Run your project's build step
-      - name: Use Yarn 4
-        run: corepack enable
-      - name: Inject Environment Variables
-        run: |
-          echo "PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}" >> .env
-      - name: Build
-        run: yarn install --immutable && yarn build
-      - name: Publish
+          name: dist-files
+          path: dist/
+      
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=fcc-cms-6b4t
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-qcloud:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      deployments: write
+    name: Deploy to QCloud Pages
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+      
+      - name: Deploy to QCloud Pages
+        run: |
+          npm install -g edgeone
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            edgeone pages deploy ./dist -n fcc-dashboard -t ${{ secrets.QCLOUD_PAGES_TOKEN }}
+          else
+            edgeone pages deploy ./dist -n fcc-dashboard -e preview -t ${{ secrets.QCLOUD_PAGES_TOKEN }}
+          fi
