@@ -8,7 +8,7 @@ export async function getEventList(params: {
   search?: string;
   orgSearch?: string;
 }) {
-  const res = await Axios.get<List<EventItem>>("/event/list", {
+  const res = await Axios.get<List<EventItem>>("/internal/cms/event/list", {
     params,
   });
 
@@ -16,7 +16,7 @@ export async function getEventList(params: {
 }
 
 export async function getEventDetail(params: { id: string }) {
-  const res = await Axios.get<EventItem>(`/open/v1/event/detail/${params.id}`);
+  const res = await Axios.get<EventItem>(`/internal/cms/event/detail/${params.id}`);
 
   return res.data;
 }
