@@ -9,7 +9,7 @@ export async function getOrganizationList(params: {
   pageSize: number;
   current: number;
 }) {
-  const res = await Axios.get<List<OrganizationType>>("/organization/list", {
+  const res = await Axios.get<List<OrganizationType>>("/internal/cms/organization/list", {
     params,
   });
 
@@ -17,7 +17,7 @@ export async function getOrganizationList(params: {
 }
 
 export async function getAllOrganizations(params: { search?: string }) {
-  const res = await Axios.get<OrganizationType[]>("/organization/all", {
+  const res = await Axios.get<OrganizationType[]>("/internal/cms/organization/all", {
     params,
   });
 
@@ -26,7 +26,7 @@ export async function getAllOrganizations(params: { search?: string }) {
 
 export async function getOrganizationDetail(params: { id: string }) {
   const res = await Axios.get<OrganizationType>(
-    `/open/v1/organization/detail/${params.id}`
+    `/internal/cms/organization/detail/${params.id}`
   );
 
   return res.data;
