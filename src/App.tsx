@@ -7,6 +7,7 @@ import FullScreenLoading from "@/components/Loading";
 import DashboardLayout from "@/pages/dashboard/layout";
 
 import "@/styles/global.css";
+
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";

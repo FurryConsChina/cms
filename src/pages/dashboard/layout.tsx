@@ -10,6 +10,7 @@ import {
   IconCloudStorm,
   IconHome,
   IconLogout,
+  IconMapPin,
   IconTag,
   IconTicket,
   IconTrademark,
@@ -22,6 +23,7 @@ const linksData = [
   { link: "/dashboard/event", label: "展会", icon: IconTicket },
   { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
   { link: "/dashboard/feature", label: "展会标签", icon: IconTag },
+  { link: "/dashboard/region", label: "区域管理", icon: IconMapPin },
   {
     link: "/dashboard/cache-manager",
     label: "缓存管理",

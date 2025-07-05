@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+export enum FeatureCategory {
+  Event = "event",
+  Ability = "ability",
+  Facility = "facility",
+}
+
+export const FeatureCategoryLabel = {
+  [FeatureCategory.Event]: "特色活动",
+  [FeatureCategory.Ability]: "服务",
+  [FeatureCategory.Facility]: "设施",
+};
+
 export const FeatureSchema = z.object({
   id: z.string(),
   name: z.string().max(256),
