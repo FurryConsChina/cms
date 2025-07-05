@@ -365,97 +365,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:^1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/biome@npm:1.9.4"
-  dependencies:
-    "@biomejs/cli-darwin-arm64": "npm:1.9.4"
-    "@biomejs/cli-darwin-x64": "npm:1.9.4"
-    "@biomejs/cli-linux-arm64": "npm:1.9.4"
-    "@biomejs/cli-linux-arm64-musl": "npm:1.9.4"
-    "@biomejs/cli-linux-x64": "npm:1.9.4"
-    "@biomejs/cli-linux-x64-musl": "npm:1.9.4"
-    "@biomejs/cli-win32-arm64": "npm:1.9.4"
-    "@biomejs/cli-win32-x64": "npm:1.9.4"
-  dependenciesMeta:
-    "@biomejs/cli-darwin-arm64":
-      optional: true
-    "@biomejs/cli-darwin-x64":
-      optional: true
-    "@biomejs/cli-linux-arm64":
-      optional: true
-    "@biomejs/cli-linux-arm64-musl":
-      optional: true
-    "@biomejs/cli-linux-x64":
-      optional: true
-    "@biomejs/cli-linux-x64-musl":
-      optional: true
-    "@biomejs/cli-win32-arm64":
-      optional: true
-    "@biomejs/cli-win32-x64":
-      optional: true
-  bin:
-    biome: bin/biome
-  checksum: 10c0/b5655c5aed9a6fffe24f7d04f15ba4444389d0e891c9ed9106fab7388ac9b4be63185852cc2a937b22940dac3e550b71032a4afd306925cfea436c33e5646b3e
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-darwin-arm64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-darwin-arm64@npm:1.9.4"
-  conditions: os=darwin & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-darwin-x64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-darwin-x64@npm:1.9.4"
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-linux-arm64-musl@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-linux-arm64-musl@npm:1.9.4"
-  conditions: os=linux & cpu=arm64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-linux-arm64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-linux-arm64@npm:1.9.4"
-  conditions: os=linux & cpu=arm64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-linux-x64-musl@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-linux-x64-musl@npm:1.9.4"
-  conditions: os=linux & cpu=x64 & libc=musl
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-linux-x64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-linux-x64@npm:1.9.4"
-  conditions: os=linux & cpu=x64 & libc=glibc
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-win32-arm64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-win32-arm64@npm:1.9.4"
-  conditions: os=win32 & cpu=arm64
-  languageName: node
-  linkType: hard
-
-"@biomejs/cli-win32-x64@npm:1.9.4":
-  version: 1.9.4
-  resolution: "@biomejs/cli-win32-x64@npm:1.9.4"
-  conditions: os=win32 & cpu=x64
-  languageName: node
-  linkType: hard
-
 "@ctrl/tinycolor@npm:^3.6.1":
   version: 3.6.1
   resolution: "@ctrl/tinycolor@npm:3.6.1"
@@ -636,9 +545,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/core@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/core@npm:7.17.8"
+"@mantine/core@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/core@npm:8.1.2"
   dependencies:
     "@floating-ui/react": "npm:^0.26.28"
     clsx: "npm:^2.1.1"
@@ -647,84 +556,84 @@ __metadata:
     react-textarea-autosize: "npm:8.5.9"
     type-fest: "npm:^4.27.0"
   peerDependencies:
-    "@mantine/hooks": 7.17.8
+    "@mantine/hooks": 8.1.2
     react: ^18.x || ^19.x
     react-dom: ^18.x || ^19.x
-  checksum: 10c0/922a2b8b254cc5a145913f3768724510f44c261a12ec35864dea17350d96dabc0e4fbee634d2433447caa71d5a5226173ba5372bf6f4b06067cca3543f3a2b0d
+  checksum: 10c0/c6498676dc5a50a036778588002301717cd9e290f6e9c460702592a2d5f0da0dc19be56f781f890656ca04ea353328c9c605fdc105924544978aa39b995433d5
   languageName: node
   linkType: hard
 
-"@mantine/dates@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/dates@npm:7.17.8"
+"@mantine/dates@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/dates@npm:8.1.2"
   dependencies:
     clsx: "npm:^2.1.1"
   peerDependencies:
-    "@mantine/core": 7.17.8
-    "@mantine/hooks": 7.17.8
+    "@mantine/core": 8.1.2
+    "@mantine/hooks": 8.1.2
     dayjs: ">=1.0.0"
     react: ^18.x || ^19.x
     react-dom: ^18.x || ^19.x
-  checksum: 10c0/d6129fdc5f3439aec0c7b322a9ecbc96321dcd2094f94afd2d6be02ebfa094c07c5c975c601af7e578290b33fb1e7c491fa335a988c4892bd17440aff909be5f
+  checksum: 10c0/c004d3b0bd4feec50af421f701e11e5065b93cc625e9d36a9c9616eb5db3528886bef18fa3cda84dccc1523a5d6e06a7060503c2562744895eb9c9da2c1a83eb
   languageName: node
   linkType: hard
 
-"@mantine/dropzone@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/dropzone@npm:7.17.8"
+"@mantine/dropzone@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/dropzone@npm:8.1.2"
   dependencies:
-    react-dropzone-esm: "npm:15.2.0"
+    react-dropzone: "npm:14.3.8"
   peerDependencies:
-    "@mantine/core": 7.17.8
-    "@mantine/hooks": 7.17.8
+    "@mantine/core": 8.1.2
+    "@mantine/hooks": 8.1.2
     react: ^18.x || ^19.x
     react-dom: ^18.x || ^19.x
-  checksum: 10c0/6d80579b99e03ad5b66880689cc2813f590a891d65882b002d28f1290eacca4dd2d12405793999972165ab6a8347fb5a257eb45ad77dd9fa8f9e9a580d7e5eb3
+  checksum: 10c0/9123fa79bf0ff70986a875242f04910a9a27b6eb9868b11fc6a80e3706a102ca52b66d13f2d104fbe5d4d56066309b10c82f7dd0ad309155ff42b4276899645c
   languageName: node
   linkType: hard
 
-"@mantine/form@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/form@npm:7.17.8"
+"@mantine/form@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/form@npm:8.1.2"
   dependencies:
     fast-deep-equal: "npm:^3.1.3"
     klona: "npm:^2.0.6"
   peerDependencies:
     react: ^18.x || ^19.x
-  checksum: 10c0/48cd768fd01dc9ce050d69c53076661beb1658c326cb22c8af86959d26cf2332a0080139d0ed0141ba8073d57f2a85fb2d62bcb6b7d59e89a55b4af00cab5021
+  checksum: 10c0/b99b37837348f43bb0cf5d92d1b019ed2fa136a1426f8e24886b42dd486928c3f5c5aba17ed87c7d390c2fad4ca4890e790a6663c8e296eb4ea7288612f4554f
   languageName: node
   linkType: hard
 
-"@mantine/hooks@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/hooks@npm:7.17.8"
+"@mantine/hooks@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/hooks@npm:8.1.2"
   peerDependencies:
     react: ^18.x || ^19.x
-  checksum: 10c0/c68ace173bae85f7dcc20951bd7d35853e743a24934d963701118e2015a7ab37fecabcb84b5013b7cf9b83ad8439fe5ac5a1502a0493c1fbb1e41f5560ddf01e
+  checksum: 10c0/64bbc2b4cf39b315958939ce0c1febf2e35c79618f99cc2a262788e7d180922f7d551445606a2b4d66fcbf5371d1d40f9c50e5ff8e87b16ac1c28e5a4f2f4373
   languageName: node
   linkType: hard
 
-"@mantine/notifications@npm:^7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/notifications@npm:7.17.8"
+"@mantine/notifications@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/notifications@npm:8.1.2"
   dependencies:
-    "@mantine/store": "npm:7.17.8"
+    "@mantine/store": "npm:8.1.2"
     react-transition-group: "npm:4.4.5"
   peerDependencies:
-    "@mantine/core": 7.17.8
-    "@mantine/hooks": 7.17.8
+    "@mantine/core": 8.1.2
+    "@mantine/hooks": 8.1.2
     react: ^18.x || ^19.x
     react-dom: ^18.x || ^19.x
-  checksum: 10c0/7c40d263528cdd91ee36225c76851618262dd362bdfde6e9080f6bf23b5faf192c1c832829beeac6b4b0256b686f445ed2ad22a76aaf059c01a5f9be32360cda
+  checksum: 10c0/05e144b928f80a2f3590d4e063c9a9b560c7c4ee3cf089521cccfb155d4ca3300a3c5895a45b39f18ce5869d4fcde7e37ff63afcc1e1bbc06961b6ef1ea1b01a
   languageName: node
   linkType: hard
 
-"@mantine/store@npm:7.17.8":
-  version: 7.17.8
-  resolution: "@mantine/store@npm:7.17.8"
+"@mantine/store@npm:8.1.2":
+  version: 8.1.2
+  resolution: "@mantine/store@npm:8.1.2"
   peerDependencies:
     react: ^18.x || ^19.x
-  checksum: 10c0/f5dd9cbeec06f5bf89c6ea32b416b5cdb6646274581153f2f03acbd0fdfa3949f53d5f64b0e76e37af538cb2d8e899be4887af2e2e69cbe442148bd6f6fd5bc1
+  checksum: 10c0/6d6a34bfe7e6e672496a8fc09326f5a9bd65614cc6e282af66e972593336b6464ee9af2f33973df174b2b2ea2e1d1a851149bc7283a03ec8c99ae337ba41f381
   languageName: node
   linkType: hard
 
@@ -1625,6 +1534,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"attr-accept@npm:^2.2.4":
+  version: 2.2.5
+  resolution: "attr-accept@npm:2.2.5"
+  checksum: 10c0/9b4cb82213925cab2d568f71b3f1c7a7778f9192829aac39a281e5418cd00c04a88f873eb89f187e0bf786fa34f8d52936f178e62cbefb9254d57ecd88ada99b
+  languageName: node
+  linkType: hard
+
 "axios@npm:^1.10.0":
   version: 1.10.0
   resolution: "axios@npm:1.10.0"
@@ -2259,14 +2175,13 @@ __metadata:
   resolution: "fcc-dashboard@workspace:."
   dependencies:
     "@ant-design/v5-patch-for-react-19": "npm:^1.0.3"
-    "@biomejs/biome": "npm:^1.9.4"
     "@hello-pangea/dnd": "npm:^18.0.1"
-    "@mantine/core": "npm:^7.17.8"
-    "@mantine/dates": "npm:^7.17.8"
-    "@mantine/dropzone": "npm:^7.17.8"
-    "@mantine/form": "npm:^7.17.8"
-    "@mantine/hooks": "npm:^7.17.8"
-    "@mantine/notifications": "npm:^7.17.8"
+    "@mantine/core": "npm:^8.1.2"
+    "@mantine/dates": "npm:^8.1.2"
+    "@mantine/dropzone": "npm:^8.1.2"
+    "@mantine/form": "npm:^8.1.2"
+    "@mantine/hooks": "npm:^8.1.2"
+    "@mantine/notifications": "npm:^8.1.2"
     "@rsbuild/core": "npm:1.4.3"
     "@rsbuild/plugin-react": "npm:1.3.3"
     "@rsbuild/plugin-svgr": "npm:^1.2.0"
@@ -2308,6 +2223,15 @@ __metadata:
     picomatch:
       optional: true
   checksum: 10c0/45b559cff889934ebb8bc498351e5acba40750ada7e7d6bde197768d2fa67c149be8ae7f8ff34d03f4e1eb20f2764116e56440aaa2f6689e9a4aa7ef06acafe9
+  languageName: node
+  linkType: hard
+
+"file-selector@npm:^2.1.0":
+  version: 2.1.2
+  resolution: "file-selector@npm:2.1.2"
+  dependencies:
+    tslib: "npm:^2.7.0"
+  checksum: 10c0/fe827e0e95410aacfcc3eabc38c29cc36055257f03c1c06b631a2b5af9730c142ad2c52f5d64724d02231709617bda984701f52bd1f4b7aca50fb6585a27c1d2
   languageName: node
   linkType: hard
 
@@ -4049,14 +3973,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dropzone-esm@npm:15.2.0":
-  version: 15.2.0
-  resolution: "react-dropzone-esm@npm:15.2.0"
+"react-dropzone@npm:14.3.8":
+  version: 14.3.8
+  resolution: "react-dropzone@npm:14.3.8"
   dependencies:
+    attr-accept: "npm:^2.2.4"
+    file-selector: "npm:^2.1.0"
     prop-types: "npm:^15.8.1"
   peerDependencies:
     react: ">= 16.8 || 18.0.0"
-  checksum: 10c0/a82dce547746f29214fa396e4060930250dd1b5f15c81e761035a05a09a1354493a90f79c1125c6341aee4b6226444bc7c7d29fc54ad266c149dfff170ef47a9
+  checksum: 10c0/e17b1832783cda7b8824fe9370e99185d1abbdd5e4980b2985d6321c5768c8de18ff7b9ad550c809ee9743269dea608ff74d5208062754ce8377ad022897b278
   languageName: node
   linkType: hard
 
@@ -4752,7 +4678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.4.0, tslib@npm:^2.8.0":
+"tslib@npm:^2.4.0, tslib@npm:^2.7.0, tslib@npm:^2.8.0":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62
