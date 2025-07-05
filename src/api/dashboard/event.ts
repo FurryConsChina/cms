@@ -16,21 +16,21 @@ export async function getEventList(params: {
 }
 
 export async function getEventDetail(params: { id: string }) {
-  const res = await Axios.get<EventItem>(`/internal/cms/event/detail/${params.id}`);
+  const res = await Axios.get<EventItem>(`/open/v1/event/detail/${params.id}`);
 
   return res.data;
 }
 
 export async function createEvent(event: EditableEvent) {
-  const res = await Axios.post<EventItem>("/internal/cms/event/create", {
+  const res = await Axios.post<EventItem>("/internal/cms/event", {
     event,
   });
 
   return res.data;
 }
 
-export async function updateEvent(event: EditableEvent) {
-  const res = await Axios.post<EventItem>("/internal/cms/event/update", {
+export async function updateEvent(eventId: string, event: EditableEvent) {
+  const res = await Axios.post<EventItem>(`/internal/cms/event/${eventId}`, {
     event,
   });
 
@@ -39,7 +39,7 @@ export async function updateEvent(event: EditableEvent) {
 
 export async function deleteEvent(id: string) {
   const res = await Axios.post<{ success: boolean }>(
-    "/internal/cms/event/delete",
+    `/internal/cms/event/${id}`,
     {
       id,
     }

@@ -59,7 +59,7 @@ export const OrganizationSchema = z.object({
     .optional(),
 });
 
-export type OrganizationType = z.infer<typeof OrganizationSchema>;
+export type Organization = z.infer<typeof OrganizationSchema>;
 
 export const EditableOrganizationSchema = OrganizationSchema.extend({
   id: z.string().uuid().nullish(),

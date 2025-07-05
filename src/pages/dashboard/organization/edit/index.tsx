@@ -10,7 +10,7 @@ import {
   EditableOrganizationSchema,
   OrganizationStatus,
   OrganizationStatusLabel,
-  OrganizationType,
+  Organization,
   OrganizationTypeLabel,
 } from "@/types/organization";
 import {
@@ -78,7 +78,7 @@ export default function OrganizationEditPage() {
 function OrganizationEditorContent({
   organization,
 }: {
-  organization?: OrganizationType;
+  organization?: Organization;
 }) {
   const navigate = useNavigate();
   const form = useForm({

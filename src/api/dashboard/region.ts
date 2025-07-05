@@ -5,6 +5,7 @@ import type { List } from "@/types/Request";
 export async function getRegionList(params: {
   pageSize: number;
   current: number;
+  code?: string;
 }) {
   const res = await Axios.get<List<Region>>("/internal/cms/region", {
     params,

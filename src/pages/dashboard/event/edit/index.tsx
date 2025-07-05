@@ -10,6 +10,7 @@ import {
   EventStatus,
   type EventStatusKeyType,
   EventType,
+  EditEventValidationSchema,
 } from "@/types/event";
 import {
   ActionIcon,
@@ -33,10 +34,10 @@ import {
   MultiSelect,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
-import { useForm, zodResolver } from "@mantine/form";
+import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
-import { OrganizationType } from "@/types/organization";
+import { Organization } from "@/types/organization";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllOrganizations } from "@/api/dashboard/organization";
 import {
@@ -46,6 +47,7 @@ import {
 } from "@/api/dashboard/event";
 import { z } from "zod";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import { zodResolver } from "mantine-form-zod-resolver";
 
 import "dayjs/locale/zh-cn";
 import {
@@ -59,6 +61,12 @@ import UploadImage from "@/components/UploadImage";
 import DefaultContainer from "@/components/Container";
 import LoadError from "@/components/Error";
 import { getFeatureList } from "@/api/dashboard/feature";
+import RegionSelector from "@/components/Region/RegionSelector";
+import { useState } from "react";
+import { Region } from "@/types/region";
+import OrganizationSelector from "@/components/Organization/OrganizatonSelector";
+import { FeatureCategoryLabel } from "@/types/feature";
+import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
 
 export default function EventEditPage() {
   const { eventId } = useParams();
@@ -106,6 +114,18 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         `https://apis.map.qq.com/ws/place/v1/search?key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&keyword=${params.address}&boundary=region(${params.city},2)&page_size=10&page_index=1`
       ),
   });
+
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(
+    event?.region || null
+  );
+
+  const [selectedOrganization, setSelectedOrganization] =
+    useState<Organization | null>(event?.organization || null);
+
+  const [selectedOrganizations, setSelectedOrganizations] = useState<
+    Organization[] | null
+  >(event?.organizations || null);
+
   const form = useForm({
     initialValues: {
       name: event?.name || "",
@@ -116,81 +136,71 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         ? new Date(event?.endAt)
         : new Date(new Date().setHours(18, 0, 0, 0)),
       address: event?.address || "",
-      citySlug: event?.addressExtra?.citySlug || "",
-      addressExtra: event?.addressExtra || { city: "" },
+      regionId: event?.regionId || null,
       features: event?.features || { self: [] },
-      commonFeatures: event?.commonFeatures?.map((f) => f.id) || [],
-      source: event?.source || "",
+      featureIds: event?.commonFeatures?.map((f) => f.id) || [],
+      source: event?.source || null,
       thumbnail: event?.thumbnail || "fec-event-default-cover.png",
       poster: event?.poster?.all || [],
-      organization: event?.organization?.id || "",
-      slug: event?.slug || "",
-      detail: event?.detail || "",
+      organization: event?.organization?.id || null,
+      organizations: event?.organizations?.map((o) => o.id) || [],
+      slug: event?.slug || null,
+      detail: event?.detail || null,
       status: event?.status || EventStatus.EventScheduled,
       type: event?.type || EventType.AllInCon,
       scale: event?.scale || EventScale.Cosy,
       locationType: event?.locationType || EventLocationType.Hotel,
-      addressLat: event?.addressLat || "",
-      addressLon: event?.addressLon || "",
+      addressLat: event?.addressLat || null,
+      addressLon: event?.addressLon || null,
     },
-    validate: zodResolver(
-      z.object({
-        name: z.string().min(1, { message: "文本不能为空" }),
-        slug: z
-          .string()
-          .min(1, { message: "Slug不能为空" })
-          .regex(/^[a-z0-9-]+$/, {
-            message: "只允许小写英文字母、数字和连字符-",
-          }),
-        addressExtra: z.object({
-          city: z.string().min(1, { message: "城市不能为空" }),
-        }),
-        citySlug: z
-          .string()
-          .min(1, { message: "城市Slug不能为空" })
-          .regex(/^[a-z]+$/, {
-            message: "只允许小写英文字母",
-          }),
-        poster: z.array(z.string().min(1, { message: "图片地址不能为空" })),
-      })
-    ),
+    validate: zodResolver(EditEventValidationSchema),
   });
 
   type formType = typeof form.values;
-
-  const { data: organizationList } = useQuery({
-    queryKey: ["organization-list"],
-    queryFn: () => getAllOrganizations({ search: "" }),
-  });
 
   const { data: featureList } = useQuery({
     queryKey: ["feature-list"],
     queryFn: () => getFeatureList({ pageSize: 100, current: 1 }),
   });
 
-  const organizationSelectOptions =
-    organizationList?.map((item) => ({
-      label: item.name,
-      value: item.id,
-    })) || [];
-
-  const selectedOrganization = organizationList?.find(
-    (item) => item.id === form.values.organization
-  );
-
   const featureSelectOptions =
-    featureList?.records.map((item) => ({
-      label: item.name,
-      value: item.id,
-    })) || [];
+    featureList?.records.reduce((acc, item) => {
+      const category = item.category as keyof typeof FeatureCategoryLabel;
+      const groupLabel = FeatureCategoryLabel[category] || "其他";
+
+      const existingGroup = acc.find((group) => group.group === groupLabel);
+      if (existingGroup) {
+        existingGroup.items.push({
+          label: item.name,
+          value: item.id,
+        });
+      } else {
+        acc.push({
+          group: groupLabel,
+          items: [
+            {
+              label: item.name,
+              value: item.id,
+            },
+          ],
+        });
+      }
+      return acc;
+    }, [] as Array<{ group: string; items: Array<{ label: string; value: string }> }>) ||
+    [];
 
   const generateEventSlug = () => {
     const selectedYear = form.values.startAt?.getFullYear();
     const selectedMonth = form.values.startAt
       ?.toLocaleString("en-us", { month: "short" })
       .toLocaleLowerCase();
-    const city = form.values.citySlug;
+    const city = selectedRegion?.code;
+
     if (!selectedYear || !selectedMonth || !city) {
+      notifications.show({
+        message: "活动日期或活动地区没有选择",
+        color: "red",
+      });
       return;
     }
 
@@ -200,49 +210,62 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const handleSubmit = async (formData: formType) => {
     console.log(formData);
 
-    const transFormData: EditableEvent = {
-      ...formData,
-      startAt: formData.startAt.toISOString(),
-      endAt: formData.endAt.toISOString(),
-      poster: { all: formData.poster },
-      addressExtra: {
-        city: formData.addressExtra.city,
-        citySlug: formData.citySlug,
-      },
-      organizations: [{ id: formData.organization, isPrimary: true }],
-    };
-    if (event?.id) {
-      const res = await updateEvent({
-        id: event.id,
-        ...transFormData,
+    try {
+      const validatedData = EditEventValidationSchema.parse(formData);
+      const transFormData: EditableEvent = {
+        ...formData,
+        startAt: formData.startAt.toISOString(),
+        endAt: formData.endAt.toISOString(),
+        poster: { all: formData.poster },
+
+        name: validatedData.name,
+        slug: validatedData.slug,
+        organizations: [{ id: validatedData.organization, isPrimary: true }],
+        featureIds: validatedData.featureIds,
+        regionId: validatedData.regionId,
+      };
+      if (event?.id) {
+        const res = await updateEvent(event.id, transFormData);
+        if (res) {
+          notifications.show({
+            title: "更新成功",
+            message: "更新展会数据成功",
+            color: "teal",
+            autoClose: false,
+          });
+        }
+      } else {
+        const res = await createEvent(transFormData);
+        if (res) {
+          notifications.show({
+            title: "创建成功",
+            message: "创建展会数据成功",
+            color: "teal",
+            autoClose: false,
+          });
+          navigate(`/dashboard/event/${res.id}/edit`);
+        }
+      }
+    } catch (error) {
+      notifications.show({
+        title: "有错误发生",
+        message: JSON.stringify(error),
+        color: "red",
       });
-      if (res) {
-        notifications.show({
-          title: "更新成功",
-          message: "更新展会数据成功",
-          color: "teal",
-          autoClose: false,
-        });
-      }
-      console.log("update res", res);
-    } else {
-      const res = await createEvent(transFormData);
-      console.log("create res", res);
-      if (res) {
-        notifications.show({
-          title: "创建成功",
-          message: "创建展会数据成功",
-          color: "teal",
-          autoClose: false,
-        });
-        navigate(`/dashboard/event/${res.id}/edit`);
-      }
     }
   };
 
   return (
     <Box mx="auto">
-      <form onSubmit={form.onSubmit(handleSubmit)}>
+      <form
+        onSubmit={form.onSubmit(handleSubmit, (errors) => {
+          notifications.show({
+            title: "有错误发生",
+            message: JSON.stringify(errors),
+            color: "red",
+          });
+        })}
+      >
         <Container fluid>
           <Title order={5} my="sm">
             基础信息
@@ -254,12 +277,26 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               {...form.getInputProps("name")}
             />
 
-            <Select
-              withAsterisk
-              label="展会展方"
-              data={organizationSelectOptions}
-              {...form.getInputProps("organization")}
-            />
+            <Group gap="xs" grow>
+              <OrganizationSelector
+                required
+                label="展会主办方"
+                description="展会目前只能通过主办方的 slug 进行访问"
+                onSelect={(value) => {
+                  setSelectedOrganization(value as Organization | null);
+                }}
+                {...form.getInputProps("organization")}
+              />
+              <OrganizationSelector
+                label="展会协办方"
+                multiple
+                description="可以选很多，但是请注意，主办方不能在协办方中"
+                onSelect={(value) => {
+                  setSelectedOrganizations(value as Organization[] | null);
+                }}
+                {...form.getInputProps("organizations")}
+              />
+            </Group>
 
             <Group gap="xs" grow>
               <DateTimePicker
@@ -289,57 +326,54 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         <Divider my="sm" variant="dotted" />
 
         <Container my="md" fluid>
-          <Title order={5}>地理信息</Title>
+          <Title order={5} mb="sm">
+            地理信息
+          </Title>
+
           <Stack>
+            <RegionSelector
+              required
+              label="展会区域"
+              placeholder="请选择展会区域"
+              selectedOption={event?.region}
+              onSelect={(value) => {
+                setSelectedRegion(value);
+              }}
+              {...form.getInputProps("regionId")}
+            />
+
             <Autocomplete
               label="展会地址"
               rightSection={
                 <IconSearch
                   size="14"
                   className="cursor-pointer"
-                  onClick={() => {
-                    const nowValues = form.getValues();
-                    console.log(nowValues);
-                    const searchSchema = z.object({
-                      address: z.string(),
-                      city: z.string(),
-                    });
+                  // onClick={() => {
+                  //   const nowValues = form.getValues();
+                  //   console.log(nowValues);
+                  //   const searchSchema = z.object({
+                  //     address: z.string(),
+                  //     city: z.string(),
+                  //   });
 
-                    try {
-                      mutate(
-                        searchSchema.parse({
-                          address: nowValues.address,
-                          city: nowValues.addressExtra.city,
-                        })
-                      );
-                    } catch (error) {
-                      notifications.show({
-                        title: "有错误发生",
-                        message: JSON.stringify(error),
-                      });
-                    }
-                  }}
+                  //   try {
+                  //     mutate(
+                  //       searchSchema.parse({
+                  //         address: nowValues.address,
+                  //         city: nowValues.addressExtra.city,
+                  //       })
+                  //     );
+                  //   } catch (error) {
+                  //     notifications.show({
+                  //       title: "有错误发生",
+                  //       message: JSON.stringify(error),
+                  //     });
+                  //   }
+                  // }}
                 />
               }
               {...form.getInputProps("address")}
             />
-
-            <Group grow>
-              <TextInput
-                withAsterisk
-                label="展会城市"
-                placeholder="请填写后缀（如市）"
-                {...form.getInputProps("addressExtra.city")}
-              />
-
-              <TextInput
-                withAsterisk
-                label="城市Slug"
-                placeholder="请填写城市的拼音"
-                description="请使用城市的完整拼音，比如：guangzhou，不要使用缩写和大写。"
-                {...form.getInputProps("citySlug")}
-              />
-            </Group>
 
             <Group gap="xs" grow>
               <TextInput
@@ -441,11 +475,18 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               {...form.getInputProps("features.self")}
             />
 
-            <MultiSelect
+            {/* <MultiSelect
               label="展会公共标签"
               placeholder="请选择展会共有的标签"
+              searchable
               data={featureSelectOptions}
-              {...form.getInputProps("commonFeatures")}
+              {...form.getInputProps("featureIds")}
+            /> */}
+
+            <EventFeatureSelector
+              label="展会公共标签"
+              placeholder="请选择展会共有的标签"
+              {...form.getInputProps("featureIds")}
             />
 
             <TextInput
@@ -476,21 +517,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               {...form.getInputProps("thumbnail")}
             />
             <Group>
-              <Chip
-                checked={false}
-                variant="filled"
-                onClick={() => {
-                  const organizationSlug = organizationList?.find(
-                    (item) => item.id === form.values.organization
-                  )?.slug;
-                  form.setFieldValue(
-                    "thumbnail",
-                    `organizations/${organizationSlug}/${form.values.slug}/cover.webp`
-                  );
-                }}
-              >
-                通用格式
-              </Chip>
               <Chip
                 checked={false}
                 variant="filled"

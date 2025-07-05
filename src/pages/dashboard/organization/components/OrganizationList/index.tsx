@@ -7,7 +7,7 @@ import { cleanPageCache } from '@/api/dashboard/cache';
 import type { List } from '@/types/Request';
 import {
   OrganizationStatusLabel,
-  type OrganizationType,
+  type Organization,
   OrganizationTypeLabel,
 } from '@/types/organization';
 import { notifications } from '@mantine/notifications';
@@ -28,7 +28,7 @@ export default function OrganizationList({
   isPending,
   updatePagination,
 }: {
-  data: List<OrganizationType>;
+  data: List<Organization>;
   pagination: { current: number; pageSize: number };
   isPending: boolean;
   updatePagination: React.Dispatch<
@@ -50,7 +50,7 @@ export default function OrganizationList({
     },
   });
 
-  const columns: ColumnsType<OrganizationType> = [
+  const columns: ColumnsType<Organization> = [
     {
       title: '展方名称',
       dataIndex: 'name',
