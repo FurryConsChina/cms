@@ -1,7 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 
 import {
-  EditableEventSchema,
   type EditableEvent,
   EventItem,
   EventLocationType,
@@ -22,7 +21,6 @@ import {
   Divider,
   Fieldset,
   Group,
-  NumberInput,
   Select,
   Stack,
   TextInput,
@@ -31,15 +29,19 @@ import {
   Text,
   Center,
   TagsInput,
-  MultiSelect,
 } from "@mantine/core";
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconPlus, IconSearch, IconTrash, IconArrowUp, IconArrowDown } from "@tabler/icons-react";
+import {
+  IconPlus,
+  IconSearch,
+  IconTrash,
+  IconArrowUp,
+  IconArrowDown,
+} from "@tabler/icons-react";
 import { Organization } from "@/types/organization";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getAllOrganizations } from "@/api/dashboard/organization";
+import { useQuery } from "@tanstack/react-query";
 import {
   createEvent,
   getEventDetail,
@@ -59,12 +61,10 @@ import { Spin } from "antd";
 import UploadImage from "@/components/UploadImage";
 import DefaultContainer from "@/components/Container";
 import LoadError from "@/components/Error";
-import { getFeatureList } from "@/api/dashboard/feature";
 import RegionSelector from "@/components/Region/RegionSelector";
 import { useState } from "react";
 import { Region } from "@/types/region";
 import OrganizationSelector from "@/components/Organization/OrganizatonSelector";
-import { FeatureCategoryLabel } from "@/types/feature";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
 import LocationSearch from "@/components/Event/LocationSearch";
 import { useDisclosure } from "@mantine/hooks";
@@ -129,11 +129,11 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     initialValues: {
       name: event?.name || "",
       startAt: event?.startAt
-        ? new Date(event?.startAt)
-        : new Date(new Date().setHours(10, 0, 0, 0)),
+        ? event?.startAt
+        : new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
       endAt: event?.endAt
-        ? new Date(event?.endAt)
-        : new Date(new Date().setHours(18, 0, 0, 0)),
+        ? event?.endAt
+        : new Date(new Date().setHours(18, 0, 0, 0)).toISOString(),
       address: event?.address || "",
       regionId: event?.regionId || null,
       features: event?.features || { self: [] },
@@ -160,9 +160,9 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   type InferFormValues = typeof form.values;
 
   const generateEventSlug = () => {
-    const selectedYear = form.values.startAt?.getFullYear();
-    const selectedMonth = form.values.startAt
-      ?.toLocaleString("en-us", { month: "short" })
+    const selectedYear = new Date(form.values.startAt).getFullYear();
+    const selectedMonth = new Date(form.values.startAt)
+      .toLocaleString("en-us", { month: "short" })
       .toLocaleLowerCase();
     const city = selectedRegion?.code;
 
@@ -184,8 +184,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       const validatedData = EditEventValidationSchema.parse(formData);
       const transFormData: EditableEvent = {
         ...formData,
-        startAt: formData.startAt.toISOString(),
-        endAt: formData.endAt.toISOString(),
+        startAt: formData.startAt,
+        endAt: formData.endAt,
         poster: { all: formData.poster },
 
         name: validatedData.name,
@@ -320,12 +320,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
             <Autocomplete
               label="展会地址"
-              rightSection={
-                <IconSearch
-                  size="14"
-                  className="cursor-pointer"
-                />
-              }
+              rightSection={<IconSearch size="14" className="cursor-pointer" />}
               {...form.getInputProps("address")}
             />
 
@@ -363,8 +358,14 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               handleOk={(location) => {
                 closeLocationSearchModal();
                 if (location) {
-                  form.setFieldValue("addressLat", location.location.lat.toString());
-                  form.setFieldValue("addressLon", location.location.lng.toString());
+                  form.setFieldValue(
+                    "addressLat",
+                    location.location.lat.toString()
+                  );
+                  form.setFieldValue(
+                    "addressLon",
+                    location.location.lng.toString()
+                  );
                 }
               }}
               handleCancel={() => {
@@ -466,10 +467,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               {...form.getInputProps("featureIds")}
             />
 
-            <TextInput
-              label="展会信源"
-              {...form.getInputProps("source")}
-            />
+            <TextInput label="展会信源" {...form.getInputProps("source")} />
 
             <Textarea
               label="展会描述"
@@ -490,17 +488,19 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               <ActionIcon
                 size="sm"
                 onClick={() =>
-                  form.setFieldValue(
-                    "sources",
-                    [...(form.values.sources || []), { name: "", url: "", description: "" }]
-                  )
+                  form.setFieldValue("sources", [
+                    ...(form.values.sources || []),
+                    { name: "", url: "", description: "" },
+                  ])
                 }
               >
                 <IconPlus />
               </ActionIcon>
-              <Text size="sm" c="dimmed">添加信息来源</Text>
+              <Text size="sm" c="dimmed">
+                添加信息来源
+              </Text>
             </Group>
-            
+
             {(form.values.sources || []).map((source, index) => (
               <div key={index} style={{ marginBottom: "1rem" }}>
                 <Fieldset legend={`信息来源 ${index + 1}`}>
@@ -530,7 +530,10 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         onClick={() => {
                           if (index > 0) {
                             const items = [...(form.values.sources || [])];
-                            [items[index], items[index - 1]] = [items[index - 1], items[index]];
+                            [items[index], items[index - 1]] = [
+                              items[index - 1],
+                              items[index],
+                            ];
                             form.setFieldValue("sources", items);
                           }
                         }}
@@ -544,11 +547,16 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         onClick={() => {
                           const items = [...(form.values.sources || [])];
                           if (index < items.length - 1) {
-                            [items[index], items[index + 1]] = [items[index + 1], items[index]];
+                            [items[index], items[index + 1]] = [
+                              items[index + 1],
+                              items[index],
+                            ];
                             form.setFieldValue("sources", items);
                           }
                         }}
-                        disabled={index === (form.values.sources || []).length - 1}
+                        disabled={
+                          index === (form.values.sources || []).length - 1
+                        }
                       >
                         <IconArrowDown size="14" />
                       </ActionIcon>
@@ -558,7 +566,9 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         onClick={() =>
                           form.setFieldValue(
                             "sources",
-                            (form.values.sources || []).filter((_, i) => i !== index)
+                            (form.values.sources || []).filter(
+                              (_, i) => i !== index
+                            )
                           )
                         }
                       >
@@ -581,22 +591,24 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               <ActionIcon
                 size="sm"
                 onClick={() =>
-                  form.setFieldValue(
-                    "ticketChannels",
-                    [...(form.values.ticketChannels || []), { 
-                      type: "url", 
-                      name: "", 
-                      url: "", 
-                      available: true 
-                    }]
-                  )
+                  form.setFieldValue("ticketChannels", [
+                    ...(form.values.ticketChannels || []),
+                    {
+                      type: "url",
+                      name: "",
+                      url: "",
+                      available: true,
+                    },
+                  ])
                 }
               >
                 <IconPlus />
               </ActionIcon>
-              <Text size="sm" c="dimmed">添加票务渠道</Text>
+              <Text size="sm" c="dimmed">
+                添加票务渠道
+              </Text>
             </Group>
-            
+
             {(form.values.ticketChannels || []).map((channel, index) => (
               <div key={index} style={{ marginBottom: "1rem" }}>
                 <Fieldset legend={`票务渠道 ${index + 1}`}>
@@ -634,10 +646,22 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                           { label: "可用", value: "true" },
                           { label: "不可用", value: "false" },
                         ]}
-                        value={form.values.ticketChannels?.[index]?.available?.toString() || "true"}
+                        value={
+                          form.values.ticketChannels?.[
+                            index
+                          ]?.available?.toString() || "true"
+                        }
                         onChange={(value) => {
-                          const boolValue = value === "true" ? true : value === "false" ? false : null;
-                          form.setFieldValue(`ticketChannels.${index}.available`, boolValue);
+                          const boolValue =
+                            value === "true"
+                              ? true
+                              : value === "false"
+                              ? false
+                              : null;
+                          form.setFieldValue(
+                            `ticketChannels.${index}.available`,
+                            boolValue
+                          );
                         }}
                       />
                     </Group>
@@ -647,8 +671,13 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         variant="subtle"
                         onClick={() => {
                           if (index > 0) {
-                            const items = [...(form.values.ticketChannels || [])];
-                            [items[index], items[index - 1]] = [items[index - 1], items[index]];
+                            const items = [
+                              ...(form.values.ticketChannels || []),
+                            ];
+                            [items[index], items[index - 1]] = [
+                              items[index - 1],
+                              items[index],
+                            ];
                             form.setFieldValue("ticketChannels", items);
                           }
                         }}
@@ -662,11 +691,17 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         onClick={() => {
                           const items = [...(form.values.ticketChannels || [])];
                           if (index < items.length - 1) {
-                            [items[index], items[index + 1]] = [items[index + 1], items[index]];
+                            [items[index], items[index + 1]] = [
+                              items[index + 1],
+                              items[index],
+                            ];
                             form.setFieldValue("ticketChannels", items);
                           }
                         }}
-                        disabled={index === (form.values.ticketChannels || []).length - 1}
+                        disabled={
+                          index ===
+                          (form.values.ticketChannels || []).length - 1
+                        }
                       >
                         <IconArrowDown size="14" />
                       </ActionIcon>
@@ -676,7 +711,9 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                         onClick={() =>
                           form.setFieldValue(
                             "ticketChannels",
-                            (form.values.ticketChannels || []).filter((_, i) => i !== index)
+                            (form.values.ticketChannels || []).filter(
+                              (_, i) => i !== index
+                            )
                           )
                         }
                       >
