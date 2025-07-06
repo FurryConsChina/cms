@@ -184,8 +184,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       const validatedData = EditEventValidationSchema.parse(formData);
       const transFormData: EditableEvent = {
         ...formData,
-        startAt: formData.startAt,
-        endAt: formData.endAt,
+        startAt: new Date(formData.startAt).toISOString(),
+        endAt: new Date(formData.endAt).toISOString(),
         poster: { all: formData.poster },
 
         name: validatedData.name,
