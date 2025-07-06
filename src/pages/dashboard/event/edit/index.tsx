@@ -36,7 +36,7 @@ import {
 import { DateTimePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconTrash, IconArrowUp, IconArrowDown } from "@tabler/icons-react";
 import { Organization } from "@/types/organization";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getAllOrganizations } from "@/api/dashboard/organization";
@@ -45,8 +45,7 @@ import {
   getEventDetail,
   updateEvent,
 } from "@/api/dashboard/event";
-import { z } from "zod";
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+
 import { zodResolver } from "mantine-form-zod-resolver";
 
 import "dayjs/locale/zh-cn";
@@ -325,28 +324,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                 <IconSearch
                   size="14"
                   className="cursor-pointer"
-                  // onClick={() => {
-                  //   const nowValues = form.getValues();
-                  //   console.log(nowValues);
-                  //   const searchSchema = z.object({
-                  //     address: z.string(),
-                  //     city: z.string(),
-                  //   });
-
-                  //   try {
-                  //     mutate(
-                  //       searchSchema.parse({
-                  //         address: nowValues.address,
-                  //         city: nowValues.addressExtra.city,
-                  //       })
-                  //     );
-                  //   } catch (error) {
-                  //     notifications.show({
-                  //       title: "有错误发生",
-                  //       message: JSON.stringify(error),
-                  //     });
-                  //   }
-                  // }}
                 />
               }
               {...form.getInputProps("address")}
@@ -483,14 +460,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               {...form.getInputProps("features.self")}
             />
 
-            {/* <MultiSelect
-              label="展会公共标签"
-              placeholder="请选择展会共有的标签"
-              searchable
-              data={featureSelectOptions}
-              {...form.getInputProps("featureIds")}
-            /> */}
-
             <EventFeatureSelector
               label="展会公共标签"
               placeholder="请选择展会共有的标签"
@@ -498,7 +467,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
             />
 
             <TextInput
-              // withAsterisk
               label="展会信源"
               {...form.getInputProps("source")}
             />
@@ -510,6 +478,215 @@ function EventEditorContent({ event }: { event?: EventItem }) {
               maxRows={20}
               {...form.getInputProps("detail")}
             />
+          </Stack>
+        </Container>
+
+        <Divider my="sm" variant="dotted" />
+
+        <Container my="md" fluid>
+          <Title order={5}>展会信息来源</Title>
+          <Stack>
+            <Group>
+              <ActionIcon
+                size="sm"
+                onClick={() =>
+                  form.setFieldValue(
+                    "sources",
+                    [...(form.values.sources || []), { name: "", url: "", description: "" }]
+                  )
+                }
+              >
+                <IconPlus />
+              </ActionIcon>
+              <Text size="sm" c="dimmed">添加信息来源</Text>
+            </Group>
+            
+            {(form.values.sources || []).map((source, index) => (
+              <div key={index} style={{ marginBottom: "1rem" }}>
+                <Fieldset legend={`信息来源 ${index + 1}`}>
+                  <Group align="flex-end">
+                    <TextInput
+                      style={{ flexGrow: 1 }}
+                      label="名称"
+                      placeholder="信息来源名称"
+                      {...form.getInputProps(`sources.${index}.name`)}
+                    />
+                    <TextInput
+                      style={{ flexGrow: 1 }}
+                      label="链接"
+                      placeholder="信息来源链接"
+                      {...form.getInputProps(`sources.${index}.url`)}
+                    />
+                    <TextInput
+                      style={{ flexGrow: 1 }}
+                      label="描述"
+                      placeholder="信息来源描述（可选）"
+                      {...form.getInputProps(`sources.${index}.description`)}
+                    />
+                    <Group gap="xs">
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => {
+                          if (index > 0) {
+                            const items = [...(form.values.sources || [])];
+                            [items[index], items[index - 1]] = [items[index - 1], items[index]];
+                            form.setFieldValue("sources", items);
+                          }
+                        }}
+                        disabled={index === 0}
+                      >
+                        <IconArrowUp size="14" />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => {
+                          const items = [...(form.values.sources || [])];
+                          if (index < items.length - 1) {
+                            [items[index], items[index + 1]] = [items[index + 1], items[index]];
+                            form.setFieldValue("sources", items);
+                          }
+                        }}
+                        disabled={index === (form.values.sources || []).length - 1}
+                      >
+                        <IconArrowDown size="14" />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="sm"
+                        color="red"
+                        onClick={() =>
+                          form.setFieldValue(
+                            "sources",
+                            (form.values.sources || []).filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        <IconTrash size="14" />
+                      </ActionIcon>
+                    </Group>
+                  </Group>
+                </Fieldset>
+              </div>
+            ))}
+          </Stack>
+        </Container>
+
+        <Divider my="sm" variant="dotted" />
+
+        <Container my="md" fluid>
+          <Title order={5}>票务渠道</Title>
+          <Stack>
+            <Group>
+              <ActionIcon
+                size="sm"
+                onClick={() =>
+                  form.setFieldValue(
+                    "ticketChannels",
+                    [...(form.values.ticketChannels || []), { 
+                      type: "url", 
+                      name: "", 
+                      url: "", 
+                      available: true 
+                    }]
+                  )
+                }
+              >
+                <IconPlus />
+              </ActionIcon>
+              <Text size="sm" c="dimmed">添加票务渠道</Text>
+            </Group>
+            
+            {(form.values.ticketChannels || []).map((channel, index) => (
+              <div key={index} style={{ marginBottom: "1rem" }}>
+                <Fieldset legend={`票务渠道 ${index + 1}`}>
+                  <Stack gap="xs">
+                    <Group align="flex-end">
+                      <Select
+                        style={{ flexGrow: 1 }}
+                        label="渠道类型"
+                        placeholder="选择渠道类型"
+                        data={[
+                          { label: "微信小程序", value: "wxMiniProgram" },
+                          { label: "网页链接", value: "url" },
+                          { label: "二维码", value: "qrcode" },
+                          { label: "APP", value: "app" },
+                        ]}
+                        {...form.getInputProps(`ticketChannels.${index}.type`)}
+                      />
+                      <TextInput
+                        style={{ flexGrow: 1 }}
+                        label="渠道名称"
+                        placeholder="票务渠道名称"
+                        {...form.getInputProps(`ticketChannels.${index}.name`)}
+                      />
+                      <TextInput
+                        style={{ flexGrow: 1 }}
+                        label="链接/地址/图片地址"
+                        placeholder="渠道链接或地址或图片地址"
+                        {...form.getInputProps(`ticketChannels.${index}.url`)}
+                      />
+                      <Select
+                        style={{ flexGrow: 1 }}
+                        label="可用状态"
+                        placeholder="选择状态"
+                        data={[
+                          { label: "可用", value: "true" },
+                          { label: "不可用", value: "false" },
+                        ]}
+                        value={form.values.ticketChannels?.[index]?.available?.toString() || "true"}
+                        onChange={(value) => {
+                          const boolValue = value === "true" ? true : value === "false" ? false : null;
+                          form.setFieldValue(`ticketChannels.${index}.available`, boolValue);
+                        }}
+                      />
+                    </Group>
+                    <Group justify="flex-end">
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => {
+                          if (index > 0) {
+                            const items = [...(form.values.ticketChannels || [])];
+                            [items[index], items[index - 1]] = [items[index - 1], items[index]];
+                            form.setFieldValue("ticketChannels", items);
+                          }
+                        }}
+                        disabled={index === 0}
+                      >
+                        <IconArrowUp size="14" />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => {
+                          const items = [...(form.values.ticketChannels || [])];
+                          if (index < items.length - 1) {
+                            [items[index], items[index + 1]] = [items[index + 1], items[index]];
+                            form.setFieldValue("ticketChannels", items);
+                          }
+                        }}
+                        disabled={index === (form.values.ticketChannels || []).length - 1}
+                      >
+                        <IconArrowDown size="14" />
+                      </ActionIcon>
+                      <ActionIcon
+                        size="sm"
+                        color="red"
+                        onClick={() =>
+                          form.setFieldValue(
+                            "ticketChannels",
+                            (form.values.ticketChannels || []).filter((_, i) => i !== index)
+                          )
+                        }
+                      >
+                        <IconTrash size="14" />
+                      </ActionIcon>
+                    </Group>
+                  </Stack>
+                </Fieldset>
+              </div>
+            ))}
           </Stack>
         </Container>
 

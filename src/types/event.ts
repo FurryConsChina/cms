@@ -101,6 +101,17 @@ export const EventSchema = z.object({
     ])
     .nullable(),
   source: z.string().nullable(),
+  sources: z.array(z.object({
+    name: z.string(),
+    url: z.string(),
+    description: z.string().nullable(),
+  })).nullable(),
+  ticketChannels: z.array(z.object({
+    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"]),
+    name: z.string(),
+    url: z.string().nullable(),
+    available: z.boolean().nullable(),
+  })).nullable(),
   address: z.string().nullable(),
   regionId: z.string().uuid().nullable(),
   region: RegionSchema.nullable(),
@@ -142,7 +153,7 @@ export const EditableEventSchema = EventSchema.omit({
 export const EditEventValidationSchema = z.object({
   name: z.string({ message: "文本不能为空" }).min(1, { message: "文本不能为空" }),
   slug: z
-    .string()
+    .string({ message: "Slug不能为空" })
     .min(1, { message: "Slug不能为空" })
     .regex(/^[a-z0-9-]+$/, {
       message: "只允许小写英文字母、数字和连字符-",
@@ -160,6 +171,17 @@ export const EditEventValidationSchema = z.object({
     .uuid({ message: "请选择展会区域" }),
   poster: z.array(z.string().min(1, { message: "图片地址不能为空" })),
   featureIds: z.array(z.string()).nullable(),
+  sources: z.array(z.object({
+    name: z.string().min(1, { message: "信息来源名称不能为空" }),
+    url: z.string().min(1, { message: "信息来源链接不能为空" }),
+    description: z.string().nullable(),
+  })).nullable(),
+  ticketChannels: z.array(z.object({
+    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"], { message: "请选择渠道类型" }),
+    name: z.string().min(1, { message: "渠道名称不能为空" }),
+    url: z.string().min(1, { message: "渠道链接不能为空" }),
+    available: z.boolean(),
+  })).nullable(),
 });
 
 export type EventItem = z.infer<typeof EventSchema>;
