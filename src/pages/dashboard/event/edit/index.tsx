@@ -258,6 +258,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                 required
                 label="展会主办方"
                 description="展会目前只能通过主办方的 slug 进行访问"
+                selectedOption={event?.organization}
                 onSelect={(value) => {
                   setSelectedOrganization(value as Organization | null);
                 }}
@@ -267,6 +268,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                 label="展会协办方"
                 multiple
                 description="可以选很多，但是请注意，主办方不能在协办方中"
+                selectedOptions={selectedOrganizations}
                 onSelect={(value) => {
                   setSelectedOrganizations(value as Organization[] | null);
                 }}
