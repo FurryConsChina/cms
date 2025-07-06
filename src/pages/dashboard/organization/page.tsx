@@ -4,11 +4,21 @@ import OrganizationList from '@/pages/dashboard/organization/components/Organiza
 import { Button, Group, Title } from '@mantine/core';
 import { IconCirclePlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryState, parseAsInteger } from 'nuqs';
+import { useState } from 'react';
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
+  
+  const [currentPage, setCurrentPage] = useQueryState(
+    'currentPage',
+    parseAsInteger.withDefault(1)
+  );
+  const [pageSize, setPageSize] = useQueryState(
+    'pageSize',
+    parseAsInteger.withDefault(20)
+  );
 
   const [pagination, setPagination] = useState<{
     current: number;
