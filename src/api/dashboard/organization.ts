@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import {
-  OrganizationType,
+  Organization,
   EditableOrganizationType,
 } from "@/types/organization";
 import { List } from "@/types/Request";
@@ -8,8 +8,9 @@ import { List } from "@/types/Request";
 export async function getOrganizationList(params: {
   pageSize: number;
   current: number;
+  name?: string;
 }) {
-  const res = await Axios.get<List<OrganizationType>>("/internal/cms/organization/list", {
+  const res = await Axios.get<List<Organization>>("/internal/cms/organization/list", {
     params,
   });
 
@@ -17,7 +18,7 @@ export async function getOrganizationList(params: {
 }
 
 export async function getAllOrganizations(params: { search?: string }) {
-  const res = await Axios.get<OrganizationType[]>("/internal/cms/organization/all", {
+  const res = await Axios.get<Organization[]>("/internal/cms/organization/all", {
     params,
   });
 
@@ -25,7 +26,7 @@ export async function getAllOrganizations(params: { search?: string }) {
 }
 
 export async function getOrganizationDetail(params: { id: string }) {
-  const res = await Axios.get<OrganizationType>(
+  const res = await Axios.get<Organization>(
     `/internal/cms/organization/detail/${params.id}`
   );
 
@@ -35,7 +36,7 @@ export async function getOrganizationDetail(params: { id: string }) {
 export async function createOrganization(
   organization: EditableOrganizationType
 ) {
-  const res = await Axios.post<OrganizationType>(
+  const res = await Axios.post<Organization>(
     "/internal/cms/organization/create",
     {
       organization,
@@ -48,7 +49,7 @@ export async function createOrganization(
 export async function updateOrganization(
   organization: EditableOrganizationType
 ) {
-  const res = await Axios.post<OrganizationType>(
+  const res = await Axios.post<Organization>(
     "/internal/cms/organization/update",
     {
       organization,

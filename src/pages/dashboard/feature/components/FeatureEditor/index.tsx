@@ -1,8 +1,8 @@
-import { createFeature, updateFeature } from '@/api/dashboard/feature';
-import type { CrateFeatureType, EditableFeatureType } from '@/types/feature';
-import { Button, Group, Modal, Textarea, TextInput } from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
+import { createFeature, updateFeature } from "@/api/dashboard/feature";
+import { FeatureCategory, FeatureCategoryLabel, type CrateFeatureType, type EditableFeatureType } from "@/types/feature";
+import { Button, Group, Modal, Select, Textarea, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 
 export default function FeatureEditor({
   opened,
@@ -27,13 +27,16 @@ export default function FeatureEditor({
 function ModalComponent({
   editingFeature,
   onClose,
-}: { editingFeature: EditableFeatureType | null; onClose: () => void }) {
+}: {
+  editingFeature: EditableFeatureType | null;
+  onClose: () => void;
+}) {
   const form = useForm({
-    mode: 'uncontrolled',
+    mode: "uncontrolled",
     initialValues: {
-      name: editingFeature?.name || '',
-      category: editingFeature?.category || '',
-      description: editingFeature?.description || '',
+      name: editingFeature?.name || "",
+      category: editingFeature?.category || "",
+      description: editingFeature?.description || "",
     },
   });
 
@@ -42,18 +45,18 @@ function ModalComponent({
       const res = await updateFeature({ ...value, id: editingFeature.id });
       console.log(res);
       notifications.show({
-        title: '更新成功',
-        message: '更新标签成功',
-        color: 'teal',
+        title: "更新成功",
+        message: "更新标签成功",
+        color: "teal",
       });
       return onClose();
     }
     const res = await createFeature(value);
     console.log(res);
     notifications.show({
-      title: '创建成功',
-      message: '创建标签成功',
-      color: 'teal',
+      title: "创建成功",
+      message: "创建标签成功",
+      color: "teal",
     });
     return onClose();
   };
@@ -64,24 +67,27 @@ function ModalComponent({
         withAsterisk
         label="标签名称"
         placeholder="请输入标签名称"
-        key={form.key('name')}
-        {...form.getInputProps('name')}
+        key={form.key("name")}
+        {...form.getInputProps("name")}
       />
 
-      <TextInput
+      <Select
         withAsterisk
         label="标签分类"
-        placeholder="请输入标签类别"
-        key={form.key('category')}
-        {...form.getInputProps('category')}
+        placeholder="请选择标签分类"
+        {...form.getInputProps("category")}
+        data={Object.values(FeatureCategory).map((item) => ({
+          label: FeatureCategoryLabel[item],
+          value: item,
+        }))}
       />
 
       <Textarea
         label="标签简述"
         description="标签简述可能会在未来展示于筛选设置中。"
         placeholder="请输入标签简述"
-        key={form.key('description')}
-        {...form.getInputProps('description')}
+        key={form.key("description")}
+        {...form.getInputProps("description")}
       />
 
       <Group justify="flex-end" mt="md">

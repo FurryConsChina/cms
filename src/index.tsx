@@ -11,7 +11,13 @@ import router from "@/routes";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
-  components: {},
+  components: {
+    Notification: {
+      defaultProps: {
+        radius: "lg",
+      },
+    },
+  },
 });
 const queryClient = new QueryClient();
 
@@ -24,7 +30,10 @@ if (rootEl) {
     <React.StrictMode>
       <MantineProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <Notifications />
+          <Notifications
+            position="top-right"
+            styles={{ root: { borderRadius: 20 } }}
+          />
           <RouterProvider router={router} />
         </QueryClientProvider>
       </MantineProvider>

@@ -5,24 +5,20 @@ import dayjs from "dayjs";
 
 import { cleanPageCache } from "@/api/dashboard/cache";
 import type { List } from "@/types/Request";
-import {
-  FeatureCategory,
-  FeatureCategoryLabel,
-  type FeatureType,
-} from "@/types/feature";
+import { RegionTypeLabel, type Region } from "@/types/region";
 import { notifications } from "@mantine/notifications";
 import { IconEdit, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-export default function FeatureList({
+export default function RegionList({
   data,
   pagination,
   isPending,
   updatePagination,
   onEdit,
 }: {
-  data: List<FeatureType>;
+  data: List<Region>;
   pagination: { current: number; pageSize: number };
   isPending: boolean;
   updatePagination: React.Dispatch<
@@ -31,7 +27,7 @@ export default function FeatureList({
       pageSize: number;
     }>
   >;
-  onEdit: (feature: FeatureType) => void;
+  onEdit: (region: Region) => void;
 }) {
   const navigate = useNavigate();
 
@@ -45,29 +41,34 @@ export default function FeatureList({
     },
   });
 
-  const columns: ColumnsType<FeatureType> = [
+  const columns: ColumnsType<Region> = [
     {
-      title: "标签名称",
+      title: "区域名称",
       dataIndex: "name",
       key: "name",
       width: 200,
     },
     {
-      title: "类别",
-      dataIndex: "category",
-      key: "category",
-      width: 100,
-      render: (_, record) => (
-        <Badge color="blue">
-          {FeatureCategoryLabel[record.category as FeatureCategory]}
-        </Badge>
-      ),
+      title: "区域代码",
+      dataIndex: "code",
+      key: "code",
+      width: 150,
     },
     {
-      title: "描述",
-      dataIndex: "description",
-      key: "description",
+      title: "区域类型",
+      dataIndex: "type",
+      key: "type",
+      width: 150,
+      render: (_, record) => RegionTypeLabel[record.type],
     },
+    {
+      title: "父级区域",
+      dataIndex: "parent",
+      key: "parent",
+      width: 150,
+      render: (_, record) => record.parent?.name,
+    },
+
     {
       title: "操作",
       key: "action",
@@ -126,12 +127,6 @@ export default function FeatureList({
         columns={columns}
         loading={isPending}
         dataSource={data?.records || []}
-        scroll={
-          {
-            // x: 1500,
-            // y: 600
-          }
-        }
         pagination={{
           pageSize: pagination.pageSize,
           total: data?.total,

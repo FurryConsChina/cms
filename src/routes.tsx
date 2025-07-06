@@ -7,6 +7,8 @@ import EventPage from '@/pages/dashboard/event/page';
 import FeaturePage from '@/pages/dashboard/feature';
 import OrganizationEditPage from '@/pages/dashboard/organization/edit';
 import OrganizationPage from '@/pages/dashboard/organization/page';
+import RegionPage from '@/pages/dashboard/region';
+import RegionEditPage from '@/pages/dashboard/region/edit';
 import ErrorPage from '@/pages/error';
 import useAuthStore from '@/stores/auth';
 import { createBrowserRouter, redirect } from 'react-router-dom';
@@ -64,6 +66,23 @@ const router = createBrowserRouter([
           {
             index: true,
             Component: FeaturePage,
+          },
+        ],
+      },
+      {
+        path: 'region',
+        children: [
+          {
+            index: true,
+            Component: RegionPage,
+          },
+          {
+            path: 'create',
+            Component: RegionEditPage,
+          },
+          {
+            path: ':id/edit',
+            Component: RegionEditPage,
           },
         ],
       },

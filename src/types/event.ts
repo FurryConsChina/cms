@@ -1,5 +1,6 @@
 import { FeatureSchema } from "@/types/feature";
 import { OrganizationSchema } from "@/types/organization";
+import { RegionSchema } from "@/types/region";
 import z from "zod";
 
 /** Sync with https://schema.org/EventStatusType */
@@ -100,12 +101,22 @@ export const EventSchema = z.object({
     ])
     .nullable(),
   source: z.string().nullable(),
+  sources: z.array(z.object({
+    name: z.string(),
+    url: z.string(),
+    description: z.string().nullable(),
+  })).nullable(),
+  ticketChannels: z.array(z.object({
+    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"]),
+    name: z.string(),
+    url: z.string().nullable(),
+    available: z.boolean().nullable(),
+  })).nullable(),
   address: z.string().nullable(),
+  regionId: z.string().uuid().nullable(),
+  region: RegionSchema.nullable(),
   addressLat: z.string().nullable(),
   addressLon: z.string().nullable(),
-  addressExtra: z
-    .object({ city: z.string().nullable(), citySlug: z.string().nullable() })
-    .nullable(),
   thumbnail: z.string().nullable(),
   poster: z
     .object({
@@ -117,12 +128,14 @@ export const EventSchema = z.object({
   commonFeatures: z.array(FeatureSchema).nullable(),
 
   organization: OrganizationSchema,
+  organizations: z.array(OrganizationSchema),
 });
 
 export const EditableEventSchema = EventSchema.omit({
   id: true,
   organization: true,
   commonFeatures: true,
+  region: true,
 }).merge(
   z.object({
     id: z.string().optional(),
@@ -132,9 +145,44 @@ export const EditableEventSchema = EventSchema.omit({
         isPrimary: z.boolean(),
       })
     ),
-    commonFeatures: z.array(z.string()).nullable(),
+    featureIds: z.array(z.string()).nullable(),
+    regionId: z.string().uuid(),
   })
 );
+
+export const EditEventValidationSchema = z.object({
+  name: z.string({ message: "文本不能为空" }).min(1, { message: "文本不能为空" }),
+  slug: z
+    .string({ message: "Slug不能为空" })
+    .min(1, { message: "Slug不能为空" })
+    .regex(/^[a-z0-9-]+$/, {
+      message: "只允许小写英文字母、数字和连字符-",
+    }),
+  organization: z.string({ message: "请选择展会主办方" }).uuid({
+    message: "请选择展会主办方",
+  }),
+  organizations: z.array(
+    z.string({ message: "请选择展会协办方" }).uuid({
+      message: "请选择展会协办方",
+    })
+  ),
+  regionId: z
+    .string({ message: "请选择展会区域" })
+    .uuid({ message: "请选择展会区域" }),
+  poster: z.array(z.string().min(1, { message: "图片地址不能为空" })),
+  featureIds: z.array(z.string()).nullable(),
+  sources: z.array(z.object({
+    name: z.string().min(1, { message: "信息来源名称不能为空" }),
+    url: z.string().min(1, { message: "信息来源链接不能为空" }),
+    description: z.string().nullable(),
+  })).nullable(),
+  ticketChannels: z.array(z.object({
+    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"], { message: "请选择渠道类型" }),
+    name: z.string().min(1, { message: "渠道名称不能为空" }),
+    url: z.string().min(1, { message: "渠道链接不能为空" }),
+    available: z.boolean(),
+  })).nullable(),
+});
 
 export type EventItem = z.infer<typeof EventSchema>;
 export type EditableEvent = z.infer<typeof EditableEventSchema>;
