@@ -94,7 +94,7 @@ function ModalContent({
   } = useMutation({
     mutationFn: (params: { region: string; keyword: string }) =>
       axios.get<{ count: number; data: TencentLocation[] }>(
-        `https://apis.map.qq.com/ws/place/v1/suggestion?region=${params.region}&keyword=${params.keyword}&key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4`
+        `https://apis.map.qq.com/ws/place/v1/suggestion?region=${params.region}&keyword=${params.keyword}&key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&output=jsonp`
       ),
   });
 

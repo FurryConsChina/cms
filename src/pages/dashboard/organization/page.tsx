@@ -10,14 +10,24 @@ import { useNavigate } from 'react-router-dom';
 export default function OrganizationPage() {
   const navigate = useNavigate();
 
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<{
+    current: number;
+    pageSize: number;
+    name?: string;
+    slug?: string;
+  }>({
     current: 1,
     pageSize: 20,
   });
 
   const { isPending, isError, data, error, refetch } = useQuery({
     queryKey: ['organization-list', pagination],
-    queryFn: () => getOrganizationList(pagination),
+    queryFn: () => getOrganizationList({
+      pageSize: pagination.pageSize,
+      current: pagination.current,
+      name: pagination.name,
+      slug: pagination.slug,
+    }),
   });
 
   return (

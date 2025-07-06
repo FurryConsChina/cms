@@ -12,6 +12,7 @@ import {
   OrganizationStatusLabel,
   Organization,
   OrganizationTypeLabel,
+  OrganizationType,
 } from "@/types/organization";
 import {
   Alert,
