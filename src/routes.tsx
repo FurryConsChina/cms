@@ -1,21 +1,23 @@
-import App from '@/App';
-import Auth from '@/pages/auth';
-import Dashboard from '@/pages/dashboard';
-import CacheManagerPage from '@/pages/dashboard/cacheManager';
-import EventEditPage from '@/pages/dashboard/event/edit';
-import EventPage from '@/pages/dashboard/event/page';
-import FeaturePage from '@/pages/dashboard/feature';
-import OrganizationEditPage from '@/pages/dashboard/organization/edit';
-import OrganizationPage from '@/pages/dashboard/organization/page';
-import RegionPage from '@/pages/dashboard/region';
-import RegionEditPage from '@/pages/dashboard/region/edit';
-import ErrorPage from '@/pages/error';
-import useAuthStore from '@/stores/auth';
-import { createBrowserRouter, redirect } from 'react-router-dom';
+import App from "@/App";
+import NotFound from "@/pages/404";
+import Auth from "@/pages/auth";
+import Dashboard from "@/pages/dashboard";
+import CacheManagerPage from "@/pages/dashboard/cacheManager";
+import EventEditPage from "@/pages/dashboard/event/edit";
+import EventPage from "@/pages/dashboard/event/page";
+import FeaturePage from "@/pages/dashboard/feature";
+import OrganizationEditPage from "@/pages/dashboard/organization/edit";
+import OrganizationPage from "@/pages/dashboard/organization/page";
+import RegionPage from "@/pages/dashboard/region";
+import RegionEditPage from "@/pages/dashboard/region/edit";
+import ErrorPage from "@/pages/error";
+import useAuthStore from "@/stores/auth";
+import React from "react";
+import { createBrowserRouter, redirect } from "react-router-dom";
 
 const router = createBrowserRouter([
   {
-    path: '/dashboard',
+    path: "/dashboard",
     Component: App,
     errorElement: <ErrorPage />,
     children: [
@@ -24,7 +26,7 @@ const router = createBrowserRouter([
         Component: Dashboard,
       },
       {
-        path: 'event',
+        path: "event",
 
         children: [
           {
@@ -32,17 +34,17 @@ const router = createBrowserRouter([
             Component: EventPage,
           },
           {
-            path: 'create',
+            path: "create",
             Component: EventEditPage,
           },
           {
-            path: ':eventId/edit',
+            path: ":eventId/edit",
             Component: EventEditPage,
           },
         ],
       },
       {
-        path: 'organization',
+        path: "organization",
 
         children: [
           {
@@ -50,17 +52,17 @@ const router = createBrowserRouter([
             Component: OrganizationPage,
           },
           {
-            path: 'create',
+            path: "create",
             Component: OrganizationEditPage,
           },
           {
-            path: ':organizationId/edit',
+            path: ":organizationId/edit",
             Component: OrganizationEditPage,
           },
         ],
       },
       {
-        path: 'feature',
+        path: "feature",
 
         children: [
           {
@@ -70,48 +72,52 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'region',
+        path: "region",
         children: [
           {
             index: true,
             Component: RegionPage,
           },
           {
-            path: 'create',
+            path: "create",
             Component: RegionEditPage,
           },
           {
-            path: ':id/edit',
+            path: ":id/edit",
             Component: RegionEditPage,
           },
         ],
       },
       {
-        path: 'cache-manager',
+        path: "cache-manager",
         Component: CacheManagerPage,
       },
     ],
   },
   {
-    path: 'auth',
+    path: "auth",
     loader: () => {
       const user = useAuthStore.getState().user;
       if (user) {
-        return redirect('/dashboard');
+        return redirect("/dashboard");
       }
       return null;
     },
     Component: Auth,
   },
   {
-    path: '/',
+    path: "/",
     loader: () => {
       const user = useAuthStore.getState().user;
       if (user) {
-        return redirect('/dashboard');
+        return redirect("/dashboard");
       }
-      return redirect('/auth');
+      return redirect("/auth");
     },
+  },
+  {
+    path: "*",
+    Component: React.lazy(() => import("@/pages/404")),
   },
 ]);
 

@@ -9,6 +9,7 @@ export async function getOrganizationList(params: {
   pageSize: number;
   current: number;
   name?: string;
+  slug?: string;
 }) {
   const res = await Axios.get<List<Organization>>("/internal/cms/organization/list", {
     params,

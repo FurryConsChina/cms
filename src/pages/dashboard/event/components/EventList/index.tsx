@@ -111,6 +111,7 @@ function EventList({
 
   const getColumnSearchProps = (
     dataIndex: keyof EventItem,
+    searchPlaceholder?: string,
   ): TableColumnType<EventItem> => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -122,7 +123,7 @@ function EventList({
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Space direction="vertical">
           <Input
-            placeholder={`搜索列 ${dataIndex}`}
+            placeholder={searchPlaceholder}
             value={selectedKeys[0]}
             allowClear
             onChange={(e) =>
@@ -182,14 +183,14 @@ function EventList({
       dataIndex: ['organization', 'name'],
       key: 'organizationName',
       fixed: 'left',
-      ...getColumnSearchProps('organization'),
+      ...getColumnSearchProps('organization', '请输入展商名称'),
     },
     {
       title: '展会名称',
       dataIndex: 'name',
       key: 'name',
       fixed: 'left',
-      ...getColumnSearchProps('name'),
+      ...getColumnSearchProps('name', '请输入展会名称'),
     },
     {
       title: '日期',
@@ -275,29 +276,6 @@ function EventList({
                 leftSection={
                   <IconLink style={{ width: rem(14), height: rem(14) }} />
                 }
-                rightSection={
-                  <Tooltip label="国际站没有缓存，修改后会立刻显示">
-                    <IconInfoCircle size={14} />
-                  </Tooltip>
-                }
-                onClick={() => {
-                  window.open(
-                    `https://www.furryeventchina.com/${record.organization.slug}/${record.slug}`,
-                    '_blank',
-                  );
-                }}
-              >
-                去国际站查看
-              </Menu.Item>
-              <Menu.Item
-                leftSection={
-                  <IconLink style={{ width: rem(14), height: rem(14) }} />
-                }
-                rightSection={
-                  <Tooltip label="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
-                    <IconInfoCircle size={14} />
-                  </Tooltip>
-                }
                 onClick={() => {
                   window.open(
                     `https://www.furrycons.cn/${record.organization.slug}/${record.slug}`,
@@ -305,7 +283,7 @@ function EventList({
                   );
                 }}
               >
-                去国内站查看
+                在网站上查看
               </Menu.Item>
 
               <Menu.Divider />
