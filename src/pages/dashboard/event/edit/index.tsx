@@ -67,6 +67,8 @@ import { Region } from "@/types/region";
 import OrganizationSelector from "@/components/Organization/OrganizatonSelector";
 import { FeatureCategoryLabel } from "@/types/feature";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
+import LocationSearch from "@/components/Event/LocationSearch";
+import { useDisclosure } from "@mantine/hooks";
 
 export default function EventEditPage() {
   const { eventId } = useParams();
@@ -108,12 +110,10 @@ export default function EventEditPage() {
 function EventEditorContent({ event }: { event?: EventItem }) {
   const navigate = useNavigate();
 
-  const { data: addressSearchResult, mutate } = useMutation({
-    mutationFn: (params: { address: string; city: string }) =>
-      fetch(
-        `https://apis.map.qq.com/ws/place/v1/search?key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&keyword=${params.address}&boundary=region(${params.city},2)&page_size=10&page_index=1`
-      ),
-  });
+  const [
+    isLocationSearchModalOpen,
+    { open: openLocationSearchModal, close: closeLocationSearchModal },
+  ] = useDisclosure(false);
 
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(
     event?.region || null
@@ -152,42 +152,13 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       locationType: event?.locationType || EventLocationType.Hotel,
       addressLat: event?.addressLat || null,
       addressLon: event?.addressLon || null,
+      sources: event?.sources || [],
+      ticketChannels: event?.ticketChannels || [],
     },
     validate: zodResolver(EditEventValidationSchema),
   });
 
-  type formType = typeof form.values;
-
-  const { data: featureList } = useQuery({
-    queryKey: ["feature-list"],
-    queryFn: () => getFeatureList({ pageSize: 100, current: 1 }),
-  });
-
-  const featureSelectOptions =
-    featureList?.records.reduce((acc, item) => {
-      const category = item.category as keyof typeof FeatureCategoryLabel;
-      const groupLabel = FeatureCategoryLabel[category] || "其他";
-
-      const existingGroup = acc.find((group) => group.group === groupLabel);
-      if (existingGroup) {
-        existingGroup.items.push({
-          label: item.name,
-          value: item.id,
-        });
-      } else {
-        acc.push({
-          group: groupLabel,
-          items: [
-            {
-              label: item.name,
-              value: item.id,
-            },
-          ],
-        });
-      }
-      return acc;
-    }, [] as Array<{ group: string; items: Array<{ label: string; value: string }> }>) ||
-    [];
+  type InferFormValues = typeof form.values;
 
   const generateEventSlug = () => {
     const selectedYear = form.values.startAt?.getFullYear();
@@ -207,7 +178,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     return `${selectedYear}-${selectedMonth}-${city.toLowerCase()}-con`;
   };
 
-  const handleSubmit = async (formData: formType) => {
+  const handleSubmit = async (formData: InferFormValues) => {
     console.log(formData);
 
     try {
@@ -220,7 +191,13 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
         name: validatedData.name,
         slug: validatedData.slug,
-        organizations: [{ id: validatedData.organization, isPrimary: true }],
+        organizations: [
+          { id: validatedData.organization, isPrimary: true },
+          ...validatedData.organizations.map((id) => ({
+            id,
+            isPrimary: false,
+          })),
+        ],
         featureIds: validatedData.featureIds,
         regionId: validatedData.regionId,
       };
@@ -388,6 +365,37 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                 {...form.getInputProps("addressLat")}
               />
             </Group>
+
+            <Button
+              onClick={() => {
+                if (!selectedRegion) {
+                  notifications.show({
+                    title: "请先选择展会区域",
+                    message: "请先选择展会区域",
+                    color: "red",
+                  });
+                  return;
+                }
+                openLocationSearchModal();
+              }}
+            >
+              搜索地址
+            </Button>
+            <LocationSearch
+              isModalOpen={isLocationSearchModalOpen}
+              handleOk={(location) => {
+                closeLocationSearchModal();
+                if (location) {
+                  form.setFieldValue("addressLat", location.location.lat.toString());
+                  form.setFieldValue("addressLon", location.location.lng.toString());
+                }
+              }}
+              handleCancel={() => {
+                closeLocationSearchModal();
+              }}
+              region={selectedRegion!}
+              keyword={form.values.address}
+            />
           </Stack>
         </Container>
 
