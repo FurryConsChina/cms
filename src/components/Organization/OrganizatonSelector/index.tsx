@@ -17,6 +17,7 @@ interface OrganizationSelectorProps {
   error?: string;
   description?: string;
   selectedOption?: Organization | null;
+  selectedOptions?: Organization[] | null;
   multiple?: boolean;
 }
 
@@ -31,6 +32,7 @@ export default function OrganizationSelector({
   error,
   description,
   selectedOption,
+  selectedOptions,
   multiple = false,
   ...props
 }: OrganizationSelectorProps) {
@@ -52,6 +54,7 @@ export default function OrganizationSelector({
 
   const organizations = [
     ...(selectedOption ? [selectedOption] : []),
+    ...(selectedOptions || []),
     ...(data?.records || []),
   ];
 
