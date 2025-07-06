@@ -1,42 +1,11 @@
+import { getTencentLocation } from "@/api/dashboard/map";
+import { TencentLocation } from "@/types/map";
 import { Region } from "@/types/region";
 import { Center, SimpleGrid, Stack } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 import { Card, Modal, Spin } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import useSWRMutation from "swr/mutation";
-
-// {
-//     "id": "5646138039615211307",
-//     "title": "如家酒店·neo(北京长安街北京站店)",
-//     "address": "北京市东城区站站前街1号3楼4楼",
-//     "category": "酒店宾馆:经济型酒店",
-//     "type": 0,
-//     "location": {
-//         "lat": 39.905433,
-//         "lng": 116.426255
-//     },
-//     "adcode": 110101,
-//     "province": "北京市",
-//     "city": "北京市",
-//     "district": "东城区"
-// },
-
-type TencentLocation = {
-  id: string;
-  title: string;
-  address: string;
-  category: string;
-  type: number;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  adcode: number;
-  province: string;
-  city: string;
-  district: string;
-};
 
 export default function LocationSearch({
   isModalOpen,
@@ -93,9 +62,7 @@ function ModalContent({
     isPending,
   } = useMutation({
     mutationFn: (params: { region: string; keyword: string }) =>
-      axios.get<{ count: number; data: TencentLocation[] }>(
-        `https://apis.map.qq.com/ws/place/v1/suggestion?region=${params.region}&keyword=${params.keyword}&key=PXEBZ-QLM6C-RZX2K-AV2XX-SBBW5-VGFC4&output=jsonp`
-      ),
+      getTencentLocation({ region: params.region, keyword: params.keyword }),
   });
 
   useEffect(() => {
@@ -110,7 +77,7 @@ function ModalContent({
     </Center>
   ) : (
     <SimpleGrid cols={2}>
-      {addressSearchResult?.data?.data.map((location) => (
+      {addressSearchResult?.data.map((location) => (
         <LocationItem
           key={location.id}
           location={location}

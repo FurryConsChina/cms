@@ -147,7 +147,6 @@ function OrganizationEditorContent({
             title: "更新成功",
             message: "更新展商数据成功",
             color: "teal",
-            autoClose: false,
           });
         }
         console.log("update res", res);
@@ -159,7 +158,6 @@ function OrganizationEditorContent({
             title: "创建成功",
             message: "创建展商数据成功",
             color: "teal",
-            autoClose: false,
           });
           navigate(`/dashboard/organization/${res.id}/edit`);
         }
