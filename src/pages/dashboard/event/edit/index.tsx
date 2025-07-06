@@ -207,7 +207,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
             title: "更新成功",
             message: "更新展会数据成功",
             color: "teal",
-            autoClose: false,
           });
         }
       } else {
@@ -217,7 +216,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
             title: "创建成功",
             message: "创建展会数据成功",
             color: "teal",
-            autoClose: false,
           });
           navigate(`/dashboard/event/${res.id}/edit`);
         }
