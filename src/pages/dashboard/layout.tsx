@@ -25,11 +25,11 @@ const linksData = [
   { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
   { link: "/dashboard/feature", label: "展会标签", icon: IconTag },
   { link: "/dashboard/region", label: "区域管理", icon: IconMapPin },
-  {
-    link: '/dashboard/cache-manager',
-    label: '缓存管理',
-    icon: IconCloudStorm,
-  },
+  // {
+  //   link: '/dashboard/cache-manager',
+  //   label: '缓存管理',
+  //   icon: IconCloudStorm,
+  // },
 ];
 
 export default function DashboardLayout() {
