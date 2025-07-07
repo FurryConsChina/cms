@@ -57,7 +57,7 @@ import {
   EventStatusLabel,
   EventTypeLabel,
 } from "@/consts/event";
-import { Spin } from "antd";
+import { Spin, Image } from "antd";
 import UploadImage from "@/components/UploadImage";
 import DefaultContainer from "@/components/Container";
 import LoadError from "@/components/Error";
@@ -790,35 +790,85 @@ function EventEditorContent({ event }: { event?: EventItem }) {
                   <IconPlus />
                 </ActionIcon>
                 {form.values.poster.map((item, index) => (
-                  <Group align="flex-end" key={index}>
-                    <TextInput
-                      style={{ flexGrow: 1 }}
-                      label={`展会详情图片 ${index + 1}`}
-                      {...form.getInputProps(`poster.${index}`)}
-                    />
-                    <UploadImage
-                      pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
-                      defaultImageName={`details-${index + 1}`}
-                      onUploadSuccess={(s) =>
-                        form.setFieldValue(`poster.${index}`, s)
-                      }
-                      disabled={
-                        !selectedOrganization?.slug || !form.values.slug
-                      }
-                    />
-                    <Button
-                      color="red"
-                      size={"sm"}
-                      onClick={() =>
-                        form.setFieldValue(
-                          "poster",
-                          form.values.poster.filter((_, i) => i !== index)
-                        )
-                      }
-                    >
-                      <IconTrash />
-                    </Button>
-                  </Group>
+                  <div key={index} style={{ marginBottom: "1rem" }}>
+                    <Group>
+                      {selectedOrganization?.slug &&
+                        form.values.slug &&
+                        item && (
+                          <Image
+                            width={160}
+                            height={160}
+                            src={`https://images.furrycons.cn/${item}`}
+                            style={{ objectFit: "cover" }}
+                          />
+                        )}
+                      <Stack flex={1}>
+                        <TextInput
+                          style={{ flexGrow: 1 }}
+                          label={`展会详情图片 ${index + 1}`}
+                          {...form.getInputProps(`poster.${index}`)}
+                        />
+                        <UploadImage
+                          pathPrefix={`organizations/${selectedOrganization?.slug}/${form.values.slug}/`}
+                          defaultImageName={`details-${index + 1}`}
+                          onUploadSuccess={(s) =>
+                            form.setFieldValue(`poster.${index}`, s)
+                          }
+                          disabled={
+                            !selectedOrganization?.slug || !form.values.slug
+                          }
+                        />
+                        <Group gap="xs" justify="flex-end">
+                          <ActionIcon
+                            size="lg"
+                            variant="subtle"
+                            onClick={() => {
+                              if (index > 0) {
+                                const items = [...form.values.poster];
+                                [items[index], items[index - 1]] = [
+                                  items[index - 1],
+                                  items[index],
+                                ];
+                                form.setFieldValue("poster", items);
+                              }
+                            }}
+                            disabled={index === 0}
+                          >
+                            <IconArrowUp size="14" />
+                          </ActionIcon>
+                          <ActionIcon
+                            size="lg"
+                            variant="subtle"
+                            onClick={() => {
+                              const items = [...form.values.poster];
+                              if (index < items.length - 1) {
+                                [items[index], items[index + 1]] = [
+                                  items[index + 1],
+                                  items[index],
+                                ];
+                                form.setFieldValue("poster", items);
+                              }
+                            }}
+                            disabled={index === form.values.poster.length - 1}
+                          >
+                            <IconArrowDown size="14" />
+                          </ActionIcon>
+                          <ActionIcon
+                            size="lg"
+                            color="red"
+                            onClick={() =>
+                              form.setFieldValue(
+                                "poster",
+                                form.values.poster.filter((_, i) => i !== index)
+                              )
+                            }
+                          >
+                            <IconTrash size="14" />
+                          </ActionIcon>
+                        </Group>
+                      </Stack>
+                    </Group>
+                  </div>
                 ))}
               </Fieldset>
             </Group>
