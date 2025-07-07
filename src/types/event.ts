@@ -101,30 +101,70 @@ export const EventSchema = z.object({
     ])
     .nullable(),
   source: z.string().nullable(),
-  sources: z.array(z.object({
-    name: z.string(),
-    url: z.string(),
-    description: z.string().nullable(),
-  })).nullable(),
-  ticketChannels: z.array(z.object({
-    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"]),
-    name: z.string(),
-    url: z.string().nullable(),
-    available: z.boolean().nullable(),
-  })).nullable(),
+  sources: z
+    .array(
+      z.object({
+        url: z.string().nullable(),
+        name: z.string().nullable(),
+        description: z.string().nullable(),
+      })
+    )
+    .nullable(),
+  ticketChannels: z
+    .array(
+      z.object({
+        type: z.enum(["wxMiniProgram", "url", "qrcode", "app"]),
+        name: z.string(),
+        url: z.string().nullable(),
+        available: z.boolean().nullable(),
+      })
+    )
+    .nullable(),
   address: z.string().nullable(),
   regionId: z.string().uuid().nullable(),
   region: RegionSchema.nullable(),
   addressLat: z.string().nullable(),
   addressLon: z.string().nullable(),
   thumbnail: z.string().nullable(),
-  poster: z
+
+  media: z
     .object({
-      all: z.array(z.string()).nullable(),
+      images: z
+        .array(
+          z.object({
+            url: z.string(),
+            title: z.string().nullable(),
+            description: z.string().nullable(),
+          })
+        )
+        .optional(),
+      videos: z
+        .array(
+          z.object({
+            url: z.string(),
+            title: z.string().nullable(),
+            description: z.string().nullable(),
+          })
+        )
+        .optional(),
+      lives: z
+        .array(
+          z.object({
+            url: z.string(),
+            title: z.string().nullable(),
+            description: z.string().nullable(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  detail: z.string().nullable(),
+  features: z
+    .object({
+      self: z.array(z.string()).optional(),
+      common: z.array(z.string().uuid()).optional(),
     })
     .nullable(),
-  detail: z.string().nullable(),
-  features: z.object({}).nullable(),
   commonFeatures: z.array(FeatureSchema).nullable(),
 
   organization: OrganizationSchema,
@@ -151,13 +191,24 @@ export const EditableEventSchema = EventSchema.omit({
 );
 
 export const EditEventValidationSchema = z.object({
-  name: z.string({ message: "文本不能为空" }).min(1, { message: "文本不能为空" }),
+  name: z
+    .string({ message: "文本不能为空" })
+    .min(1, { message: "文本不能为空" }),
   slug: z
     .string({ message: "Slug不能为空" })
     .min(1, { message: "Slug不能为空" })
     .regex(/^[a-z0-9-]+$/, {
       message: "只允许小写英文字母、数字和连字符-",
     }),
+  startAt: z.string(),
+  endAt: z.string(),
+  address: z.string().nullable(),
+  regionId: z
+    .string({ message: "请选择展会区域" })
+    .uuid({ message: "请选择展会区域" }),
+  addressLat: z.string().nullable(),
+  addressLon: z.string().nullable(),
+  thumbnail: z.string().nullable(),
   organization: z.string({ message: "请选择展会主办方" }).uuid({
     message: "请选择展会主办方",
   }),
@@ -166,22 +217,64 @@ export const EditEventValidationSchema = z.object({
       message: "请选择展会协办方",
     })
   ),
-  regionId: z
-    .string({ message: "请选择展会区域" })
-    .uuid({ message: "请选择展会区域" }),
-  poster: z.array(z.string().min(1, { message: "图片地址不能为空" })),
+  detail: z.string().nullable(),
+  status: z.string(),
+  type: z.string().nullable(),
+  scale: z.string(),
+  locationType: z.string().nullable(),
+  source: z.string().nullable(),
+  features: z.object({}).nullable(),
+  media: z.object({
+    images: z
+      .array(
+        z.object({
+          url: z.string().min(1, { message: "图片地址不能为空" }),
+          title: z.string().nullable(),
+          description: z.string().nullable(),
+        })
+      )
+      .optional(),
+    videos: z
+      .array(
+        z.object({
+          url: z.string().min(1, { message: "视频地址不能为空" }),
+          title: z.string().nullable(),
+          description: z.string().nullable(),
+        })
+      )
+      .optional(),
+    lives: z
+      .array(
+        z.object({
+          url: z.string().min(1, { message: "直播地址不能为空" }),
+          title: z.string().nullable(),
+          description: z.string().nullable(),
+        })
+      )
+      .optional(),
+  }),
   featureIds: z.array(z.string()).nullable(),
-  sources: z.array(z.object({
-    name: z.string().min(1, { message: "信息来源名称不能为空" }),
-    url: z.string().min(1, { message: "信息来源链接不能为空" }),
-    description: z.string().nullable(),
-  })).nullable(),
-  ticketChannels: z.array(z.object({
-    type: z.enum(["wxMiniProgram", "url", "qrcode", "app"], { message: "请选择渠道类型" }),
-    name: z.string().min(1, { message: "渠道名称不能为空" }),
-    url: z.string().min(1, { message: "渠道链接不能为空" }),
-    available: z.boolean(),
-  })).nullable(),
+  sources: z
+    .array(
+      z.object({
+        name: z.string().min(1, { message: "信息来源名称不能为空" }).nullable(),
+        url: z.string().min(1, { message: "信息来源链接不能为空" }),
+        description: z.string().nullable(),
+      })
+    )
+    .nullable(),
+  ticketChannels: z
+    .array(
+      z.object({
+        type: z.enum(["wxMiniProgram", "url", "qrcode", "app"], {
+          message: "请选择渠道类型",
+        }),
+        name: z.string().min(1, { message: "渠道名称不能为空" }),
+        url: z.string().min(1, { message: "渠道链接不能为空" }),
+        available: z.boolean(),
+      })
+    )
+    .nullable(),
 });
 
 export type EventItem = z.infer<typeof EventSchema>;
