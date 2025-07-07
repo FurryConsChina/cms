@@ -10,7 +10,9 @@ import {
   Title,
   Paper,
   Switch,
+  Input,
 } from "@mantine/core";
+import { Select as AntdSelect } from "antd";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,6 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 import DefaultContainer from "@/components/Container";
 import { IconArrowLeft } from "@tabler/icons-react";
 import React from "react";
+import RegionSelector from "@/components/Region/RegionSelector";
 
 export default function RegionEditPage() {
   const navigate = useNavigate();
@@ -37,7 +40,7 @@ export default function RegionEditPage() {
       name: regionData?.name || "",
       code: regionData?.code || "",
       type: regionData?.type || "state",
-      level: regionData?.level || 1,
+      level: regionData?.level || 2,
       parentId: regionData?.parentId || null,
       countryCode: regionData?.countryCode || null,
       isOverseas: regionData?.isOverseas || false,
@@ -57,7 +60,7 @@ export default function RegionEditPage() {
   // 当 regionData 加载完成后，更新表单值
   React.useEffect(() => {
     if (regionData && isEditing) {
-        console.log(regionData)
+      console.log(regionData);
       form.setValues({
         name: regionData.name,
         code: regionData.code,
@@ -174,35 +177,50 @@ export default function RegionEditPage() {
             placeholder="请选择区域类型"
             {...form.getInputProps("type")}
             data={[
-              { label: "国家", value: "country" },
+              { label: "国家", value: "country", disabled: true },
               { label: "省份", value: "state" },
               { label: "城市", value: "city" },
-              { label: "区县", value: "district" },
+              // { label: "区县", value: "district" },
             ]}
             mb="md"
           />
 
-          <NumberInput
-            withAsterisk
+          <Input.Wrapper
             label="区域级别"
-            placeholder="请输入区域级别"
+            error={form.getInputProps("level").error}
+            withAsterisk
             key={form.key("level")}
-            {...form.getInputProps("level")}
             mb="md"
-          />
+          >
+            <AntdSelect
+              style={{ width: "100%" }}
+              placeholder="请输入区域级别"
+              options={[
+                // { label: "国家", value: 1 },
+                { label: "省份/直辖市", value: 2 },
+                { label: "城市", value: 3 },
+                // { label: "区县", value: 4 },
+              ]}
+              {...form.getInputProps("level")}
+            />
+          </Input.Wrapper>
 
-          <TextInput
+          <RegionSelector
+            required
             label="父级区域ID"
-            placeholder="请输入父级区域ID（可选）"
+            placeholder="请输入父级区域ID"
             key={form.key("parentId")}
             {...form.getInputProps("parentId")}
-            mb="md"
           />
 
-          <TextInput
-            label="国家代码"
-            placeholder="请输入国家代码（可选）"
+          <Select
+            label="ISO 3166-1 代码"
+            placeholder="请选择 ISO 3166-1 代码"
             key={form.key("countryCode")}
+            data={[
+              { label: "CN", value: "CN" },
+              { label: "TW", value: "TW" },
+            ]}
             {...form.getInputProps("countryCode")}
             mb="md"
           />
@@ -213,11 +231,12 @@ export default function RegionEditPage() {
             mb="md"
           />
 
-          <TextInput
+          <Select
             label="地址格式"
             placeholder="请输入地址格式（可选）"
             key={form.key("addressFormat")}
             {...form.getInputProps("addressFormat")}
+            data={[{ label: "中式", value: "chinese" }]}
             mb="md"
           />
 
@@ -229,35 +248,51 @@ export default function RegionEditPage() {
             mb="md"
           />
 
-          <TextInput
+          <Select
             label="时区"
             placeholder="请输入时区（可选）"
             key={form.key("timezone")}
+            data={[
+              { label: "Asia/Shanghai", value: "Asia/Shanghai" },
+              { label: "Asia/Taipei", value: "Asia/Taipei" },
+            ]}
             {...form.getInputProps("timezone")}
             mb="md"
           />
 
-          <TextInput
+          <Select
             label="语言代码"
             placeholder="请输入语言代码（可选）"
             key={form.key("languageCode")}
             {...form.getInputProps("languageCode")}
+            data={[
+              { label: "zh-CN", value: "zh-CN" },
+              { label: "zh-TW", value: "zh-TW" },
+            ]}
             mb="md"
           />
 
-          <TextInput
+          <Select
             label="货币代码"
             placeholder="请输入货币代码（可选）"
             key={form.key("currencyCode")}
             {...form.getInputProps("currencyCode")}
+            data={[
+              { label: "CNY", value: "CNY" },
+              { label: "TWD", value: "TWD" },
+            ]}
             mb="md"
           />
 
-          <TextInput
+          <Select
             label="电话代码"
             placeholder="请输入电话代码（可选）"
             key={form.key("phoneCode")}
             {...form.getInputProps("phoneCode")}
+            data={[
+              { label: "+86", value: "+86" },
+              { label: "+886", value: "+886" },
+            ]}
             mb="md"
           />
 

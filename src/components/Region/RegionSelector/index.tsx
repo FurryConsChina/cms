@@ -81,6 +81,7 @@ export default function RegionSelector({
       description={description}
       error={error}
       withAsterisk={required}
+      mb="md"
     >
       <Select
         placeholder={placeholder}
