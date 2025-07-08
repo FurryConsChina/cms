@@ -104,7 +104,7 @@ export const EventSchema = z.object({
   sources: z
     .array(
       z.object({
-        url: z.string().nullable(),
+        url: z.string(),
         name: z.string().nullable(),
         description: z.string().nullable(),
       })
