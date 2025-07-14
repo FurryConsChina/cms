@@ -13,6 +13,6 @@ export default defineConfig({
     define: publicVars,
   },
   html: {
-    title: "FEC Dashboard",
+    title: "FCC Dashboard",
   },
 });

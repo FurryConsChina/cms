@@ -2,6 +2,8 @@ export type List<T> = {
   total: number;
   // next: string;
   // previous: string;
+  current: number;
+  pageSize: number;
   records: T[];
 };
 

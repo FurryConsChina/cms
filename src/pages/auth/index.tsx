@@ -1,112 +1,151 @@
-import useAuthStore from '@/stores/auth';
-import { useMutation } from '@tanstack/react-query';
-import { useForm } from '@mantine/form';
+import useAuthStore from "@/stores/auth";
+import { useForm } from "@mantine/form";
+import { useMutation } from "@tanstack/react-query";
 
-import { login as loginFn } from '@/api/auth';
-import { notifications } from '@mantine/notifications';
-import { useNavigate } from 'react-router-dom';
-import { Button, TextInput } from '@mantine/core';
+import { login as userLogin } from "@/api/auth";
+import {
+  Anchor,
+  Button,
+  Center,
+  Container,
+  Flex,
+  Group,
+  Paper,
+  PasswordInput,
+  TextInput,
+} from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconHome } from "@tabler/icons-react";
+import { Segmented } from "antd";
+import { zodResolver } from "mantine-form-zod-resolver";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import z from "zod";
 
 export default function Auth() {
   const { login, refreshToken } = useAuthStore();
   const navigate = useNavigate();
 
+  const [currentSegment, setCurrentSegment] = useState<
+    "login" | "register" | "reset"
+  >("login");
+
   const form = useForm({
-    mode: 'uncontrolled',
+    mode: "uncontrolled",
     initialValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
 
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-      password: (value) => (value.length < 6 ? '密码长度至少为6位' : null),
-    },
+    validate: zodResolver(
+      z.object({
+        email: z.string().email("无效的邮箱"),
+        password: z.string().min(6, "密码长度至少为6位"),
+      })
+    ),
   });
 
   const { mutate } = useMutation({
-    mutationFn: loginFn,
+    mutationFn: userLogin,
     onSuccess: (data) => {
       login(data.user);
       refreshToken(data.token);
-      navigate('/dashboard');
+      navigate("/dashboard");
       notifications.show({
-        message: '登录成功',
+        message: "登录成功",
       });
     },
   });
 
   return (
-    <>
-      <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <img
-            alt="Your Company"
-            src="https://images.furrycons.cn/logo_800x800.png"
-            className="mx-auto h-24 w-auto"
-          />
-          <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            欢迎回来，请登录
-          </h2>
-        </div>
+    <Container
+      fluid
+      className="h-screen"
+      style={{
+        background: "radial-gradient(#e0f2fe,transparent)",
+        // backgroundImage: `url("http://s-sh-11810-static.oss.dogecdn.com/jesse.jpg")`,
+        // backgroundSize: "cover",
+        // backgroundPosition: "center",
+        // backgroundRepeat: "no-repeat",
+        // backgroundAttachment: "fixed",
+        backdropFilter: "blur(5px)",
+      }}
+    >
+      <Flex
+        justify={"center"}
+        align={"flex-end"}
+        style={{ height: "100%" }}
+        direction="column"
+      >
+        <Paper
+          withBorder
+          shadow="sm"
+          p={20}
+          radius="md"
+          my="20"
+          className="w-full md:w-96 h-full"
+        >
+          <Flex direction="column" justify="space-between" h="100%">
+            <div>
+              <Segmented
+                value={currentSegment}
+                block
+                size="middle"
+                style={{ marginBottom: 8 }}
+                onChange={setCurrentSegment}
+                options={[
+                  { label: "登录", value: "login" },
+                  { label: "注册", value: "register" },
+                ]}
+              />
 
-        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-          <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-            <form
-              onSubmit={form.onSubmit((values) => {
-                mutate(values);
-              })}
-              className="space-y-6"
-            >
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  邮箱
-                </label>
-                <div className="mt-2">
-                  <TextInput
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    key={form.key('email')}
-                    {...form.getInputProps('email')}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  密码
-                </label>
-                <div className="mt-2">
-                  <TextInput
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                    key={form.key('password')}
-                    {...form.getInputProps('password')}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Button type="submit" fullWidth>
+              <form
+                onSubmit={form.onSubmit((values) => {
+                  mutate(values);
+                })}
+                className="space-y-6"
+              >
+                <TextInput
+                  type="email"
+                  required
+                  autoComplete="email"
+                  label="邮箱"
+                  placeholder="请输入您的注册邮箱"
+                  radius="md"
+                  mt="lg"
+                  key={form.key("email")}
+                  {...form.getInputProps("email")}
+                />
+                <PasswordInput
+                  label="密码"
+                  placeholder="请输入您的密码"
+                  required
+                  mt="lg"
+                  radius="md"
+                  key={form.key("password")}
+                  {...form.getInputProps("password")}
+                />
+                <Group justify="space-between" mt="sm">
+                  <Anchor component="button" size="sm">
+                    忘记密码了吗？
+                  </Anchor>
+                  {/* <Anchor component="button" size="sm">
+                    使用一次性登录代码
+                  </Anchor> */}
+                </Group>
+                <Button type="submit" fullWidth mt="xl" radius="md">
                   登录
                 </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </>
+              </form>
+            </div>
+            <Center>
+              <Anchor href="https://docs.furrycons.cn" target="_blank">
+                <IconHome color="gray" size="18" />
+              </Anchor>
+            </Center>
+          </Flex>
+        </Paper>
+      </Flex>
+    </Container>
   );
 }
