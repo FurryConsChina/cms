@@ -58,8 +58,8 @@ export default function TicketChannels({ form }: TicketChannelsProps) {
                   />
                   <TextInput
                     style={{ flexGrow: 1 }}
-                    label="链接/地址/图片地址"
-                    placeholder="渠道链接或地址或图片地址"
+                    label="渠道链接/地址/描述"
+                    placeholder="渠道链接或地址或描述"
                     {...form.getInputProps(`ticketChannels.${index}.url`)}
                   />
                   <Select
