@@ -6,26 +6,21 @@ import { login as userLogin } from "@/api/auth";
 import {
   Anchor,
   Button,
+  Center,
   Container,
+  Flex,
   Group,
   Paper,
   PasswordInput,
   TextInput,
-  Title,
-  Text,
-  Flex,
-  Divider,
-  Image,
-  UnstyledButton,
-  Center,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconHome } from "@tabler/icons-react";
+import { Segmented } from "antd";
 import { zodResolver } from "mantine-form-zod-resolver";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import z from "zod";
-import { Segmented } from "antd";
-import { useState } from "react";
-import { IconHome } from "@tabler/icons-react";
 
 export default function Auth() {
   const { login, refreshToken } = useAuthStore();
