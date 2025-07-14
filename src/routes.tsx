@@ -3,6 +3,7 @@ import NotFound from "@/pages/404";
 import Auth from "@/pages/auth";
 import Dashboard from "@/pages/dashboard";
 import CacheManagerPage from "@/pages/dashboard/cacheManager";
+import ApplicationPage from "@/pages/dashboard/developer/application";
 import EventEditPage from "@/pages/dashboard/event/edit";
 import EventPage from "@/pages/dashboard/event/page";
 import FeaturePage from "@/pages/dashboard/feature";
@@ -91,6 +92,17 @@ const router = createBrowserRouter([
       {
         path: "cache-manager",
         Component: CacheManagerPage,
+      },
+    ],
+  },
+  {
+    path: "developer",
+    Component: App,
+    children: [
+      {
+        index: true,
+        path: "application",
+        Component: ApplicationPage,
       },
     ],
   },
