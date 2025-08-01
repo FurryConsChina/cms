@@ -88,8 +88,8 @@ function OrganizationEditorContent({
       slug: organization?.slug || "",
       description: organization?.description || "",
       creationTime: organization?.creationTime
-        ? new Date(organization.creationTime)
-        : null,
+        ? organization.creationTime
+        : new Date(new Date().setHours(0, 0, 0, 0)).toISOString(),
       logoUrl: organization?.logoUrl || "",
       website: organization?.website || "",
       contactMail: organization?.contactMail || "",
@@ -129,7 +129,7 @@ function OrganizationEditorContent({
     const validResult = EditableOrganizationSchema.safeParse({
       ...validFormData,
       creationTime: formData.creationTime
-        ? formData.creationTime.toISOString()
+        ? new Date(formData.creationTime).toISOString()
         : undefined,
     });
     const validPayload = validResult.data;
