@@ -1,5 +1,5 @@
 import Axios from "@/api";
-import type { EditableRegion, Region } from "@/types/region";
+import type { EditableRegion, Region, RegionType } from "@/types/region";
 import type { List } from "@/types/Request";
 
 export async function getRegionList(params: {
@@ -40,6 +40,16 @@ export async function deleteRegion(id: string) {
   const res = await Axios.delete<{
     success: boolean;
   }>(`/internal/cms/region/${id}`);
+
+  return res.data;
+}
+
+export async function recreateRegionOrder(type: RegionType) {
+  const res = await Axios.post<{
+    success: boolean;
+  }>("/internal/cms/region/recreate-order", {
+    type,
+  });
 
   return res.data;
 }
