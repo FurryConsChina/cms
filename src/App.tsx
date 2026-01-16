@@ -8,10 +8,6 @@ import DashboardLayout from "@/pages/dashboard/layout";
 
 import "@/styles/global.css";
 
-// Form 相关的 mantine 样式保留
-import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
-
 const App = () => {
   const { user, _hasHydrated } = useAuthStore();
 

@@ -56,7 +56,7 @@ export default function ApplicationPage() {
 
   return (
     <>
-      <DefaultContainer className="sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
           <Title level={2} style={{ margin: 0 }}>应用列表</Title>
 

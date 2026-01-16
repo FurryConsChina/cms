@@ -1,17 +1,24 @@
-import { Fieldset, Select, TextInput } from "@mantine/core";
-import { UseFormReturnType } from "@mantine/form";
+import { useFieldArray, UseFormReturn, Controller } from "react-hook-form";
 import { IconArrowDown, IconArrowUp, IconPlus, IconTrash } from "@tabler/icons-react";
-import { Typography, Button, Flex, Row, Col } from "antd";
+import { Typography, Button, Flex, Row, Col, Form, Select, Input, Card } from "antd";
+import { EditEventSchema } from "@/types/event";
+import { z } from "zod";
 
 const { Title, Text } = Typography;
 
+type EventFormValues = z.infer<typeof EditEventSchema>;
+
 interface TicketChannelsProps {
-  form: UseFormReturnType<any>;
+  form: UseFormReturn<EventFormValues>;
 }
 
 export default function TicketChannels({ form }: TicketChannelsProps) {
+  const { fields, append, remove, move } = useFieldArray({
+    control: form.control,
+    name: "ticketChannels",
+  });
   return (
-    <div style={{ padding: "0 24px", margin: "16px 0" }}>
+    <div>
       <Title level={5}>票务渠道</Title>
       <Flex vertical gap={8}>
         <Flex align="center" gap={8}>
@@ -19,15 +26,12 @@ export default function TicketChannels({ form }: TicketChannelsProps) {
             size="small"
             icon={<IconPlus size={14} />}
             onClick={() =>
-              form.setFieldValue("ticketChannels", [
-                ...(form.values.ticketChannels || []),
-                {
-                  type: "url",
-                  name: "",
-                  url: "",
-                  available: true,
-                },
-              ])
+              append({
+                type: "url",
+                name: "",
+                url: "",
+                available: true,
+              })
             }
           />
           <Text type="secondary" style={{ fontSize: 14 }}>
@@ -35,120 +39,136 @@ export default function TicketChannels({ form }: TicketChannelsProps) {
           </Text>
         </Flex>
 
-        {(form.values.ticketChannels || []).map((channel: any, index: number) => (
+        {fields.map((field, index) => (
           <div key={index} style={{ marginBottom: "1rem" }}>
-            <Fieldset legend={`票务渠道 ${index + 1}`}>
-              <Flex vertical gap={8}>
-                <Row gutter={8} align="bottom">
+            <Card title={`票务渠道 ${index + 1}`}>
+              <Row gutter={8} align="bottom">
                   <Col flex={1}>
-                    <Select
+                    <Form.Item
                       label="渠道类型"
-                      placeholder="选择渠道类型"
-                      data={[
-                        { label: "微信小程序", value: "wxMiniProgram" },
-                        { label: "网页链接", value: "url" },
-                        { label: "二维码", value: "qrcode" },
-                        { label: "APP", value: "app" },
-                      ]}
-                      {...form.getInputProps(`ticketChannels.${index}.type`)}
-                    />
+                      validateStatus={form.formState.errors.ticketChannels?.[index]?.type ? "error" : undefined}
+                      help={form.formState.errors.ticketChannels?.[index]?.type?.message}
+                    >
+                      <Controller
+                        name={`ticketChannels.${index}.type`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <Select
+                            placeholder="选择渠道类型"
+                            options={[
+                              { label: "微信小程序", value: "wxMiniProgram" },
+                              { label: "网页链接", value: "url" },
+                              { label: "二维码", value: "qrcode" },
+                              { label: "APP", value: "app" },
+                            ]}
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </Form.Item>
                   </Col>
                   <Col flex={1}>
-                    <TextInput
+                    <Form.Item
                       label="渠道名称"
-                      placeholder="票务渠道名称"
-                      {...form.getInputProps(`ticketChannels.${index}.name`)}
-                    />
+                      validateStatus={form.formState.errors.ticketChannels?.[index]?.name ? "error" : undefined}
+                      help={form.formState.errors.ticketChannels?.[index]?.name?.message}
+                    >
+                      <Controller
+                        name={`ticketChannels.${index}.name`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            placeholder="票务渠道名称"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </Form.Item>
                   </Col>
                   <Col flex={1}>
-                    <TextInput
+                    <Form.Item
                       label="渠道链接/地址/描述"
-                      placeholder="渠道链接或地址或描述"
-                      {...form.getInputProps(`ticketChannels.${index}.url`)}
-                    />
+                      validateStatus={form.formState.errors.ticketChannels?.[index]?.url ? "error" : undefined}
+                      help={form.formState.errors.ticketChannels?.[index]?.url?.message}
+                    >
+                      <Controller
+                        name={`ticketChannels.${index}.url`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <Input
+                            placeholder="渠道链接或地址或描述"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </Form.Item>
                   </Col>
                   <Col flex={1}>
-                    <Select
+                    <Form.Item
                       label="可用状态"
-                      placeholder="选择状态"
-                      data={[
-                        { label: "可用", value: "true" },
-                        { label: "不可用", value: "false" },
-                      ]}
-                      value={
-                        form.values.ticketChannels?.[
-                          index
-                        ]?.available?.toString() || "true"
-                      }
-                      onChange={(value) => {
-                        const boolValue =
-                          value === "true"
-                            ? true
-                            : value === "false"
-                            ? false
-                            : null;
-                        form.setFieldValue(
-                          `ticketChannels.${index}.available`,
-                          boolValue
-                        );
-                      }}
-                    />
+                      validateStatus={form.formState.errors.ticketChannels?.[index]?.available ? "error" : undefined}
+                      help={form.formState.errors.ticketChannels?.[index]?.available?.message}
+                    >
+                      <Controller
+                        name={`ticketChannels.${index}.available`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <Select
+                            placeholder="选择状态"
+                            options={[
+                              { label: "可用", value: "true" },
+                              { label: "不可用", value: "false" },
+                            ]}
+                            value={field.value?.toString() || "true"}
+                            onChange={(value) => {
+                              const boolValue =
+                                value === "true"
+                                  ? true
+                                  : value === "false"
+                                  ? false
+                                  : null;
+                              field.onChange(boolValue);
+                            }}
+                          />
+                        )}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col>
+                    <Flex gap={4}>
+                      <Button
+                        size="small"
+                        type="text"
+                        icon={<IconArrowUp size={14} />}
+                        onClick={() => {
+                          if (index > 0) {
+                            move(index, index - 1);
+                          }
+                        }}
+                        disabled={index === 0}
+                      />
+                      <Button
+                        size="small"
+                        type="text"
+                        icon={<IconArrowDown size={14} />}
+                        onClick={() => {
+                          move(index, index + 1);
+                        }}
+                        disabled={index === fields.length - 1}
+                      />
+                      <Button
+                        size="small"
+                        danger
+                        icon={<IconTrash size={14} />}
+                        onClick={() => remove(index)}
+                      />
+                    </Flex>
                   </Col>
                 </Row>
-                <Flex justify="flex-end" gap={4}>
-                  <Button
-                    size="small"
-                    type="text"
-                    icon={<IconArrowUp size={14} />}
-                    onClick={() => {
-                      if (index > 0) {
-                        const items = [
-                          ...(form.values.ticketChannels || []),
-                        ];
-                        [items[index], items[index - 1]] = [
-                          items[index - 1],
-                          items[index],
-                        ];
-                        form.setFieldValue("ticketChannels", items);
-                      }
-                    }}
-                    disabled={index === 0}
-                  />
-                  <Button
-                    size="small"
-                    type="text"
-                    icon={<IconArrowDown size={14} />}
-                    onClick={() => {
-                      const items = [...(form.values.ticketChannels || [])];
-                      if (index < items.length - 1) {
-                        [items[index], items[index + 1]] = [
-                          items[index + 1],
-                          items[index],
-                        ];
-                        form.setFieldValue("ticketChannels", items);
-                      }
-                    }}
-                    disabled={
-                      index ===
-                      (form.values.ticketChannels || []).length - 1
-                    }
-                  />
-                  <Button
-                    size="small"
-                    danger
-                    icon={<IconTrash size={14} />}
-                    onClick={() =>
-                      form.setFieldValue(
-                        "ticketChannels",
-                        (form.values.ticketChannels || []).filter(
-                          (_: any, i: number) => i !== index
-                        )
-                      )
-                    }
-                  />
-                </Flex>
-              </Flex>
-            </Fieldset>
+            </Card>
           </div>
         ))}
       </Flex>

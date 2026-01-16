@@ -1,12 +1,13 @@
 import { Region } from "@/types/region";
-import { TextInput } from "@mantine/core";
-import { UseFormReturnType } from "@mantine/form";
-import { Typography, Button, Flex, App } from "antd";
+import { UseFormReturn } from "react-hook-form";
+import { Typography, Button, Flex, App, Form, Input } from "antd";
+import { EditEventSchema } from "@/types/event";
+import { InferZodType } from "@/types/common";
 
 const { Title } = Typography;
 
 interface UriBuilderProps {
-  form: UseFormReturnType<any>;
+  form: UseFormReturn<InferZodType<typeof EditEventSchema>>;
   selectedRegion: Region | null;
 }
 
@@ -14,8 +15,9 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   const { message } = App.useApp();
 
   const generateEventSlug = () => {
-    const selectedYear = new Date(form.values.startAt).getFullYear();
-    const selectedMonth = new Date(form.values.startAt)
+    const startAt = form.watch("startAt");
+    const selectedYear = new Date(startAt).getFullYear();
+    const selectedMonth = new Date(startAt)
       .toLocaleString("en-us", { month: "short" })
       .toLocaleLowerCase();
     const city = selectedRegion?.code;
@@ -29,22 +31,28 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   };
 
   return (
-    <div style={{ padding: "0 24px" }}>
-      <Title level={5}>URI构建</Title>
+    <div>
+      <h5 className="text-lg font-bold">URI构建</h5>
       <Flex vertical gap={8}>
-        <TextInput
-          withAsterisk
+        <Form.Item
           label="展会Slug"
-          disabled
-          {...form.getInputProps("slug")}
-        />
+          required
+          validateStatus={form.formState.errors.slug ? "error" : undefined}
+          help={form.formState.errors.slug?.message}
+        >
+          <Input
+            disabled
+            placeholder="请输入展会Slug"
+            {...form.register("slug")}
+          />
+        </Form.Item>
         <Button
           onClick={() => {
             const slug = generateEventSlug();
             if (!slug) {
               return;
             }
-            form.setFieldValue("slug", slug);
+            form.setValue("slug", slug);
           }}
         >
           生成Slug
@@ -52,4 +60,4 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
       </Flex>
     </div>
   );
-} 
+}

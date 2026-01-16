@@ -1,22 +1,16 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  type EditableEvent,
-  EventItem,
-  EditEventValidationSchema,
-} from "@/types/event";
-import { Button, Divider, Typography, Flex, App } from "antd";
+import { type EditableEvent, EventItem, EditEventSchema, EventStatus, EventType, EventScale, EventLocationType } from "@/types/event";
+import { Button, Divider, Typography, Flex, App, Form } from "antd";
 import { Spin } from "antd";
-import { useForm } from "@mantine/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Organization } from "@/types/organization";
-import { useQuery } from "@tanstack/react-query";
 import {
   createEvent,
   getEventDetail,
   updateEvent,
 } from "@/api/dashboard/event";
-
-import { zodResolver } from "mantine-form-zod-resolver";
 
 import "dayjs/locale/zh-cn";
 import DefaultContainer from "@/components/Container";
@@ -32,22 +26,24 @@ import EventAdditionalInfo from "./EventAdditionalInfo";
 import EventSources from "./EventSources";
 import TicketChannels from "./TicketChannels";
 import EventMedia from "./EventMedia";
-
-const { Title } = Typography;
+import useSWR from "swr";
+import { InferZodType } from "@/types/common";
 
 export default function EventEditPage() {
   const { eventId } = useParams();
+
   const {
     data: event,
     isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["event-detail", eventId],
-    queryFn: () => getEventDetail({ id: eventId as string }),
-    refetchOnWindowFocus: false,
-    enabled: !!eventId,
-    gcTime: 0,
-  });
+    error: isError,
+  } = useSWR(
+    [`event-detail`, eventId],
+    eventId ? () => getEventDetail({ id: eventId! }) : null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
 
   if (isError) {
     return <LoadError />;
@@ -55,8 +51,10 @@ export default function EventEditPage() {
 
   return (
     <div className="relative">
-      <DefaultContainer className="sticky top-0 z-10">
-        <Title level={2} style={{ margin: 0 }}>{eventId ? "编辑展会" : "新建展会"}</Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <h2 className="text-2xl font-bold">
+          {eventId ? "编辑展会" : "新建展会"}
+        </h2>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
@@ -88,7 +86,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   >(event?.organizations || null);
 
   const form = useForm({
-    initialValues: {
+    defaultValues: {
       name: event?.name || "",
       startAt: event?.startAt
         ? event?.startAt
@@ -97,9 +95,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         ? event?.endAt
         : new Date(new Date().setHours(18, 0, 0, 0)).toISOString(),
       address: event?.address || "",
-      regionId: event?.regionId || null,
-      features: event?.features || { self: [] },
-      featureIds: event?.commonFeatures?.map((f) => f.id) || [],
+      regionId: event?.regionId || "",
+      features: event?.features || { self: [], common: [] },
       source: event?.source || null,
       thumbnail: event?.thumbnail || "fec-event-default-cover.png",
       media: {
@@ -107,29 +104,28 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         videos: event?.media?.videos || [],
         lives: event?.media?.lives || [],
       },
-      organization: event?.organization?.id || null,
+      organization: event?.organization?.id,
       organizations: event?.organizations?.map((o) => o.id) || [],
-      slug: event?.slug || null,
-      detail: event?.detail || null,
-      status: event?.status || "EventScheduled",
-      type: event?.type || "AllInCon",
-      scale: event?.scale || "Cosy",
-      locationType: event?.locationType || "Hotel",
+      slug: event?.slug || "",
+      detail: event?.detail || "",
+      status: event?.status || EventStatus.EventScheduled,
+      type: event?.type || EventType.AllInCon,
+      scale: event?.scale || EventScale.Cosy,
+      locationType: event?.locationType || EventLocationType.Hotel,
       addressLat: event?.addressLat || null,
       addressLon: event?.addressLon || null,
       sources: event?.sources || [],
       ticketChannels: event?.ticketChannels || [],
     },
-    validate: zodResolver(EditEventValidationSchema),
+    resolver: zodResolver(EditEventSchema),
   });
 
-  type InferFormValues = typeof form.values;
+  const { handleSubmit } = form;
 
-  const handleSubmit = async (formData: InferFormValues) => {
-    console.log(formData);
 
+  const onSubmit = async (formData: InferZodType<typeof EditEventSchema>) => {
     try {
-      const validatedData = EditEventValidationSchema.parse(formData);
+      const validatedData = EditEventSchema.parse(formData);
       const transFormData: EditableEvent = {
         ...formData,
         startAt: new Date(formData.startAt).toISOString(),
@@ -165,12 +161,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   };
 
   return (
-    <div style={{ margin: "0 auto" }}>
-      <form
-        onSubmit={form.onSubmit(handleSubmit, (errors) => {
-          message.error(`有错误发生: ${JSON.stringify(errors)}`);
-        })}
-      >
+    <div>
+      <Form onFinish={handleSubmit(onSubmit)} layout="vertical">
         <BasicInfo
           form={form}
           event={event}
@@ -180,7 +172,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           setSelectedOrganizations={setSelectedOrganizations}
         />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <GeographicInfo
           form={form}
@@ -189,36 +181,38 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           setSelectedRegion={setSelectedRegion}
         />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <UriBuilder form={form} selectedRegion={selectedRegion} />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <EventAdditionalInfo form={form} event={event} />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <EventSources form={form} />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <TicketChannels form={form} />
 
-        <Divider dashed style={{ margin: "12px 0" }} />
+        <Divider dashed />
 
         <EventMedia
           form={form}
-          event={event}
-          selectedOrganization={selectedOrganization}
+          pathPrefix={`organizations/${selectedOrganization?.slug}/${event?.slug}/`}
+          disabled={!selectedOrganization?.slug || !event?.slug}
         />
 
-        <div style={{ padding: "0 24px" }}>
+        <div>
           <Flex justify="flex-end" style={{ marginTop: 16 }}>
-            <Button type="primary" htmlType="submit">提交</Button>
+            <Button type="primary" htmlType="submit">
+              提交
+            </Button>
           </Flex>
         </div>
-      </form>
+      </Form>
     </div>
   );
 }

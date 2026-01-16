@@ -1,4 +1,4 @@
-import { EventItem } from "@/types/event";
+import { EditEventSchema, EventItem } from "@/types/event";
 import {
   EventLocationType,
   EventScale,
@@ -7,8 +7,7 @@ import {
   type EventStatusKeyType,
   EventType,
 } from "@/types/event";
-import { Select, TagsInput, Textarea } from "@mantine/core";
-import { UseFormReturnType } from "@mantine/form";
+import { UseFormReturn, Controller } from "react-hook-form";
 import {
   EventLocationTypeLabel,
   EventScaleLabel,
@@ -16,90 +15,157 @@ import {
   EventTypeLabel,
 } from "@/consts/event";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
-import { Typography, Flex } from "antd";
+import { Typography, Flex, Form, Select, Input } from "antd";
+import { InferZodType } from "@/types/common";
 
 const { Title } = Typography;
+const { TextArea } = Input;
 
 interface EventAdditionalInfoProps {
-  form: UseFormReturnType<any>;
+  form: UseFormReturn<InferZodType<typeof EditEventSchema>>;
   event?: EventItem;
 }
 
-export default function EventAdditionalInfo({ form, event }: EventAdditionalInfoProps) {
+export default function EventAdditionalInfo({
+  form,
+  event,
+}: EventAdditionalInfoProps) {
   return (
-    <div style={{ padding: "0 24px", margin: "16px 0" }}>
-      <Title level={5}>展会附加信息</Title>
-      <Flex vertical gap={8}>
-        <Select
-          label="展会状态"
-          withAsterisk
-          placeholder="选一个"
-          data={Object.keys(EventStatus).map((key) => ({
-            label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
-            value: EventStatus[key as EventStatusKeyType],
-          }))}
-          {...form.getInputProps("status")}
+    <div>
+      <h5 className="text-lg font-bold">展会附加信息</h5>
+      <Form.Item
+        label="展会状态"
+        required
+        validateStatus={form.formState.errors.status ? "error" : undefined}
+        help={form.formState.errors.status?.message}
+      >
+        <Controller
+          name="status"
+          control={form.control}
+          render={({ field }) => (
+            <Select
+              placeholder="选一个"
+              options={Object.keys(EventStatus).map((key) => ({
+                label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
+                value: EventStatus[key as EventStatusKeyType],
+              }))}
+              {...field}
+            />
+          )}
         />
+      </Form.Item>
 
-        <Select
-          label="展会规模"
-          withAsterisk
-          placeholder="选一个"
-          data={Object.keys(EventScale).map((key) => ({
-            label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
-            value: EventScale[key as EventScaleKeyType],
-            disabled: ["Mega", "XXLarge"].includes(key),
-          }))}
-          {...form.getInputProps("scale")}
+      <Form.Item
+        label="展会规模"
+        required
+        validateStatus={form.formState.errors.scale ? "error" : undefined}
+        help={form.formState.errors.scale?.message}
+      >
+        <Controller
+          name="scale"
+          control={form.control}
+          render={({ field }) => (
+            <Select
+              placeholder="选一个"
+              options={Object.keys(EventScale).map((key) => ({
+                label: EventScaleLabel[EventScale[key as EventScaleKeyType]],
+                value: EventScale[key as EventScaleKeyType],
+                disabled: ["Mega", "XXLarge"].includes(key),
+              }))}
+              {...field}
+            />
+          )}
         />
+      </Form.Item>
 
-        <Select
-          label="展会类型"
-          withAsterisk
-          placeholder="选一个"
-          data={Object.keys(EventType).map((key) => ({
-            label: EventTypeLabel[EventType[key as keyof typeof EventType]],
-            value: EventType[key as keyof typeof EventType],
-          }))}
-          {...form.getInputProps("type")}
+      <Form.Item
+        label="展会类型"
+        required
+        validateStatus={form.formState.errors.type ? "error" : undefined}
+        help={form.formState.errors.type?.message}
+      >
+        <Controller
+          name="type"
+          control={form.control}
+          render={({ field }) => (
+            <Select
+              placeholder="选一个"
+              options={Object.keys(EventType).map((key) => ({
+                label: EventTypeLabel[EventType[key as keyof typeof EventType]],
+                value: EventType[key as keyof typeof EventType],
+              }))}
+              {...field}
+            />
+          )}
         />
+      </Form.Item>
 
-        <Select
-          label="展会场地"
-          withAsterisk
-          placeholder="选一个"
-          data={Object.keys(EventLocationType).map((key) => ({
-            label:
-              EventLocationTypeLabel[
-                EventLocationType[key as keyof typeof EventLocationType]
-              ],
-            value: EventLocationType[key as keyof typeof EventLocationType],
-          }))}
-          {...form.getInputProps("locationType")}
+      <Form.Item
+        label="展会场地"
+        required
+        validateStatus={
+          form.formState.errors.locationType ? "error" : undefined
+        }
+        help={form.formState.errors.locationType?.message}
+      >
+        <Controller
+          name="locationType"
+          control={form.control}
+          render={({ field }) => (
+            <Select
+              placeholder="选一个"
+              options={Object.keys(EventLocationType).map((key) => ({
+                label:
+                  EventLocationTypeLabel[
+                    EventLocationType[key as keyof typeof EventLocationType]
+                  ],
+                value: EventLocationType[key as keyof typeof EventLocationType],
+              }))}
+              {...field}
+            />
+          )}
         />
+      </Form.Item>
 
-        <TagsInput
-          label="展会专属标签"
-          placeholder="请输入展会专属的标签"
-          {...form.getInputProps("features.self")}
+      <Form.Item
+        label="展会专属标签"
+        validateStatus={
+          form.formState.errors.features?.self ? "error" : undefined
+        }
+        help={form.formState.errors.features?.self?.message}
+      >
+        <Controller
+          name="features.self"
+          control={form.control}
+          render={({ field }) => (
+            <Select mode="tags" placeholder="请输入展会专属的标签" {...field} />
+          )}
         />
+      </Form.Item>
 
-        <EventFeatureSelector
-          label="展会公共标签"
-          placeholder="请选择展会共有的标签"
-          {...form.getInputProps("featureIds")}
+      <Controller
+        name="featureIds"
+        control={form.control}
+        render={({ field }) => (
+          <EventFeatureSelector
+            label="展会公共标签"
+            placeholder="请选择展会共有的标签"
+            {...field}
+          />
+        )}
+      />
+
+      <Form.Item
+        label="展会描述"
+        validateStatus={form.formState.errors.detail ? "error" : undefined}
+        help={form.formState.errors.detail?.message}
+      >
+        <TextArea
+          autoSize={{ minRows: 5, maxRows: 20 }}
+          placeholder="请输入展会描述"
+          {...form.register("detail")}
         />
-
-        {/* <TextInput label="展会信源" {...form.getInputProps("source")} /> */}
-
-        <Textarea
-          label="展会描述"
-          autosize
-          minRows={5}
-          maxRows={20}
-          {...form.getInputProps("detail")}
-        />
-      </Flex>
+      </Form.Item>
     </div>
   );
-} 
+}

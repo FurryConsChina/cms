@@ -14,20 +14,16 @@ import {
   OrganizationTypeLabel,
   OrganizationType,
 } from "@/types/organization";
-import {
-  Select,
-  TextInput,
-  Textarea,
-} from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
-import { useForm } from "@mantine/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Spin, Typography, Button, Flex, Divider, Row, Col, App } from "antd";
+import { Alert, Spin, Typography, Button, Flex, Divider, Row, Col, App, Form, Input, Select, DatePicker } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { zodResolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
+const { TextArea } = Input;
 
 export default function OrganizationEditPage() {
   const { organizationId } = useParams();
@@ -48,7 +44,7 @@ export default function OrganizationEditPage() {
   }
   return (
     <div className="relative">
-      <DefaultContainer className="sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-20">
         <Title level={2} style={{ margin: 0 }}>{organizationId ? "编辑展商" : "新建展商"}</Title>
       </DefaultContainer>
 
@@ -72,8 +68,33 @@ function OrganizationEditorContent({
 }) {
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const form = useForm({
-    initialValues: {
+  
+  type OrganizationFormValues = {
+    name: string;
+    slug: string;
+    description: string;
+    creationTime: string;
+    logoUrl: string;
+    website: string;
+    contactMail: string;
+    status: string;
+    twitter: string;
+    weibo: string;
+    bilibili: string;
+    wikifur: string;
+    qqGroup: string;
+    rednote: string;
+    facebook: string;
+    plurk: string;
+    extraMedia: {
+      qqGroups: Array<{ label: string; value: string }>;
+    };
+    richMediaConfig: Record<string, unknown>;
+    type: string;
+  };
+
+  const formMethods = useForm<OrganizationFormValues>({
+    defaultValues: {
       name: organization?.name || "",
       slug: organization?.slug || "",
       description: organization?.description || "",
@@ -98,7 +119,7 @@ function OrganizationEditorContent({
       richMediaConfig: organization?.richMediaConfig || {},
       type: organization?.type || OrganizationType.Agency,
     },
-    validate: zodResolver(
+    resolver: zodResolver(
       z.object({
         name: z.string().min(1, { message: "展商名称不能为空" }),
         slug: z.string().regex(/^[a-z0-9-]+$/, {
@@ -108,9 +129,32 @@ function OrganizationEditorContent({
     ),
   });
 
-  type formType = typeof form.values;
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = formMethods;
 
-  const handleSubmit = async (formData: formType) => {
+  // Create a compatible form object for child components
+  const form = {
+    register,
+    setValue,
+    watch,
+    errors,
+    values: watch(),
+    setFieldValue: setValue,
+    getInputProps: (name: string) => ({
+      ...register(name),
+      error: errors[name]?.message,
+    }),
+    onSubmit: (onValid: (values: OrganizationFormValues) => void, onInvalid?: (errors: typeof formMethods.formState.errors) => void) => {
+      return rhfHandleSubmit(onValid, onInvalid);
+    },
+  };
+
+  const handleSubmit = async (formData: OrganizationFormValues) => {
     const validFormData = Object.fromEntries(
       Object.entries(formData).filter(
         ([key, value]) => value !== null && value !== ""
@@ -159,57 +203,89 @@ function OrganizationEditorContent({
           <Flex vertical gap={8}>
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
-                  withAsterisk
+                <Form.Item
                   label="展商名称"
-                  {...form.getInputProps("name")}
-                />
+                  required
+                  validateStatus={form.getInputProps("name").error ? "error" : undefined}
+                  help={form.getInputProps("name").error}
+                >
+                  <Input
+                    placeholder="请输入展商名称"
+                    {...form.getInputProps("name")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <DatePickerInput
-                  valueFormat="YYYY年MM月DD日"
+                <Form.Item
                   label="创立日期"
-                  placeholder="请选择日期"
-                  clearable
-                  locale="zh-cn"
-                  {...form.getInputProps("creationTime")}
-                />
+                  validateStatus={form.getInputProps("creationTime").error ? "error" : undefined}
+                  help={form.getInputProps("creationTime").error}
+                >
+                  <DatePicker
+                    format="YYYY年MM月DD日"
+                    placeholder="请选择日期"
+                    allowClear
+                    style={{ width: "100%" }}
+                    value={form.values.creationTime ? dayjs(form.values.creationTime) : null}
+                    onChange={(date) => {
+                      form.setFieldValue("creationTime", date ? date.toISOString() : null);
+                    }}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={8}>
               <Col flex={1}>
-                <Select
-                  withAsterisk
+                <Form.Item
                   label="展商状态"
-                  data={Object.values(OrganizationStatus).map((status) => ({
-                    label: OrganizationStatusLabel[status],
-                    value: status,
-                  }))}
-                  {...form.getInputProps("status")}
-                />
+                  required
+                  validateStatus={form.getInputProps("status").error ? "error" : undefined}
+                  help={form.getInputProps("status").error}
+                >
+                  <Select
+                    placeholder="请选择展商状态"
+                    options={Object.values(OrganizationStatus).map((status) => ({
+                      label: OrganizationStatusLabel[status],
+                      value: status,
+                    }))}
+                    value={form.values.status}
+                    onChange={(value) => form.setFieldValue("status", value)}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <Select
-                  withAsterisk
+                <Form.Item
                   label="展商类型"
-                  data={Object.values(OrganizationType).map((type) => ({
-                    label: OrganizationTypeLabel[type],
-                    value: type,
-                  }))}
-                  {...form.getInputProps("type")}
-                />
+                  required
+                  validateStatus={form.getInputProps("type").error ? "error" : undefined}
+                  help={form.getInputProps("type").error}
+                >
+                  <Select
+                    placeholder="请选择展商类型"
+                    options={Object.values(OrganizationType).map((type) => ({
+                      label: OrganizationTypeLabel[type],
+                      value: type,
+                    }))}
+                    value={form.values.type}
+                    onChange={(value) => form.setFieldValue("type", value)}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
-            <TextInput
-              withAsterisk
+            <Form.Item
               label="展商Slug"
-              disabled={!!organization?.id}
-              placeholder="请输入展商Slug"
-              description="请不要使用大写"
-              {...form.getInputProps("slug")}
-            />
+              required
+              help="请不要使用大写"
+              validateStatus={form.getInputProps("slug").error ? "error" : undefined}
+            >
+              <Input
+                disabled={!!organization?.id}
+                placeholder="请输入展商Slug"
+                {...form.getInputProps("slug")}
+              />
+            </Form.Item>
 
             <Flex gap={8}>
               <Alert
@@ -233,86 +309,136 @@ function OrganizationEditorContent({
           <Flex vertical gap={8}>
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="网站"
-                  placeholder="请输入网站链接"
-                  {...form.getInputProps("website")}
-                />
+                  validateStatus={form.getInputProps("website").error ? "error" : undefined}
+                  help={form.getInputProps("website").error}
+                >
+                  <Input
+                    placeholder="请输入网站链接"
+                    {...form.getInputProps("website")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="联系邮箱"
-                  placeholder="请输入邮箱地址"
-                  {...form.getInputProps("contactMail")}
-                />
+                  validateStatus={form.getInputProps("contactMail").error ? "error" : undefined}
+                  help={form.getInputProps("contactMail").error}
+                >
+                  <Input
+                    placeholder="请输入邮箱地址"
+                    {...form.getInputProps("contactMail")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="QQ群"
-                  placeholder="请输入QQ群号"
-                  {...form.getInputProps("qqGroup")}
-                />
+                  validateStatus={form.getInputProps("qqGroup").error ? "error" : undefined}
+                  help={form.getInputProps("qqGroup").error}
+                >
+                  <Input
+                    placeholder="请输入QQ群号"
+                    {...form.getInputProps("qqGroup")}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Twitter"
-                  placeholder="请输入Twitter链接"
-                  {...form.getInputProps("twitter")}
-                />
+                  validateStatus={form.getInputProps("twitter").error ? "error" : undefined}
+                  help={form.getInputProps("twitter").error}
+                >
+                  <Input
+                    placeholder="请输入Twitter链接"
+                    {...form.getInputProps("twitter")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Weibo"
-                  placeholder="请输入微博链接"
-                  {...form.getInputProps("weibo")}
-                />
+                  validateStatus={form.getInputProps("weibo").error ? "error" : undefined}
+                  help={form.getInputProps("weibo").error}
+                >
+                  <Input
+                    placeholder="请输入微博链接"
+                    {...form.getInputProps("weibo")}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Bilibili"
-                  placeholder="请输入B站链接"
-                  {...form.getInputProps("bilibili")}
-                />
+                  validateStatus={form.getInputProps("bilibili").error ? "error" : undefined}
+                  help={form.getInputProps("bilibili").error}
+                >
+                  <Input
+                    placeholder="请输入B站链接"
+                    {...form.getInputProps("bilibili")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Wikifur"
-                  placeholder="请输入Wikifur链接"
-                  {...form.getInputProps("wikifur")}
-                />
+                  validateStatus={form.getInputProps("wikifur").error ? "error" : undefined}
+                  help={form.getInputProps("wikifur").error}
+                >
+                  <Input
+                    placeholder="请输入Wikifur链接"
+                    {...form.getInputProps("wikifur")}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="小红书"
-                  placeholder="请输入小红书用户链接"
-                  {...form.getInputProps("rednote")}
-                />
+                  validateStatus={form.getInputProps("rednote").error ? "error" : undefined}
+                  help={form.getInputProps("rednote").error}
+                >
+                  <Input
+                    placeholder="请输入小红书用户链接"
+                    {...form.getInputProps("rednote")}
+                  />
+                </Form.Item>
               </Col>
             </Row>
 
             <Row gutter={8}>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Plurk"
-                  placeholder="请输入Plurk用户链接"
-                  {...form.getInputProps("plurk")}
-                />
+                  validateStatus={form.getInputProps("plurk").error ? "error" : undefined}
+                  help={form.getInputProps("plurk").error}
+                >
+                  <Input
+                    placeholder="请输入Plurk用户链接"
+                    {...form.getInputProps("plurk")}
+                  />
+                </Form.Item>
               </Col>
               <Col flex={1}>
-                <TextInput
+                <Form.Item
                   label="Facebook"
-                  placeholder="请输入Facebook链接"
-                  {...form.getInputProps("facebook")}
-                />
+                  validateStatus={form.getInputProps("facebook").error ? "error" : undefined}
+                  help={form.getInputProps("facebook").error}
+                >
+                  <Input
+                    placeholder="请输入Facebook链接"
+                    {...form.getInputProps("facebook")}
+                  />
+                </Form.Item>
               </Col>
             </Row>
           </Flex>
@@ -323,15 +449,17 @@ function OrganizationEditorContent({
         <div style={{ padding: "0 24px" }}>
           <Title level={5}>展会附加信息</Title>
           <Flex vertical gap={8}>
-            <Textarea
+            <Form.Item
               label="展商描述"
-              description="可以是展商的自我简介之类的东西，不填也没关系。"
-              placeholder="请输入展商简介"
-              autosize
-              minRows={5}
-              maxRows={20}
-              {...form.getInputProps("description")}
-            />
+              help="可以是展商的自我简介之类的东西，不填也没关系。"
+              validateStatus={form.getInputProps("description").error ? "error" : undefined}
+            >
+              <TextArea
+                placeholder="请输入展商简介"
+                autoSize={{ minRows: 5, maxRows: 20 }}
+                {...form.getInputProps("description")}
+              />
+            </Form.Item>
           </Flex>
         </div>
 
@@ -341,11 +469,16 @@ function OrganizationEditorContent({
           <Title level={5}>展会媒体资源</Title>
 
           <Flex vertical gap={8}>
-            <TextInput
+            <Form.Item
               label="展商标志图片"
-              description="一般来说无需手动编辑，除非有两个组织的logo一致，可以直接复用另外一个组织的URL。"
-              {...form.getInputProps("logoUrl")}
-            />
+              help="一般来说无需手动编辑，除非有两个组织的logo一致，可以直接复用另外一个组织的URL。"
+              validateStatus={form.getInputProps("logoUrl").error ? "error" : undefined}
+            >
+              <Input
+                placeholder="请输入展商标志图片URL"
+                {...form.getInputProps("logoUrl")}
+              />
+            </Form.Item>
             <Flex>
               <UploadImage
                 pathPrefix={`organizations/${form.values.slug}/`}

@@ -1,13 +1,12 @@
 import useAuthStore from "@/stores/auth";
-import { useForm } from "@mantine/form";
-import { TextInput, PasswordInput } from "@mantine/core";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 
 import { login as userLogin } from "@/api/auth";
-import { Button, Card, Flex, App, Typography } from "antd";
+import { Button, Card, Flex, App, Typography, Form, Input } from "antd";
 import { IconHome } from "@tabler/icons-react";
 import { Segmented } from "antd";
-import { zodResolver } from "mantine-form-zod-resolver";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import z from "zod";
@@ -23,14 +22,16 @@ export default function Auth() {
     "login" | "register" | "reset"
   >("login");
 
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
       email: "",
       password: "",
     },
-
-    validate: zodResolver(
+    resolver: zodResolver(
       z.object({
         email: z.string().email("无效的邮箱"),
         password: z.string().min(6, "密码长度至少为6位"),
@@ -81,31 +82,37 @@ export default function Auth() {
               />
 
               <form
-                onSubmit={form.onSubmit((values) => {
+                onSubmit={handleSubmit((values) => {
                   mutate(values);
                 })}
                 className="space-y-6"
               >
-                <TextInput
-                  type="email"
-                  required
-                  autoComplete="email"
+                <Form.Item
                   label="邮箱"
-                  placeholder="请输入您的注册邮箱"
-                  radius="md"
-                  mt="lg"
-                  key={form.key("email")}
-                  {...form.getInputProps("email")}
-                />
-                <PasswordInput
-                  label="密码"
-                  placeholder="请输入您的密码"
                   required
-                  mt="lg"
-                  radius="md"
-                  key={form.key("password")}
-                  {...form.getInputProps("password")}
-                />
+                  validateStatus={errors.email ? "error" : undefined}
+                  help={errors.email?.message}
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="请输入您的注册邮箱"
+                    {...register("email")}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label="密码"
+                  required
+                  validateStatus={errors.password ? "error" : undefined}
+                  help={errors.password?.message}
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input.Password
+                    placeholder="请输入您的密码"
+                    {...register("password")}
+                  />
+                </Form.Item>
                 <Flex justify="space-between" style={{ marginTop: 8 }}>
                   <Link style={{ fontSize: 14 }}>
                     忘记密码了吗？

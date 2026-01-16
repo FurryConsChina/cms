@@ -1,22 +1,19 @@
 import { createRegion, updateRegion, getRegion } from "@/api/dashboard/region";
 import type { EditableRegion, Region } from "@/types/region";
-import {
-  NumberInput,
-  Select,
-  Textarea,
-  TextInput,
-  Switch,
-} from "@mantine/core";
-import { Select as AntdSelect, Typography, Button, Flex, Card, Form, App } from "antd";
-import { useForm } from "@mantine/form";
+import { RegionType } from "@/types/region";
+import { Typography, Button, Flex, Card, Form, App, Input, InputNumber, Switch, Select } from "antd";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import DefaultContainer from "@/components/Container";
 import { IconArrowLeft } from "@tabler/icons-react";
 import React from "react";
 import RegionSelector from "@/components/Region/RegionSelector";
+import { z } from "zod";
 
 const { Title } = Typography;
+const { TextArea } = Input;
 
 export default function RegionEditPage() {
   const navigate = useNavigate();
@@ -31,9 +28,28 @@ export default function RegionEditPage() {
     enabled: isEditing && !!id,
   });
 
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
+  type RegionFormValues = {
+    name: string;
+    code: string;
+    type: string;
+    level: number;
+    parentId: string | null;
+    countryCode: string | null;
+    isOverseas: boolean;
+    addressFormat: string | null;
+    localName: string | null;
+    timezone: string | null;
+    languageCode: string | null;
+    currencyCode: string | null;
+    phoneCode: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    sortOrder: number | null;
+    remark: string | null;
+  };
+
+  const formMethods = useForm<RegionFormValues>({
+    defaultValues: {
       name: regionData?.name || "",
       code: regionData?.code || "",
       type: regionData?.type || "state",
@@ -53,6 +69,33 @@ export default function RegionEditPage() {
       remark: regionData?.remark || null,
     },
   });
+
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = formMethods;
+
+  // Create a compatible form object for child components
+  const form = {
+    register,
+    setValue,
+    watch,
+    errors,
+    values: watch(),
+    setFieldValue: setValue,
+    getInputProps: (name: string) => ({
+      ...register(name),
+      error: errors[name]?.message,
+    }),
+    setValues: (values: Partial<RegionFormValues>) => {
+      Object.keys(values).forEach(key => {
+        setValue(key as keyof RegionFormValues, values[key as keyof RegionFormValues]);
+      });
+    },
+  };
 
   // 当 regionData 加载完成后，更新表单值
   React.useEffect(() => {
@@ -80,13 +123,13 @@ export default function RegionEditPage() {
     }
   }, [regionData, isEditing]);
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: RegionFormValues) => {
     try {
       // 转换表单数据为 EditableRegion 格式
       const submitData: EditableRegion = {
         name: values.name,
         code: values.code,
-        type: values.type as any,
+        type: values.type as RegionType,
         level: values.level,
         parentId: values.parentId,
         countryCode: values.countryCode,
@@ -132,51 +175,61 @@ export default function RegionEditPage() {
         </Button>
       </Flex>
 
-      <Title level={2} style={{ marginBottom: 24 }}>
+      <h2 className="text-2xl font-bold">
         {isEditing ? "编辑区域" : "添加区域"}
-      </Title>
+      </h2>
 
       <Card>
-        <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
-          <TextInput
-            withAsterisk
+        <form onSubmit={rhfHandleSubmit((values) => handleSubmit(values))}>
+          <Form.Item
             label="区域名称"
-            placeholder="请输入区域名称"
-            key={form.key("name")}
-            {...form.getInputProps("name")}
-            mb="md"
-          />
+            required
+            validateStatus={form.getInputProps("name").error ? "error" : undefined}
+            help={form.getInputProps("name").error}
+          >
+            <Input
+              placeholder="请输入区域名称"
+              {...form.getInputProps("name")}
+            />
+          </Form.Item>
 
-          <TextInput
-            withAsterisk
+          <Form.Item
             label="区域代码"
-            placeholder="请输入区域代码"
-            key={form.key("code")}
-            {...form.getInputProps("code")}
-            mb="md"
-          />
+            required
+            validateStatus={form.getInputProps("code").error ? "error" : undefined}
+            help={form.getInputProps("code").error}
+          >
+            <Input
+              placeholder="请输入区域代码"
+              {...form.getInputProps("code")}
+            />
+          </Form.Item>
 
-          <Select
-            withAsterisk
+          <Form.Item
             label="区域类型"
-            placeholder="请选择区域类型"
-            {...form.getInputProps("type")}
-            data={[
-              { label: "国家", value: "country", disabled: true },
-              { label: "省份", value: "state" },
-              { label: "城市", value: "city" },
-              // { label: "区县", value: "district" },
-            ]}
-            mb="md"
-          />
+            required
+            validateStatus={form.getInputProps("type").error ? "error" : undefined}
+            help={form.getInputProps("type").error}
+          >
+            <Select
+              placeholder="请选择区域类型"
+              options={[
+                { label: "国家", value: "country", disabled: true },
+                { label: "省份", value: "state" },
+                { label: "城市", value: "city" },
+                // { label: "区县", value: "district" },
+              ]}
+              value={form.values.type}
+              onChange={(value) => form.setFieldValue("type", value)}
+            />
+          </Form.Item>
 
           <Form.Item
             label="区域级别"
             validateStatus={form.getInputProps("level").error ? "error" : undefined}
             required
-            style={{ marginBottom: 16 }}
           >
-            <AntdSelect
+            <Select
               style={{ width: "100%" }}
               placeholder="请输入区域级别"
               options={[
@@ -185,7 +238,8 @@ export default function RegionEditPage() {
                 { label: "城市", value: 3 },
                 // { label: "区县", value: 4 },
               ]}
-              {...form.getInputProps("level")}
+              value={form.values.level}
+              onChange={(value) => form.setFieldValue("level", value)}
             />
           </Form.Item>
 
@@ -193,124 +247,179 @@ export default function RegionEditPage() {
             required
             label="父级区域ID"
             placeholder="请输入父级区域ID"
-            key={form.key("parentId")}
             {...form.getInputProps("parentId")}
           />
 
-          <Select
+          <Form.Item
             label="ISO 3166-1 代码"
-            placeholder="请选择 ISO 3166-1 代码"
-            key={form.key("countryCode")}
-            data={[
-              { label: "CN", value: "CN" },
-              { label: "TW", value: "TW" },
-            ]}
-            {...form.getInputProps("countryCode")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("countryCode").error ? "error" : undefined}
+            help={form.getInputProps("countryCode").error}
+          >
+            <Select
+              placeholder="请选择 ISO 3166-1 代码"
+              options={[
+                { label: "CN", value: "CN" },
+                { label: "TW", value: "TW" },
+              ]}
+              value={form.values.countryCode}
+              onChange={(value) => form.setFieldValue("countryCode", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <Switch
+          <Form.Item
             label="是否海外"
-            {...form.getInputProps("isOverseas")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("isOverseas").error ? "error" : undefined}
+            help={form.getInputProps("isOverseas").error}
+          >
+            <Switch
+              checked={form.values.isOverseas}
+              onChange={(checked) => form.setFieldValue("isOverseas", checked)}
+            />
+          </Form.Item>
 
-          <Select
+          <Form.Item
             label="地址格式"
-            placeholder="请输入地址格式（可选）"
-            key={form.key("addressFormat")}
-            {...form.getInputProps("addressFormat")}
-            data={[{ label: "中式", value: "chinese" }]}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("addressFormat").error ? "error" : undefined}
+            help={form.getInputProps("addressFormat").error}
+          >
+            <Select
+              placeholder="请输入地址格式（可选）"
+              options={[{ label: "中式", value: "chinese" }]}
+              value={form.values.addressFormat}
+              onChange={(value) => form.setFieldValue("addressFormat", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <TextInput
+          <Form.Item
             label="本地名称"
-            placeholder="请输入本地名称（可选）"
-            key={form.key("localName")}
-            {...form.getInputProps("localName")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("localName").error ? "error" : undefined}
+            help={form.getInputProps("localName").error}
+          >
+            <Input
+              placeholder="请输入本地名称（可选）"
+              {...form.getInputProps("localName")}
+            />
+          </Form.Item>
 
-          <Select
+          <Form.Item
             label="时区"
-            placeholder="请输入时区（可选）"
-            key={form.key("timezone")}
-            data={[
-              { label: "Asia/Shanghai", value: "Asia/Shanghai" },
-              { label: "Asia/Taipei", value: "Asia/Taipei" },
-            ]}
-            {...form.getInputProps("timezone")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("timezone").error ? "error" : undefined}
+            help={form.getInputProps("timezone").error}
+          >
+            <Select
+              placeholder="请输入时区（可选）"
+              options={[
+                { label: "Asia/Shanghai", value: "Asia/Shanghai" },
+                { label: "Asia/Taipei", value: "Asia/Taipei" },
+              ]}
+              value={form.values.timezone}
+              onChange={(value) => form.setFieldValue("timezone", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <Select
+          <Form.Item
             label="语言代码"
-            placeholder="请输入语言代码（可选）"
-            key={form.key("languageCode")}
-            {...form.getInputProps("languageCode")}
-            data={[
-              { label: "zh-CN", value: "zh-CN" },
-              { label: "zh-TW", value: "zh-TW" },
-            ]}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("languageCode").error ? "error" : undefined}
+            help={form.getInputProps("languageCode").error}
+          >
+            <Select
+              placeholder="请输入语言代码（可选）"
+              options={[
+                { label: "zh-CN", value: "zh-CN" },
+                { label: "zh-TW", value: "zh-TW" },
+              ]}
+              value={form.values.languageCode}
+              onChange={(value) => form.setFieldValue("languageCode", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <Select
+          <Form.Item
             label="货币代码"
-            placeholder="请输入货币代码（可选）"
-            key={form.key("currencyCode")}
-            {...form.getInputProps("currencyCode")}
-            data={[
-              { label: "CNY", value: "CNY" },
-              { label: "TWD", value: "TWD" },
-            ]}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("currencyCode").error ? "error" : undefined}
+            help={form.getInputProps("currencyCode").error}
+          >
+            <Select
+              placeholder="请输入货币代码（可选）"
+              options={[
+                { label: "CNY", value: "CNY" },
+                { label: "TWD", value: "TWD" },
+              ]}
+              value={form.values.currencyCode}
+              onChange={(value) => form.setFieldValue("currencyCode", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <Select
+          <Form.Item
             label="电话代码"
-            placeholder="请输入电话代码（可选）"
-            key={form.key("phoneCode")}
-            {...form.getInputProps("phoneCode")}
-            data={[
-              { label: "+86", value: "+86" },
-              { label: "+886", value: "+886" },
-            ]}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("phoneCode").error ? "error" : undefined}
+            help={form.getInputProps("phoneCode").error}
+          >
+            <Select
+              placeholder="请输入电话代码（可选）"
+              options={[
+                { label: "+86", value: "+86" },
+                { label: "+886", value: "+886" },
+              ]}
+              value={form.values.phoneCode}
+              onChange={(value) => form.setFieldValue("phoneCode", value)}
+              allowClear
+            />
+          </Form.Item>
 
-          <NumberInput
+          <Form.Item
             label="纬度"
-            placeholder="请输入纬度（可选）"
-            key={form.key("latitude")}
-            {...form.getInputProps("latitude")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("latitude").error ? "error" : undefined}
+            help={form.getInputProps("latitude").error}
+          >
+            <InputNumber
+              placeholder="请输入纬度（可选）"
+              style={{ width: "100%" }}
+              value={form.values.latitude}
+              onChange={(value) => form.setFieldValue("latitude", value)}
+            />
+          </Form.Item>
 
-          <NumberInput
+          <Form.Item
             label="经度"
-            placeholder="请输入经度（可选）"
-            key={form.key("longitude")}
-            {...form.getInputProps("longitude")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("longitude").error ? "error" : undefined}
+            help={form.getInputProps("longitude").error}
+          >
+            <InputNumber
+              placeholder="请输入经度（可选）"
+              style={{ width: "100%" }}
+              value={form.values.longitude}
+              onChange={(value) => form.setFieldValue("longitude", value)}
+            />
+          </Form.Item>
 
-          <NumberInput
+          <Form.Item
             label="排序"
-            placeholder="请输入排序（可选）"
-            key={form.key("sortOrder")}
-            {...form.getInputProps("sortOrder")}
-            mb="md"
-          />
+            validateStatus={form.getInputProps("sortOrder").error ? "error" : undefined}
+            help={form.getInputProps("sortOrder").error}
+          >
+            <InputNumber
+              placeholder="请输入排序（可选）"
+              style={{ width: "100%" }}
+              value={form.values.sortOrder}
+              onChange={(value) => form.setFieldValue("sortOrder", value)}
+            />
+          </Form.Item>
 
-          <Textarea
+          <Form.Item
             label="备注"
-            placeholder="请输入区域描述"
-            key={form.key("remark")}
-            {...form.getInputProps("remark")}
-            mb="xl"
-          />
+            validateStatus={form.getInputProps("remark").error ? "error" : undefined}
+            help={form.getInputProps("remark").error}
+          >
+            <TextArea
+              placeholder="请输入区域描述"
+              {...form.getInputProps("remark")}
+            />
+          </Form.Item>
 
           <Flex justify="flex-end" gap={8}>
             <Button

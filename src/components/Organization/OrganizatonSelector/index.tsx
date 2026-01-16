@@ -1,21 +1,20 @@
 import { getOrganizationList } from "@/api/dashboard/organization";
 import type { Organization } from "@/types/organization";
-import { Select, Spin, Form } from "antd";
+import { Select, Spin } from "antd";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { debounce } from "es-toolkit";
 
 interface OrganizationSelectorProps {
-  value?: string;
-  onChange?: (value: string | string[] | null) => void;
-  onSelect?: (value: Organization | Organization[] | null) => void;
+  value?: string[];
+  onChange?: (value: string[] | null | undefined) => void;
+  onSelect?: (value: Organization[] | null | undefined) => void;
   placeholder?: string;
   label?: string;
   required?: boolean;
   disabled?: boolean;
   error?: string;
   description?: string;
-  selectedOption?: Organization | null;
   selectedOptions?: Organization[] | null;
   multiple?: boolean;
 }
@@ -30,7 +29,6 @@ export default function OrganizationSelector({
   disabled = false,
   error,
   description,
-  selectedOption,
   selectedOptions,
   multiple = false,
   ...props
@@ -52,7 +50,6 @@ export default function OrganizationSelector({
   );
 
   const organizations = [
-    ...(selectedOption ? [selectedOption] : []),
     ...(selectedOptions || []),
     ...(data?.records || []),
   ];
@@ -78,47 +75,33 @@ export default function OrganizationSelector({
   };
 
   // 处理选择变化
-  const handleChange = (selectedValue: string | string[]) => {
+  const handleChange = (selectedValue: string[]) => {
     onChange?.(selectedValue);
-    if (multiple) {
-      onSelect?.(
-        organizations.filter((organization) =>
-          selectedValue.includes(organization.id)
-        )
-      );
-    } else {
-      onSelect?.(
-        organizations.find(
-          (organization) => organization.id === selectedValue
-        ) || null
-      );
-    }
+    onSelect?.(
+      organizations.filter((organization) =>
+        selectedValue.includes(organization.id)
+      )
+    );
   };
 
   return (
-    <Form.Item
-      label={label}
-      help={description}
-      validateStatus={error || swrError ? "error" : undefined}
-      required={required}
-    >
-      <Select
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        options={selectOptions}
-        optionFilterProp="label"
-        showSearch
-        onSearch={handleSearch}
-        disabled={disabled}
-        mode={multiple ? "multiple" : undefined}
-        allowClear
-        loading={isLoading}
-        notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
-        style={{ width: "100%" }}
-        status={error || swrError ? "error" : undefined}
-        {...props}
-      />
-    </Form.Item>
+    <Select
+      placeholder={placeholder}
+      value={value}
+      onChange={handleChange}
+      options={selectOptions}
+      showSearch={{
+        optionFilterProp: "label",
+        onSearch: handleSearch,
+      }}
+      disabled={disabled}
+      mode={multiple ? "multiple" : undefined}
+      allowClear
+      loading={isLoading}
+      notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
+      style={{ width: "100%" }}
+      status={error || swrError ? "error" : undefined}
+      {...props}
+    />
   );
 }

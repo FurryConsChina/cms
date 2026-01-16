@@ -80,7 +80,6 @@ export default function RegionSelector({
       help={description}
       validateStatus={error || swrError ? "error" : undefined}
       required={required}
-      style={{ marginBottom: 16 }}
     >
       <Select
         placeholder={placeholder}

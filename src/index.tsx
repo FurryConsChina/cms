@@ -4,20 +4,9 @@ import { RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntdApp } from "antd";
 import zhCN from "antd/locale/zh_CN";
+import { StyleProvider } from "@ant-design/cssinjs";
 
 import router from "@/routes";
-import { createTheme, MantineProvider } from "@mantine/core";
-
-const theme = createTheme({
-  /** Put your mantine theme override here */
-  components: {
-    Notification: {
-      defaultProps: {
-        radius: "lg",
-      },
-    },
-  },
-});
 
 const queryClient = new QueryClient();
 
@@ -28,22 +17,32 @@ if (rootEl) {
 
   root.render(
     <React.StrictMode>
-      <ConfigProvider
-        locale={zhCN}
-        theme={{
-          token: {
-            borderRadius: 8,
-          },
-        }}
-      >
-        <AntdApp>
-          <MantineProvider theme={theme}>
+      <StyleProvider layer>
+        <ConfigProvider
+          locale={zhCN}
+          theme={{
+            token: {
+              colorPrimary: "#228be6",
+              colorInfo: "#228be6",
+              borderRadius: 12,
+              wireframe: false,
+              colorSuccess: "#40c057",
+            },
+            components: {
+              Menu: {
+                itemSelectedBg: "rgba(59,131,246,0.2)",
+                subMenuItemBg: "rgba(0,0,0,0)",
+              },
+            },
+          }}
+        >
+          <AntdApp>
             <QueryClientProvider client={queryClient}>
               <RouterProvider router={router} />
             </QueryClientProvider>
-          </MantineProvider>
-        </AntdApp>
-      </ConfigProvider>
+          </AntdApp>
+        </ConfigProvider>
+      </StyleProvider>
     </React.StrictMode>
   );
 }

@@ -35,7 +35,7 @@ export default function RegionPage() {
 
   return (
     <>
-      <DefaultContainer className="sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
           <Title level={2} style={{ margin: 0 }}>区域列表</Title>
 

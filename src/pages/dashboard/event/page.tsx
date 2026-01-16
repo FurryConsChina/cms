@@ -54,9 +54,9 @@ export default function EventPage() {
 
   return (
     <>
-      <DefaultContainer className="sticky top-0 z-10">
+      <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
-          <Title level={2} style={{ margin: 0 }}>展会列表</Title>
+          <Title level={3} className="m-0">展会列表</Title>
 
           <Button
             type="primary"

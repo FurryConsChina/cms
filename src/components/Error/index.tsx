@@ -8,7 +8,7 @@ export default function LoadError() {
   const navigate = useNavigate();
 
   return (
-    <DefaultContainer className="sticky top-0 z-10">
+    <DefaultContainer className="sticky top-0 z-20">
       <Flex vertical align="center" justify="center">
         <Title level={3} className="text-slate-700">发生了错误...</Title>
         <Text type="secondary" style={{ fontSize: 16, textAlign: 'center' }}>
