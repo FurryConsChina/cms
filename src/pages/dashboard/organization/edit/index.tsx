@@ -15,31 +15,19 @@ import {
   OrganizationType,
 } from "@/types/organization";
 import {
-  Alert,
-  Box,
-  Button,
-  Center,
-  Container,
-  Divider,
-  Flex,
-  Group,
   Select,
-  Stack,
   TextInput,
   Textarea,
-  Title,
-  Tooltip,
-  rem,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
-import { IconInfoCircle } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Spin } from "antd";
+import { Alert, Spin, Typography, Button, Flex, Divider, Row, Col, App } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "mantine-form-zod-resolver";
 import { z } from "zod";
+
+const { Title } = Typography;
 
 export default function OrganizationEditPage() {
   const { organizationId } = useParams();
@@ -53,6 +41,7 @@ export default function OrganizationEditPage() {
     refetchOnWindowFocus: false,
     enabled: !!organizationId,
   });
+  console.log(organization);
 
   if (isError) {
     return <LoadError />;
@@ -60,14 +49,14 @@ export default function OrganizationEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-10">
-        <Title order={2}>{organizationId ? "编辑展商" : "新建展商"}</Title>
+        <Title level={2} style={{ margin: 0 }}>{organizationId ? "编辑展商" : "新建展商"}</Title>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
         {isLoading ? (
-          <Center>
+          <Flex justify="center" align="center">
             <Spin />
-          </Center>
+          </Flex>
         ) : (
           <OrganizationEditorContent organization={organization} />
         )}
@@ -82,6 +71,7 @@ function OrganizationEditorContent({
   organization?: Organization;
 }) {
   const navigate = useNavigate();
+  const { message } = App.useApp();
   const form = useForm({
     initialValues: {
       name: organization?.name || "",
@@ -143,191 +133,196 @@ function OrganizationEditorContent({
           id: organization.id,
         });
         if (res) {
-          notifications.show({
-            title: "更新成功",
-            message: "更新展商数据成功",
-            color: "teal",
-          });
+          message.success("更新展商数据成功");
         }
         console.log("update res", res);
       } else {
         const res = await createOrganization(validPayload);
         console.log("create res", res);
         if (res) {
-          notifications.show({
-            title: "创建成功",
-            message: "创建展商数据成功",
-            color: "teal",
-          });
+          message.success("创建展商数据成功");
           navigate(`/dashboard/organization/${res.id}/edit`);
         }
       }
     } else {
-      notifications.show({
-        title: "数据校验不通过",
-        message: "请检查表单",
-        color: "teal",
-      });
+      message.warning("数据校验不通过，请检查表单");
     }
   };
 
   return (
-    <Box mx="auto">
+    <div style={{ margin: "0 auto" }}>
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Container fluid>
-          <Title order={5} my="sm">
+        <div style={{ padding: "0 24px" }}>
+          <Title level={5} style={{ margin: "12px 0" }}>
             基础信息
           </Title>
-          <Stack gap="xs">
-            <Group justify="space-between" grow>
-              <TextInput
-                withAsterisk
-                label="展商名称"
-                {...form.getInputProps("name")}
-              />
+          <Flex vertical gap={8}>
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  withAsterisk
+                  label="展商名称"
+                  {...form.getInputProps("name")}
+                />
+              </Col>
+              <Col flex={1}>
+                <DatePickerInput
+                  valueFormat="YYYY年MM月DD日"
+                  label="创立日期"
+                  placeholder="请选择日期"
+                  clearable
+                  locale="zh-cn"
+                  {...form.getInputProps("creationTime")}
+                />
+              </Col>
+            </Row>
 
-              <DatePickerInput
-                valueFormat="YYYY年MM月DD日"
-                label="创立日期"
-                placeholder="请选择日期"
-                clearable
-                locale="zh-cn"
-                {...form.getInputProps("creationTime")}
-              />
-            </Group>
+            <Row gutter={8}>
+              <Col flex={1}>
+                <Select
+                  withAsterisk
+                  label="展商状态"
+                  data={Object.values(OrganizationStatus).map((status) => ({
+                    label: OrganizationStatusLabel[status],
+                    value: status,
+                  }))}
+                  {...form.getInputProps("status")}
+                />
+              </Col>
+              <Col flex={1}>
+                <Select
+                  withAsterisk
+                  label="展商类型"
+                  data={Object.values(OrganizationType).map((type) => ({
+                    label: OrganizationTypeLabel[type],
+                    value: type,
+                  }))}
+                  {...form.getInputProps("type")}
+                />
+              </Col>
+            </Row>
 
-            <Group justify="space-between" grow>
-              <Select
-                withAsterisk
-                label="展商状态"
-                data={Object.values(OrganizationStatus).map((status) => ({
-                  label: OrganizationStatusLabel[status],
-                  value: status,
-                }))}
-                {...form.getInputProps("status")}
-              />
+            <TextInput
+              withAsterisk
+              label="展商Slug"
+              disabled={!!organization?.id}
+              placeholder="请输入展商Slug"
+              description="请不要使用大写"
+              {...form.getInputProps("slug")}
+            />
 
-              <Select
-                withAsterisk
-                label="展商类型"
-                data={Object.values(OrganizationType).map((type) => ({
-                  label: OrganizationTypeLabel[type],
-                  value: type,
-                }))}
-                {...form.getInputProps("type")}
+            <Flex gap={8}>
+              <Alert
+                type="info"
+                message="Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。"
+                style={{ borderRadius: 8 }}
               />
-            </Group>
-
-            <Group justify="space-between" align="flex-start" grow>
-              <TextInput
-                withAsterisk
-                label="展商Slug"
-                disabled={!!organization?.id}
-                placeholder="请输入展商Slug"
-                description="请不要使用大写"
-                {...form.getInputProps("slug")}
+              <Alert
+                type="error"
+                message="不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。"
+                style={{ borderRadius: 8 }}
               />
-            </Group>
-
-            <Flex direction="row" gap="xs">
-              <Alert variant="light" color="blue" radius="lg">
-                Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。
-              </Alert>
-              <Alert variant="light" color="red" radius="lg">
-                不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。
-              </Alert>
             </Flex>
-          </Stack>
-        </Container>
+          </Flex>
+        </div>
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
-        <Container fluid>
-          <Title order={5}>媒体信息</Title>
-          <Stack>
-            <Group grow>
-              <TextInput
-                label="网站"
-                placeholder="请输入网站链接"
-                {...form.getInputProps("website")}
-              />
+        <div style={{ padding: "0 24px" }}>
+          <Title level={5}>媒体信息</Title>
+          <Flex vertical gap={8}>
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  label="网站"
+                  placeholder="请输入网站链接"
+                  {...form.getInputProps("website")}
+                />
+              </Col>
+              <Col flex={1}>
+                <TextInput
+                  label="联系邮箱"
+                  placeholder="请输入邮箱地址"
+                  {...form.getInputProps("contactMail")}
+                />
+              </Col>
+              <Col flex={1}>
+                <TextInput
+                  label="QQ群"
+                  placeholder="请输入QQ群号"
+                  {...form.getInputProps("qqGroup")}
+                />
+              </Col>
+            </Row>
 
-              <TextInput
-                label="联系邮箱"
-                placeholder="请输入邮箱地址"
-                {...form.getInputProps("contactMail")}
-              />
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  label="Twitter"
+                  placeholder="请输入Twitter链接"
+                  {...form.getInputProps("twitter")}
+                />
+              </Col>
+              <Col flex={1}>
+                <TextInput
+                  label="Weibo"
+                  placeholder="请输入微博链接"
+                  {...form.getInputProps("weibo")}
+                />
+              </Col>
+            </Row>
 
-              <TextInput
-                label="QQ群"
-                placeholder="请输入QQ群号"
-                {...form.getInputProps("qqGroup")}
-              />
-            </Group>
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  label="Bilibili"
+                  placeholder="请输入B站链接"
+                  {...form.getInputProps("bilibili")}
+                />
+              </Col>
+              <Col flex={1}>
+                <TextInput
+                  label="Wikifur"
+                  placeholder="请输入Wikifur链接"
+                  {...form.getInputProps("wikifur")}
+                />
+              </Col>
+            </Row>
 
-            <Group gap="xs" grow>
-              <TextInput
-                label="Twitter"
-                placeholder="请输入Twitter链接"
-                {...form.getInputProps("twitter")}
-              />
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  label="小红书"
+                  placeholder="请输入小红书用户链接"
+                  {...form.getInputProps("rednote")}
+                />
+              </Col>
+            </Row>
 
-              <TextInput
-                label="Weibo"
-                placeholder="请输入微博链接"
-                {...form.getInputProps("weibo")}
-              />
-            </Group>
+            <Row gutter={8}>
+              <Col flex={1}>
+                <TextInput
+                  label="Plurk"
+                  placeholder="请输入Plurk用户链接"
+                  {...form.getInputProps("plurk")}
+                />
+              </Col>
+              <Col flex={1}>
+                <TextInput
+                  label="Facebook"
+                  placeholder="请输入Facebook链接"
+                  {...form.getInputProps("facebook")}
+                />
+              </Col>
+            </Row>
+          </Flex>
+        </div>
 
-            <Group gap="xs" grow>
-              <TextInput
-                label="Bilibili"
-                placeholder="请输入B站链接"
-                {...form.getInputProps("bilibili")}
-              />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
-              <TextInput
-                label="Wikifur"
-                placeholder="请输入Wikifur链接"
-                {...form.getInputProps("wikifur")}
-              />
-            </Group>
-
-            <Group gap="xs" grow>
-              <TextInput
-                label="小红书"
-                placeholder="请输入小红书用户链接"
-                {...form.getInputProps("rednote")}
-              />
-
-              {/* <TextInput
-                label="Wikifur"
-                placeholder="请输入Wikifur链接"
-                {...form.getInputProps("wikifur")}
-              /> */}
-            </Group>
-
-            <Group gap="xs" grow>
-              <TextInput
-                label="Plurk"
-                placeholder="请输入Plurk用户链接"
-                {...form.getInputProps("plurk")}
-              />
-
-              <TextInput
-                label="Facebook"
-                placeholder="请输入Facebook链接"
-                {...form.getInputProps("facebook")}
-              />
-            </Group>
-          </Stack>
-        </Container>
-
-        <Divider my="sm" variant="dotted" />
-
-        <Container fluid>
-          <Title order={5}>展会附加信息</Title>
-          <Stack>
+        <div style={{ padding: "0 24px" }}>
+          <Title level={5}>展会附加信息</Title>
+          <Flex vertical gap={8}>
             <Textarea
               label="展商描述"
               description="可以是展商的自我简介之类的东西，不填也没关系。"
@@ -337,37 +332,37 @@ function OrganizationEditorContent({
               maxRows={20}
               {...form.getInputProps("description")}
             />
-          </Stack>
-        </Container>
+          </Flex>
+        </div>
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
-        <Container fluid>
-          <Title order={5}>展会媒体资源</Title>
+        <div style={{ padding: "0 24px" }}>
+          <Title level={5}>展会媒体资源</Title>
 
-          <Stack justify="flex-start" gap="xs">
+          <Flex vertical gap={8}>
             <TextInput
               label="展商标志图片"
               description="一般来说无需手动编辑，除非有两个组织的logo一致，可以直接复用另外一个组织的URL。"
               {...form.getInputProps("logoUrl")}
             />
-            <Group>
+            <Flex>
               <UploadImage
                 pathPrefix={`organizations/${form.values.slug}/`}
                 defaultImageName="logo"
                 onUploadSuccess={(s) => form.setFieldValue("logoUrl", s)}
                 disabled={!form.values.slug}
               />
-            </Group>
-          </Stack>
-        </Container>
+            </Flex>
+          </Flex>
+        </div>
 
-        <Container fluid>
-          <Group justify="flex-end" mt="md">
-            <Button type="submit">保存</Button>
-          </Group>
-        </Container>
+        <div style={{ padding: "0 24px" }}>
+          <Flex justify="flex-end" style={{ marginTop: 16 }}>
+            <Button type="primary" htmlType="submit">保存</Button>
+          </Flex>
+        </div>
       </form>
-    </Box>
+    </div>
   );
 }

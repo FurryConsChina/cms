@@ -1,12 +1,14 @@
 import { getOrganizationList } from '@/api/dashboard/organization';
 import DefaultContainer from '@/components/Container';
 import OrganizationList from '@/pages/dashboard/organization/components/OrganizationList';
-import { Button, Group, Title } from '@mantine/core';
+import { Button, Flex, Typography } from 'antd';
 import { IconCirclePlus } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useQueryState, parseAsInteger } from 'nuqs';
 import { useState } from 'react';
+
+const { Title } = Typography;
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
@@ -43,18 +45,19 @@ export default function OrganizationPage() {
   return (
     <>
       <DefaultContainer className="sticky top-0 z-10">
-        <Group justify="space-between">
-          <Title order={2}>展商列表</Title>
+        <Flex justify="space-between" align="center">
+          <Title level={2} style={{ margin: 0 }}>展商列表</Title>
 
           <Button
-            leftSection={<IconCirclePlus size={16} stroke={1.5} />}
+            type="primary"
+            icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
               navigate('/dashboard/organization/create');
             }}
           >
             添加展商
           </Button>
-        </Group>
+        </Flex>
       </DefaultContainer>
 
       <div className="shadow mt-4 p-4 rounded-xl bg-white">

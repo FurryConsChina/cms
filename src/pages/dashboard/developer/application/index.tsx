@@ -1,12 +1,13 @@
 import { getApplicationList } from "@/api/developer/application";
 import DefaultContainer from "@/components/Container";
 import ApplicationList from "@/pages/dashboard/developer/application/components/ApplicationList";
-import { Button, Group, Title } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
+import { Button, Flex, Typography } from "antd";
 import { IconCirclePlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useNavigate } from "react-router-dom";
+
+const { Title } = Typography;
 
 export default function ApplicationPage() {
   const navigate = useNavigate();
@@ -56,18 +57,19 @@ export default function ApplicationPage() {
   return (
     <>
       <DefaultContainer className="sticky top-0 z-10">
-        <Group justify="space-between">
-          <Title order={2}>应用列表</Title>
+        <Flex justify="space-between" align="center">
+          <Title level={2} style={{ margin: 0 }}>应用列表</Title>
 
           <Button
-            leftSection={<IconCirclePlus size={16} stroke={1.5} />}
+            type="primary"
+            icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
               navigate("/developer/application/create");
             }}
           >
             添加应用
           </Button>
-        </Group>
+        </Flex>
       </DefaultContainer>
 
       <div className="shadow mt-4 p-4 rounded-xl bg-white">

@@ -1,29 +1,13 @@
-import {
-  ActionIcon,
-  Badge,
-  Button,
-  HoverCard,
-  Menu,
-  Text,
-  rem,
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { Input, Space, Table, type TableColumnType, Tag } from "antd";
+import { Button, Dropdown, Popover, Typography, App, Space } from "antd";
+import type { MenuProps } from "antd";
+import { Input, Table, type TableColumnType, Tag } from "antd";
 import dayjs from "dayjs";
 
 import { cleanPageCache } from "@/api/dashboard/cache";
 import {
-  EventScaleLabel,
-  EventStatusColor,
-  EventStatusLabel,
-} from "@/consts/event";
-import {
   IconEdit,
   IconEye,
-  IconInfoCircle,
-  IconLink,
   IconMenu,
-  IconRefresh,
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
@@ -35,6 +19,8 @@ import type { List } from "@/types/Request";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import { EventItem } from "@/types/event";
 import { Application } from "@/types/application";
+
+const { Text } = Typography;
 
 function ApplicationList({
   data,
@@ -59,13 +45,11 @@ function ApplicationList({
   isPending: boolean;
   onDelete: (id: string) => void;
 }) {
+  const { message } = App.useApp();
   const { mutate: refreshPage } = useMutation({
     mutationFn: cleanPageCache,
     onSuccess: () => {
-      notifications.show({
-        title: "刷新成功",
-        message: "刷新页面缓存成功",
-      });
+      message.success("刷新页面缓存成功");
     },
   });
 
@@ -132,9 +116,9 @@ function ApplicationList({
               onClick={() =>
                 handleSearch(selectedKeys as string[], confirm, dataIndex)
               }
-              leftSection={<IconSearch size={14} />}
-              size="xs"
-              variant="light"
+              icon={<IconSearch size={14} />}
+              size="small"
+              type="primary"
               style={{ width: 90 }}
             >
               搜索
@@ -143,16 +127,13 @@ function ApplicationList({
               onClick={() =>
                 clearFilters && handleReset(clearFilters, confirm, dataIndex)
               }
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
             >
               重置
             </Button>
             <Button
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
+              type="text"
               onClick={() => {
                 close();
               }}
@@ -188,15 +169,17 @@ function ApplicationList({
       key: "permission",
       render: (_, record) => {
         return (
-          <HoverCard width={280} shadow="md">
-            <HoverCard.Target>
-              <IconEye size={16} />
-            </HoverCard.Target>
-            <HoverCard.Dropdown>
-              <Text>读取: {record.permission.read ? "是" : "否"}</Text>
-              <Text>写入: {record.permission.write ? "是" : "否"}</Text>
-            </HoverCard.Dropdown>
-          </HoverCard>
+          <Popover
+            content={
+              <div>
+                <Text>读取: {record.permission.read ? "是" : "否"}</Text>
+                <br />
+                <Text>写入: {record.permission.write ? "是" : "否"}</Text>
+              </div>
+            }
+          >
+            <IconEye size={16} style={{ cursor: "pointer" }} />
+          </Popover>
         );
       },
     },
@@ -224,46 +207,38 @@ function ApplicationList({
       title: "操作",
       key: "action",
       fixed: "right",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            variant="light"
-            color="green"
-            onClick={() => {
-              navigate(`/developer/application/${record.id}/edit`);
-            }}
-            leftSection={<IconEdit size={14} />}
-          >
-            编辑
-          </Button>
+      render: (_, record) => {
+        const menuItems: MenuProps['items'] = [
+          {
+            key: 'delete',
+            icon: <IconTrash style={{ width: 14, height: 14 }} />,
+            label: '删除',
+            danger: true,
+            onClick: () => {
+              onDelete(record.id);
+            },
+          },
+        ];
 
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <ActionIcon variant="light" aria-label="Settings">
-                <IconMenu
-                  style={{ width: "70%", height: "70%" }}
-                />
-              </ActionIcon>
-            </Menu.Target>
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              ghost
+              onClick={() => {
+                navigate(`/developer/application/${record.id}/edit`);
+              }}
+              icon={<IconEdit size={14} />}
+            >
+              编辑
+            </Button>
 
-            <Menu.Dropdown>
-              <Menu.Label>菜单</Menu.Label>
-              <Menu.Label>危险</Menu.Label>
-              <Menu.Item
-                color="red"
-                onClick={() => {
-                  onDelete(record.id);
-                }}
-                leftSection={
-                  <IconTrash style={{ width: rem(14), height: rem(14) }} />
-                }
-              >
-                删除
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Space>
-      ),
+            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+              <Button icon={<IconMenu size={14} />} />
+            </Dropdown>
+          </Space>
+        );
+      },
     },
   ];
 

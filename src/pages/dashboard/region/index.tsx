@@ -1,4 +1,4 @@
-import { Button, Group, Title } from "@mantine/core";
+import { Button, Flex, Typography, Space, App } from "antd";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DefaultContainer from "@/components/Container";
@@ -7,11 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { getRegionList, recreateRegionOrder } from "@/api/dashboard/region";
 import RegionList from "@/pages/dashboard/region/components/RegionList";
 import { RegionType, type Region } from "@/types/region";
-import { Space } from "antd";
-import { notifications } from "@mantine/notifications";
+
+const { Title } = Typography;
 
 export default function RegionPage() {
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const [pagination, setPagination] = useState({
     current: 1,
@@ -26,10 +27,7 @@ export default function RegionPage() {
   const handleRefreshRegionSort = async () => {
     try {
       await recreateRegionOrder(RegionType.CITY);
-      notifications.show({
-        title: "刷新成功",
-        message: "刷新区域排序成功",
-      });
+      message.success("刷新区域排序成功");
     } catch (error) {
       console.error(error);
     }
@@ -38,24 +36,25 @@ export default function RegionPage() {
   return (
     <>
       <DefaultContainer className="sticky top-0 z-10">
-        <Group justify="space-between">
-          <Title order={2}>区域列表</Title>
+        <Flex justify="space-between" align="center">
+          <Title level={2} style={{ margin: 0 }}>区域列表</Title>
 
           <Space>
             <Button
-              leftSection={<IconRefresh size={16} stroke={1.5} />}
+              icon={<IconRefresh size={16} stroke={1.5} />}
               onClick={handleRefreshRegionSort}
             >
               刷新区域排序
             </Button>
             <Button
-              leftSection={<IconCirclePlus size={16} stroke={1.5} />}
+              type="primary"
+              icon={<IconCirclePlus size={16} stroke={1.5} />}
               onClick={() => navigate("/dashboard/region/create")}
             >
               添加区域
             </Button>
           </Space>
-        </Group>
+        </Flex>
       </DefaultContainer>
 
       <div className="shadow mt-4 p-4 rounded-xl bg-white">

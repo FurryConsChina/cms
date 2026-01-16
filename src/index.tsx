@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Notifications } from "@mantine/notifications";
 import { RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createTheme, MantineProvider } from "@mantine/core";
+import { ConfigProvider, App as AntdApp } from "antd";
+import zhCN from "antd/locale/zh_CN";
 
 import router from "@/routes";
+import { createTheme, MantineProvider } from "@mantine/core";
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -17,6 +18,7 @@ const theme = createTheme({
     },
   },
 });
+
 const queryClient = new QueryClient();
 
 const rootEl = document.getElementById("root");
@@ -26,15 +28,22 @@ if (rootEl) {
 
   root.render(
     <React.StrictMode>
-      <MantineProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <Notifications
-            position="top-right"
-            styles={{ root: { borderRadius: 20 } }}
-          />
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </MantineProvider>
+      <ConfigProvider
+        locale={zhCN}
+        theme={{
+          token: {
+            borderRadius: 8,
+          },
+        }}
+      >
+        <AntdApp>
+          <MantineProvider theme={theme}>
+            <QueryClientProvider client={queryClient}>
+              <RouterProvider router={router} />
+            </QueryClientProvider>
+          </MantineProvider>
+        </AntdApp>
+      </ConfigProvider>
     </React.StrictMode>
   );
 }

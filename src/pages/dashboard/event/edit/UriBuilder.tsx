@@ -1,7 +1,9 @@
 import { Region } from "@/types/region";
-import { Button, Container, Stack, TextInput, Title } from "@mantine/core";
+import { TextInput } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
+import { Typography, Button, Flex, App } from "antd";
+
+const { Title } = Typography;
 
 interface UriBuilderProps {
   form: UseFormReturnType<any>;
@@ -9,6 +11,8 @@ interface UriBuilderProps {
 }
 
 export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
+  const { message } = App.useApp();
+
   const generateEventSlug = () => {
     const selectedYear = new Date(form.values.startAt).getFullYear();
     const selectedMonth = new Date(form.values.startAt)
@@ -17,10 +21,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
     const city = selectedRegion?.code;
 
     if (!selectedYear || !selectedMonth || !city) {
-      notifications.show({
-        message: "活动日期或活动地区没有选择",
-        color: "red",
-      });
+      message.warning("活动日期或活动地区没有选择");
       return;
     }
 
@@ -28,9 +29,9 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   };
 
   return (
-    <Container fluid>
-      <Title order={5}>URI构建</Title>
-      <Stack>
+    <div style={{ padding: "0 24px" }}>
+      <Title level={5}>URI构建</Title>
+      <Flex vertical gap={8}>
         <TextInput
           withAsterisk
           label="展会Slug"
@@ -48,7 +49,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
         >
           生成Slug
         </Button>
-      </Stack>
-    </Container>
+      </Flex>
+    </div>
   );
 } 

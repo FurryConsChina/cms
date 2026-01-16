@@ -1,12 +1,6 @@
 import useAuthStore from "@/stores/auth";
-import {
-  AppShell,
-  AppShellMain,
-  AppShellNavbar,
-  AppShellSection,
-  Divider,
-  NavLink,
-} from "@mantine/core";
+import { Layout, Menu, Divider } from "antd";
+import type { MenuProps } from "antd";
 import {
   IconApps,
   IconHome,
@@ -18,29 +12,65 @@ import {
   IconUser,
   IconUserCode,
 } from "@tabler/icons-react";
-import clsx from "clsx";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 
-const linksData = [
-  { link: "/dashboard", label: "首页", icon: IconHome },
-  { link: "/dashboard/event", label: "展会", icon: IconTicket },
-  { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
-  { link: "/dashboard/feature", label: "展会标签", icon: IconTag },
-  { link: "/dashboard/region", label: "区域管理", icon: IconMapPin },
+const { Sider, Content } = Layout;
+
+type MenuItem = Required<MenuProps>["items"][number];
+
+const menuItems: MenuItem[] = [
   {
-    link: "/developer",
+    key: "/dashboard",
+    icon: <IconHome size="1.1rem" stroke={1.5} />,
+    label: "首页",
+  },
+  {
+    key: "/dashboard/event",
+    icon: <IconTicket size="1.1rem" stroke={1.5} />,
+    label: "展会",
+  },
+  {
+    key: "/dashboard/organization",
+    icon: <IconTrademark size="1.1rem" stroke={1.5} />,
+    label: "展商",
+  },
+  {
+    key: "/dashboard/feature",
+    icon: <IconTag size="1.1rem" stroke={1.5} />,
+    label: "展会标签",
+  },
+  {
+    key: "/dashboard/region",
+    icon: <IconMapPin size="1.1rem" stroke={1.5} />,
+    label: "区域管理",
+  },
+  {
+    key: "/developer",
+    icon: <IconUserCode size="1.1rem" stroke={1.5} />,
     label: "开发者",
-    icon: IconUserCode,
-    links: [
-      { link: "/developer/application", label: "应用管理", icon: IconApps },
+    children: [
+      {
+        key: "/developer/application",
+        icon: <IconApps size="1.1rem" stroke={1.5} />,
+        label: "应用管理",
+      },
     ],
   },
-  // {
-  //   link: '/dashboard/cache-manager',
-  //   label: '缓存管理',
-  //   icon: IconCloudStorm,
-  // },
+];
+
+const bottomMenuItems: MenuItem[] = [
+  {
+    key: "user-settings",
+    icon: <IconUser size="1rem" stroke={1.5} />,
+    label: "个人设置",
+    disabled: true,
+  },
+  {
+    key: "logout",
+    icon: <IconLogout size="1rem" stroke={1.5} />,
+    label: "退出登录",
+  },
 ];
 
 export default function DashboardLayout() {
@@ -49,101 +79,78 @@ export default function DashboardLayout() {
 
   const { logout } = useAuthStore();
 
-  const isLinkActive = (linkPath: string) => {
+  const getSelectedKeys = () => {
     const currentPath = location.pathname;
 
-    // // 特殊处理首页路径
-    if (linkPath === "/dashboard") {
-      return currentPath === "/dashboard";
+    // 特殊处理首页路径
+    if (currentPath === "/dashboard") {
+      return ["/dashboard"];
     }
 
-    // 检查是否为精确匹配
-    if (currentPath === linkPath) {
-      return true;
+    // 查找最匹配的路径
+    const allKeys = [
+      "/dashboard",
+      "/dashboard/event",
+      "/dashboard/organization",
+      "/dashboard/feature",
+      "/dashboard/region",
+      "/developer/application",
+    ];
+
+    for (const key of allKeys) {
+      if (key !== "/dashboard" && currentPath.startsWith(key)) {
+        return [key];
+      }
     }
 
-    // 检查是否为子路径匹配，但排除更深层的子路径
-    if (currentPath.startsWith(`${linkPath}/`)) {
-      // 获取当前路径在 linkPath 之后的剩余部分
-      const remainingPath = currentPath.slice(linkPath.length + 1);
+    return [currentPath];
+  };
 
-      // 如果剩余路径不包含更多斜杠，说明是直接子路径
-      // 如果包含更多斜杠，说明是更深层的子路径，不应该激活父路径
-      return !remainingPath.includes("/");
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === "logout") {
+      logout();
+    } else if (e.key !== "user-settings") {
+      navigate(e.key);
     }
-
-    return false;
   };
 
   return (
-    <AppShell navbar={{ width: 300, breakpoint: "sm" }} padding="xl">
-      <AppShellNavbar withBorder={false} p="xl" className="bg-slate-100">
-        <AppShellSection grow>
-          <nav className="flex flex-col gap-2">
-            {linksData.map((link) => (
-              <NavLink
-                key={link.link}
-                active={isLinkActive(link.link)}
-                onClick={() => {
-                  if (link.links) {
-                    return;
-                  }
-                  navigate(link.link);
-                }}
-                label={link.label}
-                leftSection={<link.icon size="1.1rem" stroke={1.5} />}
-                className={clsx(
-                  "rounded",
-                  isLinkActive(link.link) && "shadow shadow-blue-500/20"
-                )}
-              >
-                {link.links?.map((subLink) => (
-                  <NavLink
-                    key={subLink.link}
-                    active={isLinkActive(subLink.link)}
-                    onClick={() => {
-                      navigate(subLink.link);
-                    }}
-                    label={subLink.label}
-                    leftSection={<subLink.icon size="1.1rem" stroke={1.5} />}
-                    className={clsx(
-                      "rounded",
-                      isLinkActive(subLink.link) && "shadow shadow-blue-500/20"
-                    )}
-                  />
-                ))}
-              </NavLink>
-            ))}
-          </nav>
-        </AppShellSection>
-
-        <AppShellSection my="xs">
-          <Divider />
-        </AppShellSection>
-
-        <AppShellSection>
-          <div>
-            <NavLink
-              label="个人设置"
-              leftSection={<IconUser size="1rem" stroke={1.5} />}
-              className="rounded"
-              disabled
-            />
-            <NavLink
-              onClick={logout}
-              label="退出登录"
-              leftSection={<IconLogout size="1rem" stroke={1.5} />}
-              className="rounded"
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        width={300}
+        className="bg-slate-100"
+        style={{ background: "#f1f5f9" }}
+      >
+        <div className="flex flex-col h-full p-6">
+          <div className="flex-1">
+            <Menu
+              mode="inline"
+              selectedKeys={getSelectedKeys()}
+              items={menuItems}
+              onClick={handleMenuClick}
+              style={{ background: "transparent", border: "none" }}
             />
           </div>
-        </AppShellSection>
-      </AppShellNavbar>
 
-      <AppShellMain className="bg-slate-100">
+          <Divider style={{ margin: "12px 0" }} />
+
+          <div>
+            <Menu
+              mode="inline"
+              selectedKeys={[]}
+              items={bottomMenuItems}
+              onClick={handleMenuClick}
+              style={{ background: "transparent", border: "none" }}
+            />
+          </div>
+        </div>
+      </Sider>
+
+      <Content className="bg-slate-100 p-6">
         <NuqsAdapter>
           <Outlet />
         </NuqsAdapter>
-      </AppShellMain>
-    </AppShell>
+      </Content>
+    </Layout>
   );
 }

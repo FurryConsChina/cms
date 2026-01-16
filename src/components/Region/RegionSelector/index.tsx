@@ -1,7 +1,6 @@
 import { getRegionList } from "@/api/dashboard/region";
 import type { Region } from "@/types/region";
-import { Input } from "@mantine/core";
-import { Select, Spin } from "antd";
+import { Select, Spin, Form } from "antd";
 import { debounce } from "es-toolkit";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
@@ -76,12 +75,12 @@ export default function RegionSelector({
   };
 
   return (
-    <Input.Wrapper
+    <Form.Item
       label={label}
-      description={description}
-      error={error}
-      withAsterisk={required}
-      mb="md"
+      help={description}
+      validateStatus={error || swrError ? "error" : undefined}
+      required={required}
+      style={{ marginBottom: 16 }}
     >
       <Select
         placeholder={placeholder}
@@ -99,6 +98,6 @@ export default function RegionSelector({
         status={error || swrError ? "error" : undefined}
         {...props}
       />
-    </Input.Wrapper>
+    </Form.Item>
   );
 }

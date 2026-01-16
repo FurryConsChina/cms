@@ -1,7 +1,6 @@
 import { getOrganizationList } from "@/api/dashboard/organization";
 import type { Organization } from "@/types/organization";
-import { Input } from "@mantine/core";
-import { Select, Spin } from "antd";
+import { Select, Spin, Form } from "antd";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { debounce } from "es-toolkit";
@@ -97,11 +96,11 @@ export default function OrganizationSelector({
   };
 
   return (
-    <Input.Wrapper
+    <Form.Item
       label={label}
-      description={description}
-      error={error}
-      withAsterisk={required}
+      help={description}
+      validateStatus={error || swrError ? "error" : undefined}
+      required={required}
     >
       <Select
         placeholder={placeholder}
@@ -120,6 +119,6 @@ export default function OrganizationSelector({
         status={error || swrError ? "error" : undefined}
         {...props}
       />
-    </Input.Wrapper>
+    </Form.Item>
   );
 }

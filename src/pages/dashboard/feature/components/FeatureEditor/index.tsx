@@ -1,8 +1,8 @@
 import { createFeature, updateFeature } from "@/api/dashboard/feature";
 import { FeatureCategory, FeatureCategoryLabel, type CrateFeatureType, type EditableFeatureType } from "@/types/feature";
-import { Button, Group, Modal, Select, Textarea, TextInput } from "@mantine/core";
+import { Select, Textarea, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
+import { Modal, Button, Flex, App } from "antd";
 
 export default function FeatureEditor({
   opened,
@@ -14,13 +14,11 @@ export default function FeatureEditor({
   editingFeature: EditableFeatureType | null;
 }) {
   return (
-    <>
-      <Modal opened={opened} onClose={onClose} title="标签编辑" centered>
-        {opened && (
-          <ModalComponent editingFeature={editingFeature} onClose={onClose} />
-        )}
-      </Modal>
-    </>
+    <Modal open={opened} onCancel={onClose} title="标签编辑" centered footer={null}>
+      {opened && (
+        <ModalComponent editingFeature={editingFeature} onClose={onClose} />
+      )}
+    </Modal>
   );
 }
 
@@ -31,6 +29,7 @@ function ModalComponent({
   editingFeature: EditableFeatureType | null;
   onClose: () => void;
 }) {
+  const { message } = App.useApp();
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
@@ -44,20 +43,12 @@ function ModalComponent({
     if (editingFeature?.id) {
       const res = await updateFeature({ ...value, id: editingFeature.id });
       console.log(res);
-      notifications.show({
-        title: "更新成功",
-        message: "更新标签成功",
-        color: "teal",
-      });
+      message.success("更新标签成功");
       return onClose();
     }
     const res = await createFeature(value);
     console.log(res);
-    notifications.show({
-      title: "创建成功",
-      message: "创建标签成功",
-      color: "teal",
-    });
+    message.success("创建标签成功");
     return onClose();
   };
 
@@ -90,9 +81,9 @@ function ModalComponent({
         {...form.getInputProps("description")}
       />
 
-      <Group justify="flex-end" mt="md">
-        <Button type="submit">提交</Button>
-      </Group>
+      <Flex justify="flex-end" style={{ marginTop: 16 }}>
+        <Button type="primary" htmlType="submit">提交</Button>
+      </Flex>
     </form>
   );
 }

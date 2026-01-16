@@ -1,8 +1,7 @@
 import { getFeatureList } from "@/api/dashboard/feature";
 import type { FeatureType } from "@/types/feature";
 import { FeatureCategoryLabel } from "@/types/feature";
-import { Input } from "@mantine/core";
-import { Select, Spin } from "antd";
+import { Select, Spin, Form } from "antd";
 import { debounce } from "es-toolkit";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
@@ -97,11 +96,11 @@ export default function EventFeatureSelector({
   };
 
   return (
-    <Input.Wrapper
+    <Form.Item
       label={label}
-      description={description}
-      error={error}
-      withAsterisk={required}
+      help={description}
+      validateStatus={error || swrError ? "error" : undefined}
+      required={required}
     >
       <Select
         placeholder={placeholder}
@@ -120,6 +119,6 @@ export default function EventFeatureSelector({
         status={error || swrError ? "error" : undefined}
         {...props}
       />
-    </Input.Wrapper>
+    </Form.Item>
   );
 }

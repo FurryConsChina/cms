@@ -1,12 +1,14 @@
 import { EventItem } from "@/types/event";
 import { Region } from "@/types/region";
-import { Autocomplete, Button, Container, Group, Stack, TextInput, Title } from "@mantine/core";
+import { Autocomplete, TextInput } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { IconSearch } from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
 import RegionSelector from "@/components/Region/RegionSelector";
 import LocationSearch from "@/components/Event/LocationSearch";
-import { useDisclosure } from "@mantine/hooks";
+import { Typography, Button, Flex, Row, Col, App } from "antd";
+import { useState } from "react";
+
+const { Title } = Typography;
 
 interface GeographicInfoProps {
   form: UseFormReturnType<any>;
@@ -21,18 +23,16 @@ export default function GeographicInfo({
   selectedRegion,
   setSelectedRegion,
 }: GeographicInfoProps) {
-  const [
-    isLocationSearchModalOpen,
-    { open: openLocationSearchModal, close: closeLocationSearchModal },
-  ] = useDisclosure(false);
+  const { message } = App.useApp();
+  const [isLocationSearchModalOpen, setIsLocationSearchModalOpen] = useState(false);
 
   return (
-    <Container my="md" fluid>
-      <Title order={5} mb="sm">
+    <div style={{ padding: "0 24px", margin: "16px 0" }}>
+      <Title level={5} style={{ marginBottom: 12 }}>
         地理信息
       </Title>
 
-      <Stack>
+      <Flex vertical gap={8}>
         <RegionSelector
           required
           label="展会区域"
@@ -50,31 +50,30 @@ export default function GeographicInfo({
           {...form.getInputProps("address")}
         />
 
-        <Group gap="xs" grow>
-          <TextInput
-            label="经度"
-            placeholder="一般是三位整数"
-            {...form.getInputProps("addressLon")}
-          />
-
-          <TextInput
-            label="纬度"
-            placeholder="一般是两位整数"
-            {...form.getInputProps("addressLat")}
-          />
-        </Group>
+        <Row gutter={8}>
+          <Col flex={1}>
+            <TextInput
+              label="经度"
+              placeholder="一般是三位整数"
+              {...form.getInputProps("addressLon")}
+            />
+          </Col>
+          <Col flex={1}>
+            <TextInput
+              label="纬度"
+              placeholder="一般是两位整数"
+              {...form.getInputProps("addressLat")}
+            />
+          </Col>
+        </Row>
 
         <Button
           onClick={() => {
             if (!selectedRegion) {
-              notifications.show({
-                title: "请先选择展会区域",
-                message: "请先选择展会区域",
-                color: "red",
-              });
+              message.warning("请先选择展会区域");
               return;
             }
-            openLocationSearchModal();
+            setIsLocationSearchModalOpen(true);
           }}
         >
           搜索地址
@@ -82,7 +81,7 @@ export default function GeographicInfo({
         <LocationSearch
           isModalOpen={isLocationSearchModalOpen}
           handleOk={(location) => {
-            closeLocationSearchModal();
+            setIsLocationSearchModalOpen(false);
             if (location) {
               form.setFieldValue(
                 "addressLat",
@@ -95,12 +94,12 @@ export default function GeographicInfo({
             }
           }}
           handleCancel={() => {
-            closeLocationSearchModal();
+            setIsLocationSearchModalOpen(false);
           }}
           region={selectedRegion!}
           keyword={form.values.address}
         />
-      </Stack>
-    </Container>
+      </Flex>
+    </div>
   );
 } 

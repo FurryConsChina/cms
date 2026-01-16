@@ -1,15 +1,17 @@
-import { Button, Group, Title } from '@mantine/core';
+import { Button, Flex, Typography, App } from 'antd';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { deleteEvent, getEventList } from '@/api/dashboard/event';
 import DefaultContainer from '@/components/Container';
 import EventList from '@/pages/dashboard/event/components/EventList';
 import { IconCirclePlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { notifications } from '@mantine/notifications';
 import { useQueryState, parseAsInteger } from 'nuqs';
+
+const { Title } = Typography;
 
 export default function EventPage() {
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const [search, setSearch] = useQueryState('search');
   const [orgSearch, setOrgSearch] = useQueryState('orgSearch');
@@ -45,10 +47,7 @@ export default function EventPage() {
   const { mutate: onDeleteEvent } = useMutation({
     mutationFn: deleteEvent,
     onSuccess: () => {
-      notifications.show({
-        title: '删除成功',
-        message: '删除展商成功，如果是误操作请马上联系管理员。',
-      });
+      message.success('删除展商成功，如果是误操作请马上联系管理员。');
       refetch();
     },
   });
@@ -56,18 +55,19 @@ export default function EventPage() {
   return (
     <>
       <DefaultContainer className="sticky top-0 z-10">
-        <Group justify="space-between">
-          <Title order={2}>展会列表</Title>
+        <Flex justify="space-between" align="center">
+          <Title level={2} style={{ margin: 0 }}>展会列表</Title>
 
           <Button
-            leftSection={<IconCirclePlus size={16} stroke={1.5} />}
+            type="primary"
+            icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
               navigate('/dashboard/event/create');
             }}
           >
             添加展会
           </Button>
-        </Group>
+        </Flex>
       </DefaultContainer>
 
       <div className="shadow mt-4 p-4 rounded-xl bg-white">

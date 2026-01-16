@@ -7,7 +7,7 @@ import {
   type EventStatusKeyType,
   EventType,
 } from "@/types/event";
-import { Container, Select, Stack, TagsInput, TextInput, Textarea, Title } from "@mantine/core";
+import { Select, TagsInput, Textarea } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import {
   EventLocationTypeLabel,
@@ -16,6 +16,9 @@ import {
   EventTypeLabel,
 } from "@/consts/event";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
+import { Typography, Flex } from "antd";
+
+const { Title } = Typography;
 
 interface EventAdditionalInfoProps {
   form: UseFormReturnType<any>;
@@ -24,9 +27,9 @@ interface EventAdditionalInfoProps {
 
 export default function EventAdditionalInfo({ form, event }: EventAdditionalInfoProps) {
   return (
-    <Container my="md" fluid>
-      <Title order={5}>展会附加信息</Title>
-      <Stack>
+    <div style={{ padding: "0 24px", margin: "16px 0" }}>
+      <Title level={5}>展会附加信息</Title>
+      <Flex vertical gap={8}>
         <Select
           label="展会状态"
           withAsterisk
@@ -96,7 +99,7 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
           maxRows={20}
           {...form.getInputProps("detail")}
         />
-      </Stack>
-    </Container>
+      </Flex>
+    </div>
   );
 } 

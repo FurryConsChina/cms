@@ -1,20 +1,10 @@
 import useAuthStore from "@/stores/auth";
 import { useForm } from "@mantine/form";
+import { TextInput, PasswordInput } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
 
 import { login as userLogin } from "@/api/auth";
-import {
-  Anchor,
-  Button,
-  Center,
-  Container,
-  Flex,
-  Group,
-  Paper,
-  PasswordInput,
-  TextInput,
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications";
+import { Button, Card, Flex, App, Typography } from "antd";
 import { IconHome } from "@tabler/icons-react";
 import { Segmented } from "antd";
 import { zodResolver } from "mantine-form-zod-resolver";
@@ -22,9 +12,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import z from "zod";
 
+const { Link } = Typography;
+
 export default function Auth() {
   const { login, refreshToken } = useAuthStore();
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const [currentSegment, setCurrentSegment] = useState<
     "login" | "register" | "reset"
@@ -51,41 +44,29 @@ export default function Auth() {
       login(data.user);
       refreshToken(data.token);
       navigate("/dashboard");
-      notifications.show({
-        message: "登录成功",
-      });
+      message.success("登录成功");
     },
   });
 
   return (
-    <Container
-      fluid
+    <div
       className="h-screen"
       style={{
         background: "radial-gradient(#e0f2fe,transparent)",
-        // backgroundImage: `url("http://s-sh-11810-static.oss.dogecdn.com/jesse.jpg")`,
-        // backgroundSize: "cover",
-        // backgroundPosition: "center",
-        // backgroundRepeat: "no-repeat",
-        // backgroundAttachment: "fixed",
         backdropFilter: "blur(5px)",
       }}
     >
       <Flex
-        justify={"center"}
-        align={"flex-end"}
+        justify="center"
+        align="flex-end"
         style={{ height: "100%" }}
-        direction="column"
+        vertical
       >
-        <Paper
-          withBorder
-          shadow="sm"
-          p={20}
-          radius="md"
-          my="20"
+        <Card
           className="w-full md:w-96 h-full"
+          style={{ margin: 20, borderRadius: 8 }}
         >
-          <Flex direction="column" justify="space-between" h="100%">
+          <Flex vertical justify="space-between" style={{ height: "100%" }}>
             <div>
               <Segmented
                 value={currentSegment}
@@ -125,27 +106,29 @@ export default function Auth() {
                   key={form.key("password")}
                   {...form.getInputProps("password")}
                 />
-                <Group justify="space-between" mt="sm">
-                  <Anchor component="button" size="sm">
+                <Flex justify="space-between" style={{ marginTop: 8 }}>
+                  <Link style={{ fontSize: 14 }}>
                     忘记密码了吗？
-                  </Anchor>
-                  {/* <Anchor component="button" size="sm">
-                    使用一次性登录代码
-                  </Anchor> */}
-                </Group>
-                <Button type="submit" fullWidth mt="xl" radius="md">
+                  </Link>
+                </Flex>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  style={{ marginTop: 24, borderRadius: 8 }}
+                >
                   登录
                 </Button>
               </form>
             </div>
-            <Center>
-              <Anchor href="https://docs.furrycons.cn" target="_blank">
+            <Flex justify="center">
+              <Link href="https://docs.furrycons.cn" target="_blank">
                 <IconHome color="gray" size="18" />
-              </Anchor>
-            </Center>
+              </Link>
+            </Flex>
           </Flex>
-        </Paper>
+        </Card>
       </Flex>
-    </Container>
+    </div>
   );
 }

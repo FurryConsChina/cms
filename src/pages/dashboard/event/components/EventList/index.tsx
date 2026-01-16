@@ -1,6 +1,6 @@
-import { ActionIcon, Badge, Button, Menu, Tooltip, rem } from '@mantine/core';
-import { notifications } from '@mantine/notifications';
-import { Input, Space, Table, type TableColumnType, Tag } from 'antd';
+import { Button, Dropdown, Tooltip, Tag, App, Space } from 'antd';
+import { Input, Table, type TableColumnType } from 'antd';
+import type { MenuProps } from 'antd';
 import dayjs from 'dayjs';
 
 import { cleanPageCache } from '@/api/dashboard/cache';
@@ -11,7 +11,6 @@ import {
 } from '@/consts/event';
 import {
   IconEdit,
-  IconInfoCircle,
   IconLink,
   IconMenu,
   IconRefresh,
@@ -49,13 +48,11 @@ function EventList({
   isPending: boolean;
   onDeleteEvent: (id: string) => void;
 }) {
+  const { message } = App.useApp();
   const { mutate: refreshPage } = useMutation({
     mutationFn: cleanPageCache,
     onSuccess: () => {
-      notifications.show({
-        title: '刷新成功',
-        message: '刷新页面缓存成功',
-      });
+      message.success('刷新页面缓存成功');
     },
   });
 
@@ -122,9 +119,9 @@ function EventList({
               onClick={() =>
                 handleSearch(selectedKeys as string[], confirm, dataIndex)
               }
-              leftSection={<IconSearch size={14} />}
-              size="xs"
-              variant="light"
+              icon={<IconSearch size={14} />}
+              size="small"
+              type="primary"
               style={{ width: 90 }}
             >
               搜索
@@ -133,16 +130,13 @@ function EventList({
               onClick={() =>
                 clearFilters && handleReset(clearFilters, confirm, dataIndex)
               }
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
             >
               重置
             </Button>
             <Button
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
+              type="text"
               onClick={() => {
                 close();
               }}
@@ -193,10 +187,10 @@ function EventList({
       dataIndex: 'status',
       key: 'status',
       render: (status) => (
-        <Tooltip label={EventStatusLabel[status]}>
-          <Badge color={EventStatusColor[status]}>
+        <Tooltip title={EventStatusLabel[status]}>
+          <Tag color={EventStatusColor[status]}>
             {EventStatusLabel[status]}
-          </Badge>
+          </Tag>
         </Tooltip>
       ),
     },
@@ -221,73 +215,58 @@ function EventList({
       title: '操作',
       key: 'action',
       fixed: 'right',
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            variant="light"
-            color="green"
-            onClick={() => {
-              window.open(`/dashboard/event/${record.id}/edit`);
-            }}
-            leftSection={<IconEdit size={14} />}
-          >
-            编辑
-          </Button>
+      render: (_, record) => {
+        const menuItems: MenuProps['items'] = [
+          {
+            key: 'refresh',
+            icon: <IconRefresh style={{ width: 14, height: 14 }} />,
+            label: '刷新',
+            onClick: () => {
+              refreshPage(`/${record.organization.slug}/${record.slug}`);
+            },
+          },
+          {
+            key: 'view',
+            icon: <IconLink style={{ width: 14, height: 14 }} />,
+            label: '在网站上查看',
+            onClick: () => {
+              window.open(
+                `https://www.furrycons.cn/${record.organization.slug}/${record.slug}`,
+                '_blank'
+              );
+            },
+          },
+          { type: 'divider' },
+          {
+            key: 'delete',
+            icon: <IconTrash style={{ width: 14, height: 14 }} />,
+            label: '删除',
+            danger: true,
+            onClick: () => {
+              onDeleteEvent(record.id);
+            },
+          },
+        ];
 
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <ActionIcon variant="light" aria-label="Settings">
-                <IconMenu
-                  style={{ width: '70%', height: '70%' }}
-                  stroke={1.5}
-                />
-              </ActionIcon>
-            </Menu.Target>
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              ghost
+              onClick={() => {
+                window.open(`/dashboard/event/${record.id}/edit`);
+              }}
+              icon={<IconEdit size={14} />}
+            >
+              编辑
+            </Button>
 
-            <Menu.Dropdown>
-              <Menu.Label>菜单</Menu.Label>
-              <Menu.Item
-                leftSection={
-                  <IconRefresh style={{ width: rem(14), height: rem(14) }} />
-                }
-                onClick={() => {
-                  refreshPage(`/${record.organization.slug}/${record.slug}`);
-                }}
-              >
-                刷新
-              </Menu.Item>
-              <Menu.Item
-                leftSection={
-                  <IconLink style={{ width: rem(14), height: rem(14) }} />
-                }
-                onClick={() => {
-                  window.open(
-                    `https://www.furrycons.cn/${record.organization.slug}/${record.slug}`,
-                    '_blank'
-                  );
-                }}
-              >
-                在网站上查看
-              </Menu.Item>
-
-              <Menu.Divider />
-
-              <Menu.Label>危险</Menu.Label>
-              <Menu.Item
-                color="red"
-                onClick={() => {
-                  onDeleteEvent(record.id);
-                }}
-                leftSection={
-                  <IconTrash style={{ width: rem(14), height: rem(14) }} />
-                }
-              >
-                删除
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Space>
-      ),
+            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+              <Button icon={<IconMenu size={14} stroke={1.5} />} />
+            </Dropdown>
+          </Space>
+        );
+      },
     },
   ];
 

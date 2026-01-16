@@ -1,20 +1,14 @@
 import { createRegion, updateRegion, getRegion } from "@/api/dashboard/region";
 import type { EditableRegion, Region } from "@/types/region";
 import {
-  Button,
-  Group,
   NumberInput,
   Select,
   Textarea,
   TextInput,
-  Title,
-  Paper,
   Switch,
-  Input,
 } from "@mantine/core";
-import { Select as AntdSelect } from "antd";
+import { Select as AntdSelect, Typography, Button, Flex, Card, Form, App } from "antd";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import DefaultContainer from "@/components/Container";
@@ -22,8 +16,11 @@ import { IconArrowLeft } from "@tabler/icons-react";
 import React from "react";
 import RegionSelector from "@/components/Region/RegionSelector";
 
+const { Title } = Typography;
+
 export default function RegionEditPage() {
   const navigate = useNavigate();
+  const { message } = App.useApp();
   const { id } = useParams<{ id: string }>();
   const isEditing = !!id;
 
@@ -108,26 +105,14 @@ export default function RegionEditPage() {
 
       if (isEditing && id) {
         await updateRegion(id, submitData);
-        notifications.show({
-          title: "更新成功",
-          message: "更新区域成功",
-          color: "teal",
-        });
+        message.success("更新区域成功");
       } else {
         await createRegion(submitData);
-        notifications.show({
-          title: "创建成功",
-          message: "创建区域成功",
-          color: "teal",
-        });
+        message.success("创建区域成功");
       }
       navigate("/dashboard/region");
     } catch (error) {
-      notifications.show({
-        title: "操作失败",
-        message: "操作失败，请重试",
-        color: "red",
-      });
+      message.error("操作失败，请重试");
     }
   };
 
@@ -137,21 +122,21 @@ export default function RegionEditPage() {
 
   return (
     <DefaultContainer>
-      <Group mb="md">
+      <Flex style={{ marginBottom: 16 }}>
         <Button
-          variant="subtle"
-          leftSection={<IconArrowLeft size={16} />}
+          type="text"
+          icon={<IconArrowLeft size={16} />}
           onClick={() => navigate("/dashboard/region")}
         >
           返回
         </Button>
-      </Group>
+      </Flex>
 
-      <Title order={2} mb="lg">
+      <Title level={2} style={{ marginBottom: 24 }}>
         {isEditing ? "编辑区域" : "添加区域"}
       </Title>
 
-      <Paper p="xl" withBorder>
+      <Card>
         <form onSubmit={form.onSubmit((values) => handleSubmit(values))}>
           <TextInput
             withAsterisk
@@ -185,12 +170,11 @@ export default function RegionEditPage() {
             mb="md"
           />
 
-          <Input.Wrapper
+          <Form.Item
             label="区域级别"
-            error={form.getInputProps("level").error}
-            withAsterisk
-            key={form.key("level")}
-            mb="md"
+            validateStatus={form.getInputProps("level").error ? "error" : undefined}
+            required
+            style={{ marginBottom: 16 }}
           >
             <AntdSelect
               style={{ width: "100%" }}
@@ -203,7 +187,7 @@ export default function RegionEditPage() {
               ]}
               {...form.getInputProps("level")}
             />
-          </Input.Wrapper>
+          </Form.Item>
 
           <RegionSelector
             required
@@ -328,17 +312,17 @@ export default function RegionEditPage() {
             mb="xl"
           />
 
-          <Group justify="flex-end">
+          <Flex justify="flex-end" gap={8}>
             <Button
-              variant="subtle"
+              type="text"
               onClick={() => navigate("/dashboard/region")}
             >
               取消
             </Button>
-            <Button type="submit">{isEditing ? "更新" : "创建"}</Button>
-          </Group>
+            <Button type="primary" htmlType="submit">{isEditing ? "更新" : "创建"}</Button>
+          </Flex>
         </form>
-      </Paper>
+      </Card>
     </DefaultContainer>
   );
 }

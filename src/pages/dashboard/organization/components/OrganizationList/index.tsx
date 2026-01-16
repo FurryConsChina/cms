@@ -1,5 +1,6 @@
-import { ActionIcon, Button, Menu, rem, Tooltip } from "@mantine/core";
-import { Space, Tag, Input, type TableColumnType } from "antd";
+import { Button, Dropdown, Tooltip, Tag, App, Space } from "antd";
+import { Input, type TableColumnType } from "antd";
+import type { MenuProps } from "antd";
 import Table, { type ColumnsType } from "antd/es/table";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import dayjs from "dayjs";
@@ -11,7 +12,6 @@ import {
   type Organization,
   OrganizationTypeLabel,
 } from "@/types/organization";
-import { notifications } from "@mantine/notifications";
 import {
   IconEdit,
   IconInfoCircle,
@@ -48,14 +48,12 @@ export default function OrganizationList({
   >;
 }) {
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const { mutate: refreshPage } = useMutation({
     mutationFn: cleanPageCache,
     onSuccess: () => {
-      notifications.show({
-        title: "刷新成功",
-        message: "刷新页面缓存成功",
-      });
+      message.success("刷新页面缓存成功");
     },
   });
 
@@ -118,9 +116,9 @@ export default function OrganizationList({
               onClick={() =>
                 handleSearch(selectedKeys as string[], confirm, dataIndex)
               }
-              leftSection={<IconSearch size={14} />}
-              size="xs"
-              variant="light"
+              icon={<IconSearch size={14} />}
+              size="small"
+              type="primary"
               style={{ width: 90 }}
             >
               搜索
@@ -129,16 +127,13 @@ export default function OrganizationList({
               onClick={() =>
                 clearFilters && handleReset(clearFilters, confirm, dataIndex)
               }
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
             >
               重置
             </Button>
             <Button
-              size="xs"
-              variant="white"
-              color="gray"
+              size="small"
+              type="text"
               onClick={() => {
                 close();
               }}
@@ -200,96 +195,75 @@ export default function OrganizationList({
       key: "action",
       fixed: "right",
       width: 250,
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            variant="light"
-            color="green"
-            aria-label="view"
-            onClick={() => {
-              window.open(`/dashboard/organization/${record.id}/edit`);
-            }}
-            leftSection={<IconEdit size={14} />}
-          >
-            编辑
-          </Button>
+      render: (_, record) => {
+        const menuItems: MenuProps['items'] = [
+          {
+            key: 'refresh',
+            icon: <IconRefresh style={{ width: 14, height: 14 }} />,
+            label: '刷新',
+            onClick: () => {
+              refreshPage(`/${record.slug}`);
+            },
+          },
+          {
+            key: 'view-international',
+            icon: <IconLink style={{ width: 14, height: 14 }} />,
+            label: (
+              <Tooltip title="国际站没有缓存，修改后会立刻显示">
+                <span>去国际站查看</span>
+              </Tooltip>
+            ),
+            onClick: () => {
+              window.open(
+                `https://www.furryeventchina.com/${record.slug}`,
+                "_blank"
+              );
+            },
+          },
+          {
+            key: 'view-domestic',
+            icon: <IconLink style={{ width: 14, height: 14 }} />,
+            label: (
+              <Tooltip title="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
+                <span>去国内站查看</span>
+              </Tooltip>
+            ),
+            onClick: () => {
+              window.open(
+                `https://www.furrycons.cn/${record.slug}`,
+                "_blank"
+              );
+            },
+          },
+          { type: 'divider' },
+          {
+            key: 'delete',
+            icon: <IconTrash style={{ width: 14, height: 14 }} />,
+            label: '删除',
+            danger: true,
+            disabled: true,
+          },
+        ];
 
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <ActionIcon variant="light" aria-label="Settings">
-                <IconMenu
-                  style={{ width: "70%", height: "70%" }}
-                  stroke={1.5}
-                />
-              </ActionIcon>
-            </Menu.Target>
+        return (
+          <Space size="middle">
+            <Button
+              type="primary"
+              ghost
+              onClick={() => {
+                window.open(`/dashboard/organization/${record.id}/edit`);
+              }}
+              icon={<IconEdit size={14} />}
+            >
+              编辑
+            </Button>
 
-            <Menu.Dropdown>
-              <Menu.Label>菜单</Menu.Label>
-              <Menu.Item
-                leftSection={
-                  <IconRefresh style={{ width: rem(14), height: rem(14) }} />
-                }
-                onClick={() => {
-                  refreshPage(`/${record.slug}`);
-                }}
-              >
-                刷新
-              </Menu.Item>
-
-              <Menu.Item
-                leftSection={
-                  <IconLink style={{ width: rem(14), height: rem(14) }} />
-                }
-                rightSection={
-                  <Tooltip label="国际站没有缓存，修改后会立刻显示">
-                    <IconInfoCircle size={14} />
-                  </Tooltip>
-                }
-                onClick={() => {
-                  window.open(
-                    `https://www.furryeventchina.com/${record.slug}`,
-                    "_blank"
-                  );
-                }}
-              >
-                去国际站查看
-              </Menu.Item>
-              <Menu.Item
-                leftSection={
-                  <IconLink style={{ width: rem(14), height: rem(14) }} />
-                }
-                rightSection={
-                  <Tooltip label="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
-                    <IconInfoCircle size={14} />
-                  </Tooltip>
-                }
-                onClick={() => {
-                  window.open(
-                    `https://www.furrycons.cn/${record.slug}`,
-                    "_blank"
-                  );
-                }}
-              >
-                去国内站查看
-              </Menu.Item>
-
-              <Menu.Divider />
-
-              <Menu.Label>危险</Menu.Label>
-              <Menu.Item
-                disabled
-                color="red"
-                leftSection={
-                  <IconTrash style={{ width: rem(14), height: rem(14) }} />
-                }
-              >
-                删除
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Space>
-      ),
+            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+              <Button icon={<IconMenu size={14} stroke={1.5} />} />
+            </Dropdown>
+          </Space>
+        );
+      },
     },
   ];
 

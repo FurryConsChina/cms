@@ -5,17 +5,9 @@ import {
   EventItem,
   EditEventValidationSchema,
 } from "@/types/event";
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Group,
-  Title,
-  Center,
-} from "@mantine/core";
+import { Button, Divider, Typography, Flex, App } from "antd";
+import { Spin } from "antd";
 import { useForm } from "@mantine/form";
-import { notifications } from "@mantine/notifications";
 import { Organization } from "@/types/organization";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -27,7 +19,6 @@ import {
 import { zodResolver } from "mantine-form-zod-resolver";
 
 import "dayjs/locale/zh-cn";
-import { Spin } from "antd";
 import DefaultContainer from "@/components/Container";
 import LoadError from "@/components/Error";
 import { useState } from "react";
@@ -41,6 +32,8 @@ import EventAdditionalInfo from "./EventAdditionalInfo";
 import EventSources from "./EventSources";
 import TicketChannels from "./TicketChannels";
 import EventMedia from "./EventMedia";
+
+const { Title } = Typography;
 
 export default function EventEditPage() {
   const { eventId } = useParams();
@@ -63,14 +56,14 @@ export default function EventEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-10">
-        <Title order={2}>{eventId ? "编辑展会" : "新建展会"}</Title>
+        <Title level={2} style={{ margin: 0 }}>{eventId ? "编辑展会" : "新建展会"}</Title>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
         {isLoading ? (
-          <Center>
+          <Flex justify="center" align="center">
             <Spin />
-          </Center>
+          </Flex>
         ) : (
           <EventEditorContent event={event} />
         )}
@@ -81,6 +74,7 @@ export default function EventEditPage() {
 
 function EventEditorContent({ event }: { event?: EventItem }) {
   const navigate = useNavigate();
+  const { message } = App.useApp();
 
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(
     event?.region || null
@@ -156,41 +150,25 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       if (event?.id) {
         const res = await updateEvent(event.id, transFormData);
         if (res) {
-          notifications.show({
-            title: "更新成功",
-            message: "更新展会数据成功",
-            color: "teal",
-          });
+          message.success("更新展会数据成功");
         }
       } else {
         const res = await createEvent(transFormData);
         if (res) {
-          notifications.show({
-            title: "创建成功",
-            message: "创建展会数据成功",
-            color: "teal",
-          });
+          message.success("创建展会数据成功");
           navigate(`/dashboard/event/${res.id}/edit`);
         }
       }
     } catch (error) {
-      notifications.show({
-        title: "有错误发生",
-        message: JSON.stringify(error),
-        color: "red",
-      });
+      message.error(`有错误发生: ${JSON.stringify(error)}`);
     }
   };
 
   return (
-    <Box mx="auto">
+    <div style={{ margin: "0 auto" }}>
       <form
         onSubmit={form.onSubmit(handleSubmit, (errors) => {
-          notifications.show({
-            title: "有错误发生",
-            message: JSON.stringify(errors),
-            color: "red",
-          });
+          message.error(`有错误发生: ${JSON.stringify(errors)}`);
         })}
       >
         <BasicInfo
@@ -202,7 +180,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           setSelectedOrganizations={setSelectedOrganizations}
         />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <GeographicInfo
           form={form}
@@ -211,23 +189,23 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           setSelectedRegion={setSelectedRegion}
         />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <UriBuilder form={form} selectedRegion={selectedRegion} />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <EventAdditionalInfo form={form} event={event} />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <EventSources form={form} />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <TicketChannels form={form} />
 
-        <Divider my="sm" variant="dotted" />
+        <Divider dashed style={{ margin: "12px 0" }} />
 
         <EventMedia
           form={form}
@@ -235,12 +213,12 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           selectedOrganization={selectedOrganization}
         />
 
-        <Container fluid>
-          <Group justify="flex-end" mt="md">
-            <Button type="submit">提交</Button>
-          </Group>
-        </Container>
+        <div style={{ padding: "0 24px" }}>
+          <Flex justify="flex-end" style={{ marginTop: 16 }}>
+            <Button type="primary" htmlType="submit">提交</Button>
+          </Flex>
+        </div>
       </form>
-    </Box>
+    </div>
   );
 }
