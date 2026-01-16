@@ -4,17 +4,7 @@ import { UseFormReturn, Controller } from "react-hook-form";
 import { IconSearch } from "@tabler/icons-react";
 import RegionSelector from "@/components/Region/RegionSelector";
 import LocationSearch from "@/components/Event/LocationSearch";
-import {
-  Typography,
-  Button,
-  Flex,
-  Row,
-  Col,
-  App,
-  Form,
-  Input,
-  AutoComplete,
-} from "antd";
+import { Typography, Button, Flex, Row, Col, App, Form, Input, AutoComplete } from "antd";
 import { useState } from "react";
 import { InferZodType } from "@/types/common";
 
@@ -27,24 +17,15 @@ interface GeographicInfoProps {
   setSelectedRegion: (region: Region | null) => void;
 }
 
-export default function GeographicInfo({
-  form,
-  event,
-  selectedRegion,
-  setSelectedRegion,
-}: GeographicInfoProps) {
+export default function GeographicInfo({ form, event, selectedRegion, setSelectedRegion }: GeographicInfoProps) {
   const { message } = App.useApp();
-  const [isLocationSearchModalOpen, setIsLocationSearchModalOpen] =
-    useState(false);
+  const [isLocationSearchModalOpen, setIsLocationSearchModalOpen] = useState(false);
 
-  
-    const address = form.watch("address");
+  const address = form.watch("address");
 
   return (
     <div>
-      <h5 className="text-lg font-bold">
-        地理信息
-      </h5>
+      <h5 className="text-lg font-bold">地理信息</h5>
 
       <Flex vertical gap={8}>
         <Controller
@@ -90,20 +71,14 @@ export default function GeographicInfo({
           <Col flex={1}>
             <Form.Item
               label="经度"
-              validateStatus={
-                form.formState.errors.addressLon ? "error" : undefined
-              }
+              validateStatus={form.formState.errors.addressLon ? "error" : undefined}
               help={form.formState.errors.addressLon?.message}
             >
               <Controller
                 name="addressLon"
                 control={form.control}
                 render={({ field }) => (
-                  <Input
-                    placeholder="一般是三位整数"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                  />
+                  <Input placeholder="一般是三位整数" value={field.value || ""} onChange={field.onChange} />
                 )}
               />
             </Form.Item>
@@ -111,20 +86,14 @@ export default function GeographicInfo({
           <Col flex={1}>
             <Form.Item
               label="纬度"
-              validateStatus={
-                form.formState.errors.addressLat ? "error" : undefined
-              }
+              validateStatus={form.formState.errors.addressLat ? "error" : undefined}
               help={form.formState.errors.addressLat?.message}
             >
               <Controller
                 name="addressLat"
                 control={form.control}
                 render={({ field }) => (
-                  <Input
-                    placeholder="一般是两位整数"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                  />
+                  <Input placeholder="一般是两位整数" value={field.value || ""} onChange={field.onChange} />
                 )}
               />
             </Form.Item>

@@ -1,16 +1,20 @@
 import { useNavigate, useParams } from "react-router-dom";
 
-import { type EditableEvent, EventItem, EditEventSchema, EventStatus, EventType, EventScale, EventLocationType } from "@/types/event";
+import {
+  type EditableEvent,
+  EventItem,
+  EditEventSchema,
+  EventStatus,
+  EventType,
+  EventScale,
+  EventLocationType,
+} from "@/types/event";
 import { Button, Divider, Typography, Flex, App, Form } from "antd";
 import { Spin } from "antd";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Organization } from "@/types/organization";
-import {
-  createEvent,
-  getEventDetail,
-  updateEvent,
-} from "@/api/dashboard/event";
+import { createEvent, getEventDetail, updateEvent } from "@/api/dashboard/event";
 
 import "dayjs/locale/zh-cn";
 import DefaultContainer from "@/components/Container";
@@ -31,19 +35,16 @@ import { InferZodType } from "@/types/common";
 
 export default function EventEditPage() {
   const { eventId } = useParams();
+  const isEditing = !!eventId;
 
   const {
     data: event,
     isLoading,
     error: isError,
-  } = useSWR(
-    [`event-detail`, eventId],
-    eventId ? () => getEventDetail({ id: eventId! }) : null,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  } = useSWR([`event-detail`, eventId], eventId ? () => getEventDetail({ id: eventId! }) : null, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   if (isError) {
     return <LoadError />;
@@ -52,18 +53,20 @@ export default function EventEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
-        <h2 className="text-2xl font-bold">
-          {eventId ? "编辑展会" : "新建展会"}
-        </h2>
+        <h2 className="text-2xl font-bold">{eventId ? "编辑展会" : "新建展会"}</h2>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
-        {isLoading ? (
-          <Flex justify="center" align="center">
-            <Spin />
-          </Flex>
+        {isEditing ? (
+          isLoading ? (
+            <Flex justify="center" align="center">
+              <Spin />
+            </Flex>
+          ) : (
+            <EventEditorContent event={event} />
+          )
         ) : (
-          <EventEditorContent event={event} />
+          <EventEditorContent />
         )}
       </DefaultContainer>
     </div>
@@ -74,26 +77,20 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const navigate = useNavigate();
   const { message } = App.useApp();
 
-  const [selectedRegion, setSelectedRegion] = useState<Region | null>(
-    event?.region || null
+  const [selectedRegion, setSelectedRegion] = useState<Region | null>(event?.region || null);
+
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(event?.organization || null);
+
+  const [selectedOrganizations, setSelectedOrganizations] = useState<Organization[] | null>(
+    event?.organizations || null,
   );
-
-  const [selectedOrganization, setSelectedOrganization] =
-    useState<Organization | null>(event?.organization || null);
-
-  const [selectedOrganizations, setSelectedOrganizations] = useState<
-    Organization[] | null
-  >(event?.organizations || null);
+  console.log("event", event);
 
   const form = useForm({
     defaultValues: {
       name: event?.name || "",
-      startAt: event?.startAt
-        ? event?.startAt
-        : new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
-      endAt: event?.endAt
-        ? event?.endAt
-        : new Date(new Date().setHours(18, 0, 0, 0)).toISOString(),
+      startAt: event?.startAt ? event?.startAt : new Date(new Date().setHours(10, 0, 0, 0)).toISOString(),
+      endAt: event?.endAt ? event?.endAt : new Date(new Date().setHours(18, 0, 0, 0)).toISOString(),
       address: event?.address || "",
       regionId: event?.regionId || "",
       features: event?.features || { self: [], common: [] },
@@ -120,8 +117,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     resolver: zodResolver(EditEventSchema),
   });
 
-  const { handleSubmit } = form;
-
+  const { handleSubmit, getValues } = form;
+  console.log("getValues", getValues());
 
   const onSubmit = async (formData: InferZodType<typeof EditEventSchema>) => {
     try {

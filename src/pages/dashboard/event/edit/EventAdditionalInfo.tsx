@@ -8,12 +8,7 @@ import {
   EventType,
 } from "@/types/event";
 import { UseFormReturn, Controller } from "react-hook-form";
-import {
-  EventLocationTypeLabel,
-  EventScaleLabel,
-  EventStatusLabel,
-  EventTypeLabel,
-} from "@/consts/event";
+import { EventLocationTypeLabel, EventScaleLabel, EventStatusLabel, EventTypeLabel } from "@/consts/event";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
 import { Typography, Flex, Form, Select, Input } from "antd";
 import { InferZodType } from "@/types/common";
@@ -26,10 +21,7 @@ interface EventAdditionalInfoProps {
   event?: EventItem;
 }
 
-export default function EventAdditionalInfo({
-  form,
-  event,
-}: EventAdditionalInfoProps) {
+export default function EventAdditionalInfo({ form, event }: EventAdditionalInfoProps) {
   return (
     <div>
       <h5 className="text-lg font-bold">展会附加信息</h5>
@@ -103,9 +95,7 @@ export default function EventAdditionalInfo({
       <Form.Item
         label="展会场地"
         required
-        validateStatus={
-          form.formState.errors.locationType ? "error" : undefined
-        }
+        validateStatus={form.formState.errors.locationType ? "error" : undefined}
         help={form.formState.errors.locationType?.message}
       >
         <Controller
@@ -115,10 +105,7 @@ export default function EventAdditionalInfo({
             <Select
               placeholder="选一个"
               options={Object.keys(EventLocationType).map((key) => ({
-                label:
-                  EventLocationTypeLabel[
-                    EventLocationType[key as keyof typeof EventLocationType]
-                  ],
+                label: EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
                 value: EventLocationType[key as keyof typeof EventLocationType],
               }))}
               {...field}
@@ -129,17 +116,13 @@ export default function EventAdditionalInfo({
 
       <Form.Item
         label="展会专属标签"
-        validateStatus={
-          form.formState.errors.features?.self ? "error" : undefined
-        }
+        validateStatus={form.formState.errors.features?.self ? "error" : undefined}
         help={form.formState.errors.features?.self?.message}
       >
         <Controller
           name="features.self"
           control={form.control}
-          render={({ field }) => (
-            <Select mode="tags" placeholder="请输入展会专属的标签" {...field} />
-          )}
+          render={({ field }) => <Select mode="tags" placeholder="请输入展会专属的标签" {...field} />}
         />
       </Form.Item>
 
@@ -147,11 +130,7 @@ export default function EventAdditionalInfo({
         name="featureIds"
         control={form.control}
         render={({ field }) => (
-          <EventFeatureSelector
-            label="展会公共标签"
-            placeholder="请选择展会共有的标签"
-            {...field}
-          />
+          <EventFeatureSelector label="展会公共标签" placeholder="请选择展会共有的标签" {...field} />
         )}
       />
 
@@ -160,11 +139,7 @@ export default function EventAdditionalInfo({
         validateStatus={form.formState.errors.detail ? "error" : undefined}
         help={form.formState.errors.detail?.message}
       >
-        <TextArea
-          autoSize={{ minRows: 5, maxRows: 20 }}
-          placeholder="请输入展会描述"
-          {...form.register("detail")}
-        />
+        <TextArea autoSize={{ minRows: 5, maxRows: 20 }} placeholder="请输入展会描述" {...form.register("detail")} />
       </Form.Item>
     </div>
   );

@@ -42,44 +42,47 @@ export default function EventFeatureSelector({
     searchValue
       ? [`feature-list-search`, { pageSize: 50, current: 1, name: searchValue }]
       : [`feature-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getFeatureList(params)
+    ([_, params]: [string, any]) => getFeatureList(params),
   );
 
   const features = [...(selectedOptions || []), ...(data?.records || [])];
 
   // 转换为 Select 组件需要的格式，按分类分组
-  const selectOptions = features.reduce((acc, feature) => {
-    const category = feature.category as keyof typeof FeatureCategoryLabel;
-    const groupLabel = FeatureCategoryLabel[category] || "其他";
+  const selectOptions = features.reduce(
+    (acc, feature) => {
+      const category = feature.category as keyof typeof FeatureCategoryLabel;
+      const groupLabel = FeatureCategoryLabel[category] || "其他";
 
-    const existingGroup = acc.find((group) => group.label === groupLabel);
-    if (existingGroup) {
-      existingGroup.options.push({
-        label: feature.name,
-        value: feature.id,
-        feature,
-      });
-    } else {
-      acc.push({
-        label: groupLabel,
-        options: [
-          {
-            label: feature.name,
-            value: feature.id,
-            feature,
-          },
-        ],
-      });
-    }
-    return acc;
-  }, [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: FeatureType }> }>);
+      const existingGroup = acc.find((group) => group.label === groupLabel);
+      if (existingGroup) {
+        existingGroup.options.push({
+          label: feature.name,
+          value: feature.id,
+          feature,
+        });
+      } else {
+        acc.push({
+          label: groupLabel,
+          options: [
+            {
+              label: feature.name,
+              value: feature.id,
+              feature,
+            },
+          ],
+        });
+      }
+      return acc;
+    },
+    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: FeatureType }> }>,
+  );
 
   // 使用 useCallback 和 debounce 处理搜索
   const debouncedSearch = useCallback(
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   // 处理搜索
@@ -90,9 +93,7 @@ export default function EventFeatureSelector({
   // 处理选择变化
   const handleChange = (selectedValue: string[]) => {
     onChange?.(selectedValue as string[]);
-    onSelect?.(
-      features.filter((feature) => selectedValue.includes(feature.id))
-    );
+    onSelect?.(features.filter((feature) => selectedValue.includes(feature.id)));
   };
 
   return (

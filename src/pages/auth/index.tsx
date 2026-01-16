@@ -18,9 +18,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const { message } = App.useApp();
 
-  const [currentSegment, setCurrentSegment] = useState<
-    "login" | "register" | "reset"
-  >("login");
+  const [currentSegment, setCurrentSegment] = useState<"login" | "register" | "reset">("login");
 
   const {
     register,
@@ -35,7 +33,7 @@ export default function Auth() {
       z.object({
         email: z.string().email("无效的邮箱"),
         password: z.string().min(6, "密码长度至少为6位"),
-      })
+      }),
     ),
   });
 
@@ -57,16 +55,8 @@ export default function Auth() {
         backdropFilter: "blur(5px)",
       }}
     >
-      <Flex
-        justify="center"
-        align="flex-end"
-        style={{ height: "100%" }}
-        vertical
-      >
-        <Card
-          className="w-full md:w-96 h-full"
-          style={{ margin: 20, borderRadius: 8 }}
-        >
+      <Flex justify="center" align="flex-end" style={{ height: "100%" }} vertical>
+        <Card className="w-full md:w-96 h-full" style={{ margin: 20, borderRadius: 8 }}>
           <Flex vertical justify="space-between" style={{ height: "100%" }}>
             <div>
               <Segmented
@@ -94,12 +84,7 @@ export default function Auth() {
                   help={errors.email?.message}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input
-                    type="email"
-                    autoComplete="email"
-                    placeholder="请输入您的注册邮箱"
-                    {...register("email")}
-                  />
+                  <Input type="email" autoComplete="email" placeholder="请输入您的注册邮箱" {...register("email")} />
                 </Form.Item>
                 <Form.Item
                   label="密码"
@@ -108,22 +93,12 @@ export default function Auth() {
                   help={errors.password?.message}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input.Password
-                    placeholder="请输入您的密码"
-                    {...register("password")}
-                  />
+                  <Input.Password placeholder="请输入您的密码" {...register("password")} />
                 </Form.Item>
                 <Flex justify="space-between" style={{ marginTop: 8 }}>
-                  <Link style={{ fontSize: 14 }}>
-                    忘记密码了吗？
-                  </Link>
+                  <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
                 </Flex>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  block
-                  style={{ marginTop: 24, borderRadius: 8 }}
-                >
+                <Button type="primary" htmlType="submit" block style={{ marginTop: 24, borderRadius: 8 }}>
                   登录
                 </Button>
               </form>

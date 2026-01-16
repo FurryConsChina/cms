@@ -14,15 +14,9 @@ export default function ApplicationPage() {
 
   const [search, setSearch] = useQueryState("search");
   const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
-  const [currentPage, setCurrentPage] = useQueryState(
-    "currentPage",
-    parseAsInteger.withDefault(1)
-  );
+  const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
 
-  const [pageSize, setPageSize] = useQueryState(
-    "pageSize",
-    parseAsInteger.withDefault(20)
-  );
+  const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
   const pagination = {
     search,
@@ -58,7 +52,9 @@ export default function ApplicationPage() {
     <>
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
-          <Title level={2} style={{ margin: 0 }}>应用列表</Title>
+          <Title level={3} className="m-0">
+            应用列表
+          </Title>
 
           <Button
             type="primary"

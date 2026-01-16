@@ -37,13 +37,12 @@ export default function RegionPage() {
     <>
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
-          <Title level={2} style={{ margin: 0 }}>区域列表</Title>
+          <Title level={3} className="m-0">
+            区域列表
+          </Title>
 
           <Space>
-            <Button
-              icon={<IconRefresh size={16} stroke={1.5} />}
-              onClick={handleRefreshRegionSort}
-            >
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={handleRefreshRegionSort}>
               刷新区域排序
             </Button>
             <Button

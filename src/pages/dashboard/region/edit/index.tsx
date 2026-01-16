@@ -91,7 +91,7 @@ export default function RegionEditPage() {
       error: errors[name]?.message,
     }),
     setValues: (values: Partial<RegionFormValues>) => {
-      Object.keys(values).forEach(key => {
+      Object.keys(values).forEach((key) => {
         setValue(key as keyof RegionFormValues, values[key as keyof RegionFormValues]);
       });
     },
@@ -166,18 +166,12 @@ export default function RegionEditPage() {
   return (
     <DefaultContainer>
       <Flex style={{ marginBottom: 16 }}>
-        <Button
-          type="text"
-          icon={<IconArrowLeft size={16} />}
-          onClick={() => navigate("/dashboard/region")}
-        >
+        <Button type="text" icon={<IconArrowLeft size={16} />} onClick={() => navigate("/dashboard/region")}>
           返回
         </Button>
       </Flex>
 
-      <h2 className="text-2xl font-bold">
-        {isEditing ? "编辑区域" : "添加区域"}
-      </h2>
+      <h2 className="text-2xl font-bold">{isEditing ? "编辑区域" : "添加区域"}</h2>
 
       <Card>
         <form onSubmit={rhfHandleSubmit((values) => handleSubmit(values))}>
@@ -187,10 +181,7 @@ export default function RegionEditPage() {
             validateStatus={form.getInputProps("name").error ? "error" : undefined}
             help={form.getInputProps("name").error}
           >
-            <Input
-              placeholder="请输入区域名称"
-              {...form.getInputProps("name")}
-            />
+            <Input placeholder="请输入区域名称" {...form.getInputProps("name")} />
           </Form.Item>
 
           <Form.Item
@@ -199,10 +190,7 @@ export default function RegionEditPage() {
             validateStatus={form.getInputProps("code").error ? "error" : undefined}
             help={form.getInputProps("code").error}
           >
-            <Input
-              placeholder="请输入区域代码"
-              {...form.getInputProps("code")}
-            />
+            <Input placeholder="请输入区域代码" {...form.getInputProps("code")} />
           </Form.Item>
 
           <Form.Item
@@ -224,11 +212,7 @@ export default function RegionEditPage() {
             />
           </Form.Item>
 
-          <Form.Item
-            label="区域级别"
-            validateStatus={form.getInputProps("level").error ? "error" : undefined}
-            required
-          >
+          <Form.Item label="区域级别" validateStatus={form.getInputProps("level").error ? "error" : undefined} required>
             <Select
               style={{ width: "100%" }}
               placeholder="请输入区域级别"
@@ -297,10 +281,7 @@ export default function RegionEditPage() {
             validateStatus={form.getInputProps("localName").error ? "error" : undefined}
             help={form.getInputProps("localName").error}
           >
-            <Input
-              placeholder="请输入本地名称（可选）"
-              {...form.getInputProps("localName")}
-            />
+            <Input placeholder="请输入本地名称（可选）" {...form.getInputProps("localName")} />
           </Form.Item>
 
           <Form.Item
@@ -415,20 +396,16 @@ export default function RegionEditPage() {
             validateStatus={form.getInputProps("remark").error ? "error" : undefined}
             help={form.getInputProps("remark").error}
           >
-            <TextArea
-              placeholder="请输入区域描述"
-              {...form.getInputProps("remark")}
-            />
+            <TextArea placeholder="请输入区域描述" {...form.getInputProps("remark")} />
           </Form.Item>
 
           <Flex justify="flex-end" gap={8}>
-            <Button
-              type="text"
-              onClick={() => navigate("/dashboard/region")}
-            >
+            <Button type="text" onClick={() => navigate("/dashboard/region")}>
               取消
             </Button>
-            <Button type="primary" htmlType="submit">{isEditing ? "更新" : "创建"}</Button>
+            <Button type="primary" htmlType="submit">
+              {isEditing ? "更新" : "创建"}
+            </Button>
           </Flex>
         </form>
       </Card>

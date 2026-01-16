@@ -1,9 +1,4 @@
-import {
-  EventLocationType,
-  EventScale,
-  EventStatus,
-  EventType,
-} from "@/types/event";
+import { EventLocationType, EventScale, EventStatus, EventType } from "@/types/event";
 
 export const EventStatusLabel = {
   [EventStatus.EventScheduled]: "正常",

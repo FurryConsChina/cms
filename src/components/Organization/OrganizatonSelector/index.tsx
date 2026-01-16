@@ -41,18 +41,12 @@ export default function OrganizationSelector({
     isLoading,
   } = useSWR(
     searchValue
-      ? [
-          `organization-list-search`,
-          { pageSize: 50, current: 1, name: searchValue },
-        ]
+      ? [`organization-list-search`, { pageSize: 50, current: 1, name: searchValue }]
       : [`organization-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getOrganizationList(params)
+    ([_, params]: [string, any]) => getOrganizationList(params),
   );
 
-  const organizations = [
-    ...(selectedOptions || []),
-    ...(data?.records || []),
-  ];
+  const organizations = [...(selectedOptions || []), ...(data?.records || [])];
 
   // 转换为 Select 组件需要的格式
   const selectOptions = organizations.map((organization) => ({
@@ -66,7 +60,7 @@ export default function OrganizationSelector({
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   // 处理搜索
@@ -77,11 +71,7 @@ export default function OrganizationSelector({
   // 处理选择变化
   const handleChange = (selectedValue: string[]) => {
     onChange?.(selectedValue);
-    onSelect?.(
-      organizations.filter((organization) =>
-        selectedValue.includes(organization.id)
-      )
-    );
+    onSelect?.(organizations.filter((organization) => selectedValue.includes(organization.id)));
   };
 
   return (

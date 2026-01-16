@@ -2,11 +2,7 @@ import Axios from "@/api";
 import type { EditableRegion, Region, RegionType } from "@/types/region";
 import type { List } from "@/types/Request";
 
-export async function getRegionList(params: {
-  pageSize: number;
-  current: number;
-  code?: string;
-}) {
+export async function getRegionList(params: { pageSize: number; current: number; code?: string }) {
   const res = await Axios.get<List<Region>>("/internal/cms/region", {
     params,
   });

@@ -38,12 +38,7 @@ export async function updateEvent(eventId: string, event: EditableEvent) {
 }
 
 export async function deleteEvent(id: string) {
-  const res = await Axios.post<{ success: boolean }>(
-    `/internal/cms/event/${id}`,
-    {
-      id,
-    }
-  );
+  const res = await Axios.delete<{ success: boolean }>(`/internal/cms/event/${id}`);
 
   return res.data;
 }

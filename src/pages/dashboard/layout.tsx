@@ -77,13 +77,13 @@ const bottomMenuItems: MenuItem[] = [
 ];
 
 const siderStyle: React.CSSProperties = {
-  overflow: 'auto',
-  height: '100vh',
-  position: 'sticky',
+  overflow: "auto",
+  height: "100vh",
+  position: "sticky",
   insetInlineStart: 0,
   top: 0,
-  scrollbarWidth: 'thin',
-  scrollbarGutter: 'stable',
+  scrollbarWidth: "thin",
+  scrollbarGutter: "stable",
 };
 
 export default function DashboardLayout() {

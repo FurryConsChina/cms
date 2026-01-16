@@ -4,13 +4,7 @@ import { Input, Table, type TableColumnType, Tag } from "antd";
 import dayjs from "dayjs";
 
 import { cleanPageCache } from "@/api/dashboard/cache";
-import {
-  IconEdit,
-  IconEye,
-  IconMenu,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconEdit, IconEye, IconMenu, IconSearch, IconTrash } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
@@ -58,7 +52,7 @@ function ApplicationList({
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem
+    dataIndex: keyof EventItem,
   ) => {
     console.log(selectedKeys);
     confirm();
@@ -74,7 +68,7 @@ function ApplicationList({
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem
+    dataIndex: keyof EventItem,
   ) => {
     clearFilters();
     confirm();
@@ -89,33 +83,21 @@ function ApplicationList({
 
   const getColumnSearchProps = (
     dataIndex: keyof EventItem,
-    searchPlaceholder?: string
+    searchPlaceholder?: string,
   ): TableColumnType<EventItem> => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Space direction="vertical">
           <Input
             placeholder={searchPlaceholder}
             value={selectedKeys[0]}
             allowClear
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
-            }
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
           />
           <Space>
             <Button
-              onClick={() =>
-                handleSearch(selectedKeys as string[], confirm, dataIndex)
-              }
+              onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
               icon={<IconSearch size={14} />}
               size="small"
               type="primary"
@@ -123,12 +105,7 @@ function ApplicationList({
             >
               搜索
             </Button>
-            <Button
-              onClick={() =>
-                clearFilters && handleReset(clearFilters, confirm, dataIndex)
-              }
-              size="small"
-            >
+            <Button onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)} size="small">
               重置
             </Button>
             <Button
@@ -144,12 +121,7 @@ function ApplicationList({
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => (
-      <IconSearch
-        size={14}
-        style={{ color: filtered ? "#1677ff" : undefined }}
-      />
-    ),
+    filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
   });
 
   const columns: ColumnsType<Application> = [
@@ -208,11 +180,11 @@ function ApplicationList({
       key: "action",
       fixed: "right",
       render: (_, record) => {
-        const menuItems: MenuProps['items'] = [
+        const menuItems: MenuProps["items"] = [
           {
-            key: 'delete',
+            key: "delete",
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
-            label: '删除',
+            label: "删除",
             danger: true,
             onClick: () => {
               onDelete(record.id);
@@ -233,7 +205,7 @@ function ApplicationList({
               编辑
             </Button>
 
-            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <Button icon={<IconMenu size={14} />} />
             </Dropdown>
           </Space>

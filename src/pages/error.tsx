@@ -26,11 +26,22 @@ export default function ErrorPage() {
       extra={
         <>
           {errorStack && (
-            <pre style={{ textAlign: "left", whiteSpace: "pre-wrap", marginBottom: 16, padding: 16, background: "#f5f5f5", borderRadius: 8, maxHeight: 300, overflow: "auto" }}>
+            <pre
+              style={{
+                textAlign: "left",
+                whiteSpace: "pre-wrap",
+                marginBottom: 16,
+                padding: 16,
+                background: "#f5f5f5",
+                borderRadius: 8,
+                maxHeight: 300,
+                overflow: "auto",
+              }}
+            >
               {errorStack}
             </pre>
           )}
-          <Button type="primary" onClick={() => window.location.href = "/"}>
+          <Button type="primary" onClick={() => (window.location.href = "/")}>
             返回首页
           </Button>
         </>

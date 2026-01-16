@@ -19,8 +19,7 @@ export default function LocationSearch({
   region: Region;
   keyword?: string | null;
 }) {
-  const [selectedLocation, setSelectedLocation] =
-    useState<TencentLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<TencentLocation | null>(null);
   return (
     <Modal
       title="搜索地址"
@@ -78,11 +77,7 @@ function ModalContent({
     <Row gutter={[16, 16]}>
       {addressSearchResult?.data.map((location) => (
         <Col span={12} key={location.id}>
-          <LocationItem
-            location={location}
-            onSelect={onSelect}
-            selected={selectedLocation?.id === location.id}
-          />
+          <LocationItem location={location} onSelect={onSelect} selected={selectedLocation?.id === location.id} />
         </Col>
       ))}
     </Row>

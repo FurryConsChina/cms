@@ -71,12 +71,12 @@ export default function RegionList({
       fixed: "right",
       width: 250,
       render: (_, record) => {
-        const menuItems: MenuProps['items'] = [
-          { type: 'divider' },
+        const menuItems: MenuProps["items"] = [
+          { type: "divider" },
           {
-            key: 'delete',
+            key: "delete",
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
-            label: '删除',
+            label: "删除",
             danger: true,
             disabled: true,
           },
@@ -95,7 +95,7 @@ export default function RegionList({
               编辑
             </Button>
 
-            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <Button icon={<IconMenu size={14} stroke={1.5} />} />
             </Dropdown>
           </Space>

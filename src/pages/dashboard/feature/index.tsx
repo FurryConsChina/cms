@@ -1,14 +1,14 @@
-import { Button, Flex, Typography } from 'antd';
-import { useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import DefaultContainer from '@/components/Container';
-import { IconCirclePlus } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
-import { getFeatureList } from '@/api/dashboard/feature';
-import FeatureList from '@/pages/dashboard/feature/components/FeatureList';
-import FeatureEditor from '@/pages/dashboard/feature/components/FeatureEditor';
-import type { FeatureType } from '@/types/feature';
-import { useQueryState, parseAsInteger } from 'nuqs';
+import { Button, Flex, Typography } from "antd";
+import { useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import DefaultContainer from "@/components/Container";
+import { IconCirclePlus } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
+import { getFeatureList } from "@/api/dashboard/feature";
+import FeatureList from "@/pages/dashboard/feature/components/FeatureList";
+import FeatureEditor from "@/pages/dashboard/feature/components/FeatureEditor";
+import type { FeatureType } from "@/types/feature";
+import { useQueryState, parseAsInteger } from "nuqs";
 
 const { Title } = Typography;
 
@@ -18,14 +18,8 @@ export default function FeaturePage() {
 
   const [opened, setOpened] = useState(false);
 
-  const [currentPage, setCurrentPage] = useQueryState(
-    'currentPage',
-    parseAsInteger.withDefault(1)
-  );
-  const [pageSize, setPageSize] = useQueryState(
-    'pageSize',
-    parseAsInteger.withDefault(20)
-  );
+  const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
+  const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
   const setPagination = {
     current: setCurrentPage,
     pageSize: setPageSize,
@@ -37,7 +31,7 @@ export default function FeaturePage() {
   };
 
   const { isPending, isError, data, error, refetch } = useQuery({
-    queryKey: ['feature-list', pagination],
+    queryKey: ["feature-list", pagination],
     queryFn: () => getFeatureList(pagination),
   });
 
@@ -45,7 +39,9 @@ export default function FeaturePage() {
     <>
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
-          <Title level={2} style={{ margin: 0 }}>标签列表</Title>
+          <Title level={3} className="m-0">
+            标签列表
+          </Title>
 
           <Button
             type="primary"
@@ -73,11 +69,7 @@ export default function FeaturePage() {
         />
       </div>
 
-      <FeatureEditor
-        opened={opened}
-        onClose={() => setOpened(false)}
-        editingFeature={editingFeature.current}
-      />
+      <FeatureEditor opened={opened} onClose={() => setOpened(false)} editingFeature={editingFeature.current} />
     </>
   );
 }

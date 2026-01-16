@@ -46,7 +46,7 @@ export const OrganizationSchema = z.object({
           z.object({
             label: z.string(),
             value: z.string(),
-          })
+          }),
         )
         .optional(),
     })
@@ -65,6 +65,4 @@ export const EditableOrganizationSchema = OrganizationSchema.extend({
   id: z.string().uuid().nullish(),
 });
 
-export type EditableOrganizationType = z.infer<
-  typeof EditableOrganizationSchema
->;
+export type EditableOrganizationType = z.infer<typeof EditableOrganizationSchema>;

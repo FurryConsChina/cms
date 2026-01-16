@@ -17,9 +17,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   const generateEventSlug = () => {
     const startAt = form.watch("startAt");
     const selectedYear = new Date(startAt).getFullYear();
-    const selectedMonth = new Date(startAt)
-      .toLocaleString("en-us", { month: "short" })
-      .toLocaleLowerCase();
+    const selectedMonth = new Date(startAt).toLocaleString("en-us", { month: "short" }).toLocaleLowerCase();
     const city = selectedRegion?.code;
 
     if (!selectedYear || !selectedMonth || !city) {
@@ -40,11 +38,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
           validateStatus={form.formState.errors.slug ? "error" : undefined}
           help={form.formState.errors.slug?.message}
         >
-          <Input
-            disabled
-            placeholder="请输入展会Slug"
-            {...form.register("slug")}
-          />
+          <Input disabled placeholder="请输入展会Slug" {...form.register("slug")} />
         </Form.Item>
         <Button
           onClick={() => {

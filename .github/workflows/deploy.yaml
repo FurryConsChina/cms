@@ -12,22 +12,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-      
+
       - name: Use Yarn 4
         run: corepack enable
-      
+
       - name: Inject Environment Variables
         run: |
           echo "PUBLIC_API_URL=${{ vars.PUBLIC_API_URL }}" >> .env
-      
+
       - name: Build
         run: yarn install --immutable && yarn build
-      
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +48,7 @@ jobs:
         with:
           name: dist-files
           path: dist/
-      
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
@@ -71,7 +71,7 @@ jobs:
         with:
           name: dist-files
           path: dist/
-      
+
       - name: Deploy to QCloud Pages
         id: deploy
         run: |
@@ -81,7 +81,7 @@ jobs:
           else
             edgeone pages deploy ./dist -n fcc-dashboard -e preview -t ${{ secrets.QCLOUD_PAGES_TOKEN }} 2>&1 | tee deploy.log
           fi
-      
+
       - name: Extract Preview URL
         id: extract-url
         run: |
@@ -100,7 +100,7 @@ jobs:
             echo "Deploy log not found"
             echo "preview_url=" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.extract-url.outputs.preview_url != ''
         uses: actions/github-script@v7
@@ -108,14 +108,14 @@ jobs:
           script: |
             const previewUrl = '${{ steps.extract-url.outputs.preview_url }}';
             const comment = `🚀 **预览部署完成！**
-            
+
             📱 **预览地址**: ${previewUrl}
-            
+
             > 此预览链接将在部署完成后可用，请稍等片刻再访问。
-            
+
             ---
             *由 GitHub Actions 自动生成*`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

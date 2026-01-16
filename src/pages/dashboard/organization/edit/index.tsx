@@ -1,8 +1,4 @@
-import {
-  createOrganization,
-  getOrganizationDetail,
-  updateOrganization,
-} from "@/api/dashboard/organization";
+import { createOrganization, getOrganizationDetail, updateOrganization } from "@/api/dashboard/organization";
 import DefaultContainer from "@/components/Container";
 import LoadError from "@/components/Error";
 import UploadImage from "@/components/UploadImage";
@@ -45,7 +41,9 @@ export default function OrganizationEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
-        <Title level={2} style={{ margin: 0 }}>{organizationId ? "编辑展商" : "新建展商"}</Title>
+        <Title level={2} style={{ margin: 0 }}>
+          {organizationId ? "编辑展商" : "新建展商"}
+        </Title>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
@@ -61,14 +59,10 @@ export default function OrganizationEditPage() {
   );
 }
 
-function OrganizationEditorContent({
-  organization,
-}: {
-  organization?: Organization;
-}) {
+function OrganizationEditorContent({ organization }: { organization?: Organization }) {
   const navigate = useNavigate();
   const { message } = App.useApp();
-  
+
   type OrganizationFormValues = {
     name: string;
     slug: string;
@@ -125,7 +119,7 @@ function OrganizationEditorContent({
         slug: z.string().regex(/^[a-z0-9-]+$/, {
           message: "只允许小写英文字母、数字和连字符-",
         }),
-      })
+      }),
     ),
   });
 
@@ -149,22 +143,21 @@ function OrganizationEditorContent({
       ...register(name),
       error: errors[name]?.message,
     }),
-    onSubmit: (onValid: (values: OrganizationFormValues) => void, onInvalid?: (errors: typeof formMethods.formState.errors) => void) => {
+    onSubmit: (
+      onValid: (values: OrganizationFormValues) => void,
+      onInvalid?: (errors: typeof formMethods.formState.errors) => void,
+    ) => {
       return rhfHandleSubmit(onValid, onInvalid);
     },
   };
 
   const handleSubmit = async (formData: OrganizationFormValues) => {
     const validFormData = Object.fromEntries(
-      Object.entries(formData).filter(
-        ([key, value]) => value !== null && value !== ""
-      )
+      Object.entries(formData).filter(([key, value]) => value !== null && value !== ""),
     );
     const validResult = EditableOrganizationSchema.safeParse({
       ...validFormData,
-      creationTime: formData.creationTime
-        ? new Date(formData.creationTime).toISOString()
-        : undefined,
+      creationTime: formData.creationTime ? new Date(formData.creationTime).toISOString() : undefined,
     });
     const validPayload = validResult.data;
 
@@ -209,10 +202,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("name").error ? "error" : undefined}
                   help={form.getInputProps("name").error}
                 >
-                  <Input
-                    placeholder="请输入展商名称"
-                    {...form.getInputProps("name")}
-                  />
+                  <Input placeholder="请输入展商名称" {...form.getInputProps("name")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -280,11 +270,7 @@ function OrganizationEditorContent({
               help="请不要使用大写"
               validateStatus={form.getInputProps("slug").error ? "error" : undefined}
             >
-              <Input
-                disabled={!!organization?.id}
-                placeholder="请输入展商Slug"
-                {...form.getInputProps("slug")}
-              />
+              <Input disabled={!!organization?.id} placeholder="请输入展商Slug" {...form.getInputProps("slug")} />
             </Form.Item>
 
             <Flex gap={8}>
@@ -314,10 +300,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("website").error ? "error" : undefined}
                   help={form.getInputProps("website").error}
                 >
-                  <Input
-                    placeholder="请输入网站链接"
-                    {...form.getInputProps("website")}
-                  />
+                  <Input placeholder="请输入网站链接" {...form.getInputProps("website")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -326,10 +309,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("contactMail").error ? "error" : undefined}
                   help={form.getInputProps("contactMail").error}
                 >
-                  <Input
-                    placeholder="请输入邮箱地址"
-                    {...form.getInputProps("contactMail")}
-                  />
+                  <Input placeholder="请输入邮箱地址" {...form.getInputProps("contactMail")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -338,10 +318,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("qqGroup").error ? "error" : undefined}
                   help={form.getInputProps("qqGroup").error}
                 >
-                  <Input
-                    placeholder="请输入QQ群号"
-                    {...form.getInputProps("qqGroup")}
-                  />
+                  <Input placeholder="请输入QQ群号" {...form.getInputProps("qqGroup")} />
                 </Form.Item>
               </Col>
             </Row>
@@ -353,10 +330,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("twitter").error ? "error" : undefined}
                   help={form.getInputProps("twitter").error}
                 >
-                  <Input
-                    placeholder="请输入Twitter链接"
-                    {...form.getInputProps("twitter")}
-                  />
+                  <Input placeholder="请输入Twitter链接" {...form.getInputProps("twitter")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -365,10 +339,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("weibo").error ? "error" : undefined}
                   help={form.getInputProps("weibo").error}
                 >
-                  <Input
-                    placeholder="请输入微博链接"
-                    {...form.getInputProps("weibo")}
-                  />
+                  <Input placeholder="请输入微博链接" {...form.getInputProps("weibo")} />
                 </Form.Item>
               </Col>
             </Row>
@@ -380,10 +351,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("bilibili").error ? "error" : undefined}
                   help={form.getInputProps("bilibili").error}
                 >
-                  <Input
-                    placeholder="请输入B站链接"
-                    {...form.getInputProps("bilibili")}
-                  />
+                  <Input placeholder="请输入B站链接" {...form.getInputProps("bilibili")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -392,10 +360,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("wikifur").error ? "error" : undefined}
                   help={form.getInputProps("wikifur").error}
                 >
-                  <Input
-                    placeholder="请输入Wikifur链接"
-                    {...form.getInputProps("wikifur")}
-                  />
+                  <Input placeholder="请输入Wikifur链接" {...form.getInputProps("wikifur")} />
                 </Form.Item>
               </Col>
             </Row>
@@ -407,10 +372,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("rednote").error ? "error" : undefined}
                   help={form.getInputProps("rednote").error}
                 >
-                  <Input
-                    placeholder="请输入小红书用户链接"
-                    {...form.getInputProps("rednote")}
-                  />
+                  <Input placeholder="请输入小红书用户链接" {...form.getInputProps("rednote")} />
                 </Form.Item>
               </Col>
             </Row>
@@ -422,10 +384,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("plurk").error ? "error" : undefined}
                   help={form.getInputProps("plurk").error}
                 >
-                  <Input
-                    placeholder="请输入Plurk用户链接"
-                    {...form.getInputProps("plurk")}
-                  />
+                  <Input placeholder="请输入Plurk用户链接" {...form.getInputProps("plurk")} />
                 </Form.Item>
               </Col>
               <Col flex={1}>
@@ -434,10 +393,7 @@ function OrganizationEditorContent({
                   validateStatus={form.getInputProps("facebook").error ? "error" : undefined}
                   help={form.getInputProps("facebook").error}
                 >
-                  <Input
-                    placeholder="请输入Facebook链接"
-                    {...form.getInputProps("facebook")}
-                  />
+                  <Input placeholder="请输入Facebook链接" {...form.getInputProps("facebook")} />
                 </Form.Item>
               </Col>
             </Row>
@@ -474,10 +430,7 @@ function OrganizationEditorContent({
               help="一般来说无需手动编辑，除非有两个组织的logo一致，可以直接复用另外一个组织的URL。"
               validateStatus={form.getInputProps("logoUrl").error ? "error" : undefined}
             >
-              <Input
-                placeholder="请输入展商标志图片URL"
-                {...form.getInputProps("logoUrl")}
-              />
+              <Input placeholder="请输入展商标志图片URL" {...form.getInputProps("logoUrl")} />
             </Form.Item>
             <Flex>
               <UploadImage
@@ -492,7 +445,9 @@ function OrganizationEditorContent({
 
         <div style={{ padding: "0 24px" }}>
           <Flex justify="flex-end" style={{ marginTop: 16 }}>
-            <Button type="primary" htmlType="submit">保存</Button>
+            <Button type="primary" htmlType="submit">
+              保存
+            </Button>
           </Flex>
         </div>
       </form>

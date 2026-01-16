@@ -123,9 +123,7 @@ export interface IEvent extends BaseModel {
 }
 
 export const EditEventSchema = z.object({
-  name: z
-    .string({ message: "文本不能为空" })
-    .min(1, { message: "文本不能为空" }),
+  name: z.string({ message: "文本不能为空" }).min(1, { message: "文本不能为空" }),
   slug: z
     .string({ message: "Slug不能为空" })
     .min(1, { message: "Slug不能为空" })
@@ -146,7 +144,7 @@ export const EditEventSchema = z.object({
         name: z.string().min(1, { message: "信息来源名称不能为空" }).nullable(),
         url: z.string().min(1, { message: "信息来源链接不能为空" }),
         description: z.string().nullable(),
-      })
+      }),
     )
     .nullable(),
   ticketChannels: z
@@ -158,7 +156,7 @@ export const EditEventSchema = z.object({
         name: z.string().min(1, { message: "渠道名称不能为空" }),
         url: z.string().min(1, { message: "渠道链接不能为空" }),
         available: z.boolean(),
-      })
+      }),
     )
     .nullable(),
   address: z.string().nullable(),
@@ -172,7 +170,7 @@ export const EditEventSchema = z.object({
           url: z.string().min(1, { message: "图片地址不能为空" }),
           title: z.string().nullable(),
           description: z.string().nullable(),
-        })
+        }),
       )
       .optional(),
     videos: z
@@ -181,7 +179,7 @@ export const EditEventSchema = z.object({
           url: z.string().min(1, { message: "视频地址不能为空" }),
           title: z.string().nullable(),
           description: z.string().nullable(),
-        })
+        }),
       )
       .optional(),
     lives: z
@@ -190,7 +188,7 @@ export const EditEventSchema = z.object({
           url: z.string().min(1, { message: "直播地址不能为空" }),
           title: z.string().nullable(),
           description: z.string().nullable(),
-        })
+        }),
       )
       .optional(),
   }),
@@ -201,7 +199,7 @@ export const EditEventSchema = z.object({
   organizations: z.array(
     z.string({ message: "请选择展会协办方" }).uuid({
       message: "请选择展会协办方",
-    })
+    }),
   ),
   features: z.object({
     self: z.array(z.string()).nullable(),

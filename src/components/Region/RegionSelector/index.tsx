@@ -41,13 +41,10 @@ export default function RegionSelector({
     searchValue
       ? [`region-list-search`, { pageSize: 50, current: 1, code: searchValue }]
       : [`region-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getRegionList(params)
+    ([_, params]: [string, any]) => getRegionList(params),
   );
 
-  const regions = [
-    ...(selectedOption ? [selectedOption] : []),
-    ...(data?.records || []),
-  ];
+  const regions = [...(selectedOption ? [selectedOption] : []), ...(data?.records || [])];
 
   // 转换为 Select 组件需要的格式
   const selectOptions = regions.map((region) => ({
@@ -61,7 +58,7 @@ export default function RegionSelector({
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   // 处理搜索

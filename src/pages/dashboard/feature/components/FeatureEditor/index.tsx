@@ -1,5 +1,10 @@
 import { createFeature, updateFeature } from "@/api/dashboard/feature";
-import { FeatureCategory, FeatureCategoryLabel, type CrateFeatureType, type EditableFeatureType } from "@/types/feature";
+import {
+  FeatureCategory,
+  FeatureCategoryLabel,
+  type CrateFeatureType,
+  type EditableFeatureType,
+} from "@/types/feature";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal, Button, Flex, App, Form, Select, Input } from "antd";
@@ -18,9 +23,7 @@ export default function FeatureEditor({
 }) {
   return (
     <Modal open={opened} onCancel={onClose} title="标签编辑" centered footer={null}>
-      {opened && (
-        <ModalComponent editingFeature={editingFeature} onClose={onClose} />
-      )}
+      {opened && <ModalComponent editingFeature={editingFeature} onClose={onClose} />}
     </Modal>
   );
 }
@@ -33,7 +36,7 @@ function ModalComponent({
   onClose: () => void;
 }) {
   const { message } = App.useApp();
-  
+
   type FeatureFormValues = {
     name: string;
     category: string;
@@ -92,10 +95,7 @@ function ModalComponent({
         validateStatus={form.getInputProps("name").error ? "error" : undefined}
         help={form.getInputProps("name").error}
       >
-        <Input
-          placeholder="请输入标签名称"
-          {...form.getInputProps("name")}
-        />
+        <Input placeholder="请输入标签名称" {...form.getInputProps("name")} />
       </Form.Item>
 
       <Form.Item
@@ -120,14 +120,13 @@ function ModalComponent({
         help="标签简述可能会在未来展示于筛选设置中。"
         validateStatus={form.getInputProps("description").error ? "error" : undefined}
       >
-        <TextArea
-          placeholder="请输入标签简述"
-          {...form.getInputProps("description")}
-        />
+        <TextArea placeholder="请输入标签简述" {...form.getInputProps("description")} />
       </Form.Item>
 
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
-        <Button type="primary" htmlType="submit">提交</Button>
+        <Button type="primary" htmlType="submit">
+          提交
+        </Button>
       </Flex>
     </form>
   );

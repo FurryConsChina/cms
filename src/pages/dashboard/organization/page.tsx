@@ -1,26 +1,20 @@
-import { getOrganizationList } from '@/api/dashboard/organization';
-import DefaultContainer from '@/components/Container';
-import OrganizationList from '@/pages/dashboard/organization/components/OrganizationList';
-import { Button, Flex, Typography } from 'antd';
-import { IconCirclePlus } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { useQueryState, parseAsInteger } from 'nuqs';
-import { useState } from 'react';
+import { getOrganizationList } from "@/api/dashboard/organization";
+import DefaultContainer from "@/components/Container";
+import OrganizationList from "@/pages/dashboard/organization/components/OrganizationList";
+import { Button, Flex, Typography } from "antd";
+import { IconCirclePlus } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useQueryState, parseAsInteger } from "nuqs";
+import { useState } from "react";
 
 const { Title } = Typography;
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
-  
-  const [currentPage, setCurrentPage] = useQueryState(
-    'currentPage',
-    parseAsInteger.withDefault(1)
-  );
-  const [pageSize, setPageSize] = useQueryState(
-    'pageSize',
-    parseAsInteger.withDefault(20)
-  );
+
+  const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
+  const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
   const [pagination, setPagination] = useState<{
     current: number;
@@ -33,26 +27,29 @@ export default function OrganizationPage() {
   });
 
   const { isPending, isError, data, error, refetch } = useQuery({
-    queryKey: ['organization-list', pagination],
-    queryFn: () => getOrganizationList({
-      pageSize: pagination.pageSize,
-      current: pagination.current,
-      name: pagination.name,
-      slug: pagination.slug,
-    }),
+    queryKey: ["organization-list", pagination],
+    queryFn: () =>
+      getOrganizationList({
+        pageSize: pagination.pageSize,
+        current: pagination.current,
+        name: pagination.name,
+        slug: pagination.slug,
+      }),
   });
 
   return (
     <>
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
-          <Title level={2} style={{ margin: 0 }}>展商列表</Title>
+          <Title level={3} className="m-0">
+            展商列表
+          </Title>
 
           <Button
             type="primary"
             icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
-              navigate('/dashboard/organization/create');
+              navigate("/dashboard/organization/create");
             }}
           >
             添加展商

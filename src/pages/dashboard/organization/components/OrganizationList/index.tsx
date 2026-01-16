@@ -7,20 +7,8 @@ import dayjs from "dayjs";
 
 import { cleanPageCache } from "@/api/dashboard/cache";
 import type { List } from "@/types/Request";
-import {
-  OrganizationStatusLabel,
-  type Organization,
-  OrganizationTypeLabel,
-} from "@/types/organization";
-import {
-  IconEdit,
-  IconInfoCircle,
-  IconLink,
-  IconMenu,
-  IconRefresh,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons-react";
+import { OrganizationStatusLabel, type Organization, OrganizationTypeLabel } from "@/types/organization";
+import { IconEdit, IconInfoCircle, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -60,7 +48,7 @@ export default function OrganizationList({
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization
+    dataIndex: keyof Organization,
   ) => {
     console.log(selectedKeys);
     confirm();
@@ -75,7 +63,7 @@ export default function OrganizationList({
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization
+    dataIndex: keyof Organization,
   ) => {
     clearFilters();
     confirm();
@@ -89,33 +77,21 @@ export default function OrganizationList({
 
   const getColumnSearchProps = (
     dataIndex: keyof Organization,
-    searchPlaceholder?: string
+    searchPlaceholder?: string,
   ): TableColumnType<Organization> => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Space direction="vertical">
           <Input
             placeholder={searchPlaceholder}
             value={selectedKeys[0]}
             allowClear
-            onChange={(e) =>
-              setSelectedKeys(e.target.value ? [e.target.value] : [])
-            }
-            onPressEnter={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
-            }
+            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
           />
           <Space>
             <Button
-              onClick={() =>
-                handleSearch(selectedKeys as string[], confirm, dataIndex)
-              }
+              onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
               icon={<IconSearch size={14} />}
               size="small"
               type="primary"
@@ -123,12 +99,7 @@ export default function OrganizationList({
             >
               搜索
             </Button>
-            <Button
-              onClick={() =>
-                clearFilters && handleReset(clearFilters, confirm, dataIndex)
-              }
-              size="small"
-            >
+            <Button onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)} size="small">
               重置
             </Button>
             <Button
@@ -144,12 +115,7 @@ export default function OrganizationList({
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => (
-      <IconSearch
-        size={14}
-        style={{ color: filtered ? "#1677ff" : undefined }}
-      />
-    ),
+    filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
   });
 
   const columns: ColumnsType<Organization> = [
@@ -183,11 +149,7 @@ export default function OrganizationList({
       title: "创立日期",
       key: "date",
       render: (_, record) => (
-        <Space>
-          {record.creationTime
-            ? dayjs(record.creationTime).format("YYYY年MM月DD日")
-            : "未配置"}
-        </Space>
+        <Space>{record.creationTime ? dayjs(record.creationTime).format("YYYY年MM月DD日") : "未配置"}</Space>
       ),
     },
     {
@@ -196,17 +158,17 @@ export default function OrganizationList({
       fixed: "right",
       width: 250,
       render: (_, record) => {
-        const menuItems: MenuProps['items'] = [
+        const menuItems: MenuProps["items"] = [
           {
-            key: 'refresh',
+            key: "refresh",
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
-            label: '刷新',
+            label: "刷新",
             onClick: () => {
               refreshPage(`/${record.slug}`);
             },
           },
           {
-            key: 'view-international',
+            key: "view-international",
             icon: <IconLink style={{ width: 14, height: 14 }} />,
             label: (
               <Tooltip title="国际站没有缓存，修改后会立刻显示">
@@ -214,14 +176,11 @@ export default function OrganizationList({
               </Tooltip>
             ),
             onClick: () => {
-              window.open(
-                `https://www.furryeventchina.com/${record.slug}`,
-                "_blank"
-              );
+              window.open(`https://www.furryeventchina.com/${record.slug}`, "_blank");
             },
           },
           {
-            key: 'view-domestic',
+            key: "view-domestic",
             icon: <IconLink style={{ width: 14, height: 14 }} />,
             label: (
               <Tooltip title="国内站有缓存，修改后大概24小时生效，除非你手动刷新">
@@ -229,17 +188,14 @@ export default function OrganizationList({
               </Tooltip>
             ),
             onClick: () => {
-              window.open(
-                `https://www.furrycons.cn/${record.slug}`,
-                "_blank"
-              );
+              window.open(`https://www.furrycons.cn/${record.slug}`, "_blank");
             },
           },
-          { type: 'divider' },
+          { type: "divider" },
           {
-            key: 'delete',
+            key: "delete",
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
-            label: '删除',
+            label: "删除",
             danger: true,
             disabled: true,
           },
@@ -258,7 +214,7 @@ export default function OrganizationList({
               编辑
             </Button>
 
-            <Dropdown menu={{ items: menuItems }} trigger={['click']}>
+            <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
               <Button icon={<IconMenu size={14} stroke={1.5} />} />
             </Dropdown>
           </Space>

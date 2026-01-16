@@ -52,8 +52,8 @@ const useAuthStore = create<UserStore>()(
           Axios.defaults.headers.common.Authorization = `${state.token}`;
         }
       },
-    }
-  )
+    },
+  ),
 );
 
 export default useAuthStore;

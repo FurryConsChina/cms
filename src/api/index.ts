@@ -17,7 +17,7 @@ Axios.interceptors.request.use(
       window.location.href = "/auth/logout";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default Axios;

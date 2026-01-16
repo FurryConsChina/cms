@@ -1,16 +1,8 @@
 import Axios from "@/api";
-import type {
-  CrateFeatureType,
-  EditableFeatureType,
-  FeatureType,
-} from "@/types/feature";
+import type { CrateFeatureType, EditableFeatureType, FeatureType } from "@/types/feature";
 import type { List } from "@/types/Request";
 
-export async function getFeatureList(params: {
-  pageSize: number;
-  current: number;
-  name?: string;
-}) {
+export async function getFeatureList(params: { pageSize: number; current: number; name?: string }) {
   const res = await Axios.get<List<FeatureType>>("/internal/cms/event/feature", {
     params,
   });

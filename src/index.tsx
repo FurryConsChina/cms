@@ -43,6 +43,6 @@ if (rootEl) {
           </AntdApp>
         </ConfigProvider>
       </StyleProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }
