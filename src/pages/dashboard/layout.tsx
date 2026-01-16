@@ -46,6 +46,9 @@ const menuItems: MenuItem[] = [
     label: "区域管理",
   },
   {
+    type: "divider",
+  },
+  {
     key: "/developer",
     icon: <IconUserCode size="1.1rem" stroke={1.5} />,
     label: "开发者",
@@ -72,6 +75,16 @@ const bottomMenuItems: MenuItem[] = [
     label: "退出登录",
   },
 ];
+
+const siderStyle: React.CSSProperties = {
+  overflow: 'auto',
+  height: '100vh',
+  position: 'sticky',
+  insetInlineStart: 0,
+  top: 0,
+  scrollbarWidth: 'thin',
+  scrollbarGutter: 'stable',
+};
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -116,11 +129,7 @@ export default function DashboardLayout() {
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider
-        width={300}
-        className="bg-slate-100"
-        style={{ background: "#f1f5f9" }}
-      >
+      <Sider width={300} className="bg-slate-100" style={siderStyle}>
         <div className="flex flex-col h-full p-6">
           <div className="flex-1">
             <Menu
@@ -131,8 +140,6 @@ export default function DashboardLayout() {
               style={{ background: "transparent", border: "none" }}
             />
           </div>
-
-          <Divider style={{ margin: "12px 0" }} />
 
           <div>
             <Menu
