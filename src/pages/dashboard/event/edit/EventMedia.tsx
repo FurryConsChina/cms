@@ -93,8 +93,29 @@ export default function EventMedia({ form, pathPrefix, disabled }: EventMediaPro
           </Form.Item>
         </Flex>
         {fields.map((field, index) => (
-          <div key={field.id} style={{ marginBottom: "1rem" }}>
-            <Title level={5}>第{index + 1}张图片</Title>
+          <div key={field.id}>
+            <Flex justify="space-between" align="center">
+              <Text strong>第{index + 1}张图片</Text>
+              <Flex gap={4} justify="flex-center">
+                <Button
+                  icon={<IconArrowUp size={14} />}
+                  onClick={() => {
+                    if (index > 0) {
+                      move(index, index - 1);
+                    }
+                  }}
+                  disabled={index === 0}
+                />
+                <Button
+                  icon={<IconArrowDown size={14} />}
+                  onClick={() => {
+                    move(index, index + 1);
+                  }}
+                  disabled={index === fields.length - 1}
+                />
+                <Button danger icon={<IconTrash size={14} />} onClick={() => remove(index)} />
+              </Flex>
+            </Flex>
             <Flex gap={16}>
               {
                 <Image
@@ -156,25 +177,6 @@ export default function EventMedia({ form, pathPrefix, disabled }: EventMediaPro
                   onUploadSuccess={(s) => form.setValue(`media.images.${index}.url`, s)}
                   disabled={disabled}
                 />
-                <Flex gap={4} justify="flex-end" className="mt-2">
-                  <Button
-                    icon={<IconArrowUp size={14} />}
-                    onClick={() => {
-                      if (index > 0) {
-                        move(index, index - 1);
-                      }
-                    }}
-                    disabled={index === 0}
-                  />
-                  <Button
-                    icon={<IconArrowDown size={14} />}
-                    onClick={() => {
-                      move(index, index + 1);
-                    }}
-                    disabled={index === fields.length - 1}
-                  />
-                  <Button danger icon={<IconTrash size={14} />} onClick={() => remove(index)} />
-                </Flex>
               </Flex>
             </Flex>
           </div>

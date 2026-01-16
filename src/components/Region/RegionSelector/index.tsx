@@ -41,7 +41,7 @@ export default function RegionSelector({
     searchValue
       ? [`region-list-search`, { pageSize: 50, current: 1, code: searchValue }]
       : [`region-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getRegionList(params),
+    ([_, params]: [string, any]) => getRegionList(params)
   );
 
   const regions = [...(selectedOption ? [selectedOption] : []), ...(data?.records || [])];
@@ -58,7 +58,7 @@ export default function RegionSelector({
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    [],
+    []
   );
 
   // 处理搜索
@@ -72,28 +72,21 @@ export default function RegionSelector({
   };
 
   return (
-    <Form.Item
-      label={label}
-      help={description}
-      validateStatus={error || swrError ? "error" : undefined}
-      required={required}
-    >
-      <Select
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        options={selectOptions}
-        optionFilterProp="label"
-        showSearch
-        onSearch={handleSearch}
-        disabled={disabled}
-        allowClear
-        loading={isLoading}
-        notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
-        style={{ width: "100%" }}
-        status={error || swrError ? "error" : undefined}
-        {...props}
-      />
-    </Form.Item>
+    <Select
+      placeholder={placeholder}
+      value={value}
+      onChange={handleChange}
+      options={selectOptions}
+      optionFilterProp="label"
+      showSearch
+      onSearch={handleSearch}
+      disabled={disabled}
+      allowClear
+      loading={isLoading}
+      notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
+      style={{ width: "100%" }}
+      status={error || swrError ? "error" : undefined}
+      {...props}
+    />
   );
 }

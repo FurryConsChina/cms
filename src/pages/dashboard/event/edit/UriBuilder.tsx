@@ -1,5 +1,5 @@
 import { Region } from "@/types/region";
-import { UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn } from "react-hook-form";
 import { Typography, Button, Flex, App, Form, Input } from "antd";
 import { EditEventSchema } from "@/types/event";
 import { InferZodType } from "@/types/common";
@@ -31,14 +31,18 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   return (
     <div>
       <h5 className="text-lg font-bold">URI构建</h5>
-      <Flex vertical gap={8}>
+      <Flex vertical>
         <Form.Item
           label="展会Slug"
           required
           validateStatus={form.formState.errors.slug ? "error" : undefined}
           help={form.formState.errors.slug?.message}
         >
-          <Input disabled placeholder="请输入展会Slug" {...form.register("slug")} />
+          <Controller
+            name="slug"
+            control={form.control}
+            render={({ field }) => <Input disabled placeholder="请输入展会Slug" {...field} />}
+          />
         </Form.Item>
         <Button
           onClick={() => {

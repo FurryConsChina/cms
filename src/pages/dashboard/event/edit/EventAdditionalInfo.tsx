@@ -13,7 +13,6 @@ import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector
 import { Typography, Flex, Form, Select, Input } from "antd";
 import { InferZodType } from "@/types/common";
 
-const { Title } = Typography;
 const { TextArea } = Input;
 
 interface EventAdditionalInfoProps {
@@ -139,7 +138,18 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
         validateStatus={form.formState.errors.detail ? "error" : undefined}
         help={form.formState.errors.detail?.message}
       >
-        <TextArea autoSize={{ minRows: 5, maxRows: 20 }} placeholder="请输入展会描述" {...form.register("detail")} />
+        <Controller
+          name="detail"
+          control={form.control}
+          render={({ field }) => (
+            <TextArea
+              autoSize={{ minRows: 5, maxRows: 20 }}
+              placeholder="请输入展会描述"
+              value={field.value ?? ""}
+              onChange={field.onChange}
+            />
+          )}
+        />
       </Form.Item>
     </div>
   );
