@@ -2324,12 +2324,13 @@ __metadata:
     es-toolkit: "npm:^1.44.0"
     nanoid: "npm:^5.1.6"
     nuqs: "npm:^2.8.6"
+    prettier: "npm:3.8.0"
     react: "npm:^19.2.3"
     react-dom: "npm:^19.2.3"
     react-hook-form: "npm:^7.71.1"
     react-router-dom: "npm:^7.12.0"
     swr: "npm:^2.3.8"
-    tailwind-merge: "npm:^2.6.0"
+    tailwind-merge: "npm:^3.4.0"
     tailwindcss: "npm:^4.1.18"
     typescript: "npm:^5.9.3"
     zod: "npm:^4.3.5"
@@ -2888,6 +2889,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prettier@npm:3.8.0":
+  version: 3.8.0
+  resolution: "prettier@npm:3.8.0"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: 10c0/8926e9c9941a293b76c2d799089d038e9f6d84fb37702fc370bedd03b3c70d7fcf507e2e3c4f151f222d81820a3b74cac5e692c955cfafe34dd0d02616ce8327
+  languageName: node
+  linkType: hard
+
 "proxy-from-env@npm:^1.1.0":
   version: 1.1.0
   resolution: "proxy-from-env@npm:1.1.0"
@@ -3126,10 +3136,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tailwind-merge@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "tailwind-merge@npm:2.6.0"
-  checksum: 10c0/fc8a5535524de9f4dacf1c16ab298581c7bb757d68a95faaf28942b1c555a619bba9d4c6726fe83986e44973b315410c1a5226e5354c30ba82353bd6d2288fa5
+"tailwind-merge@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "tailwind-merge@npm:3.4.0"
+  checksum: 10c0/eaf17bb695c51c7bb7a90366a9c62be295473ee97fcfd1da54287714d4a5788a88ff4ad1ab9e0128638257fda777d6c9ea88682e36195e31a7fa2cf43f45e310
   languageName: node
   linkType: hard
 

@@ -9,14 +9,14 @@ import type { User } from "@/types/User";
 const { Title } = Typography;
 
 export default function UserDetail() {
-  const { data: user, isLoading, error } = useSWR(
-    ["user-detail"],
-    () => AuthAPI.getCurrentUser(),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    }
-  );
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useSWR(["user-detail"], () => AuthAPI.getCurrentUser(), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+  });
 
   if (error) {
     return <LoadError />;

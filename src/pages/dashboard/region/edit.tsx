@@ -22,7 +22,7 @@ export default function RegionEditPage() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   if (error) {

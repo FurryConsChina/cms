@@ -41,7 +41,7 @@ export default function EventPage() {
       current: currentPage,
       search: search || undefined,
       orgSearch: orgSearch || undefined,
-    })
+    }),
   );
 
   const handleDeleteEvent = async (id: string) => {
@@ -62,7 +62,7 @@ export default function EventPage() {
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem
+    dataIndex: keyof EventItem,
   ) => {
     console.log(selectedKeys);
     confirm();
@@ -78,7 +78,7 @@ export default function EventPage() {
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem
+    dataIndex: keyof EventItem,
   ) => {
     clearFilters();
     confirm();
@@ -93,7 +93,7 @@ export default function EventPage() {
 
   const getColumnSearchProps = (
     dataIndex: keyof EventItem,
-    searchPlaceholder?: string
+    searchPlaceholder?: string,
   ): TableColumnType<EventItem> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -266,7 +266,7 @@ export default function EventPage() {
           columns={columns}
           loading={isLoading}
           dataSource={data?.records || []}
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: "max-content" }}
           pagination={{
             pageSize: pageSize,
             total: data?.total,

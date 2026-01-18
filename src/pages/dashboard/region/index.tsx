@@ -20,7 +20,7 @@ export default function RegionPage() {
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
   const { isLoading, data } = useSWR(["region-list", current, pageSize], () =>
-    RegionAPI.getRegionList({ current, pageSize })
+    RegionAPI.getRegionList({ current, pageSize }),
   );
 
   const columns: ColumnsType<Region> = [

@@ -25,12 +25,12 @@ export default function RegionSelector({
   const [searchValue, setSearchValue] = useState("");
 
   const { data, isLoading } = useSWR(["region/list", searchValue], () =>
-    RegionAPI.getRegionList({ pageSize: 50, current: 1, code: searchValue })
+    RegionAPI.getRegionList({ pageSize: 50, current: 1, code: searchValue }),
   );
 
   const regions = uniqBy(
     [...(selectedOption ? [selectedOption] : []), ...(data?.records || [])],
-    (region) => region.id
+    (region) => region.id,
   );
 
   const selectOptions = regions.map((region) => ({
@@ -42,7 +42,7 @@ export default function RegionSelector({
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   const handleChange = (selectedValue: string) => {

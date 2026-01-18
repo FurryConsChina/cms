@@ -31,7 +31,7 @@ export default function OrganizationPage() {
       current: currentPage,
       name: filter.name,
       slug: filter.slug,
-    })
+    }),
   );
 
   const handleRefreshPage = async (slug: string) => {
@@ -41,7 +41,7 @@ export default function OrganizationPage() {
 
   const getColumnSearchProps = (
     dataIndex: keyof Organization,
-    searchPlaceholder?: string
+    searchPlaceholder?: string,
   ): TableColumnType<Organization> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -170,7 +170,7 @@ export default function OrganizationPage() {
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization
+    dataIndex: keyof Organization,
   ) => {
     confirm();
     setFilter((exist) => ({
@@ -184,7 +184,7 @@ export default function OrganizationPage() {
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization
+    dataIndex: keyof Organization,
   ) => {
     clearFilters();
     confirm();

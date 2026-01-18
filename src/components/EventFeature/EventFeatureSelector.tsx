@@ -26,42 +26,45 @@ export default function EventFeatureSelector({
   const [searchValue, setSearchValue] = useState("");
 
   const { data, isLoading } = useSWR(["feature/list", searchValue], () =>
-    FeatureAPI.getFeatureList({ pageSize: 50, current: 1, name: searchValue })
+    FeatureAPI.getFeatureList({ pageSize: 50, current: 1, name: searchValue }),
   );
 
   const features = uniqBy([...(selectedOptions || []), ...(data?.records || [])], (feature) => feature.id);
 
-  const selectOptions = features.reduce((acc, feature) => {
-    const category = feature.category as keyof typeof FeatureCategoryLabel;
-    const groupLabel = FeatureCategoryLabel[category] || "其他";
+  const selectOptions = features.reduce(
+    (acc, feature) => {
+      const category = feature.category as keyof typeof FeatureCategoryLabel;
+      const groupLabel = FeatureCategoryLabel[category] || "其他";
 
-    const existingGroup = acc.find((group) => group.label === groupLabel);
-    if (existingGroup) {
-      existingGroup.options.push({
-        label: feature.name,
-        value: feature.id,
-        feature,
-      });
-    } else {
-      acc.push({
-        label: groupLabel,
-        options: [
-          {
-            label: feature.name,
-            value: feature.id,
-            feature,
-          },
-        ],
-      });
-    }
-    return acc;
-  }, [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>);
+      const existingGroup = acc.find((group) => group.label === groupLabel);
+      if (existingGroup) {
+        existingGroup.options.push({
+          label: feature.name,
+          value: feature.id,
+          feature,
+        });
+      } else {
+        acc.push({
+          label: groupLabel,
+          options: [
+            {
+              label: feature.name,
+              value: feature.id,
+              feature,
+            },
+          ],
+        });
+      }
+      return acc;
+    },
+    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>,
+  );
 
   const handleSearch = useCallback(
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   const handleChange = (selectedValue: string[]) => {

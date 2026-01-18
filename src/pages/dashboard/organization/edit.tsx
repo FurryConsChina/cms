@@ -29,7 +29,7 @@ export default function OrganizationEditPage() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   if (error) {
@@ -107,7 +107,7 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         ...value,
         creationTime: value.creationTime ? value.creationTime.toISOString() : undefined,
       },
-      EditOrganizationApiBody
+      EditOrganizationApiBody,
     );
     if (processedValues.errors.length > 0) {
       return modal.warning({

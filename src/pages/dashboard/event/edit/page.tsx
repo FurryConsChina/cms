@@ -36,7 +36,7 @@ export default function EventEditPage() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   );
 
   if (error) {
@@ -146,7 +146,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
           })),
         ],
       },
-      EditEventApiBody
+      EditEventApiBody,
     );
 
     if (processedValues.errors.length > 0) {

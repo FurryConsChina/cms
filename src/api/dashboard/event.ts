@@ -1,5 +1,11 @@
 import Axios from "@/api";
-import { EventLocationType, EventTicketChannelType, EventType, type EditableEvent, type EventItem } from "@/types/event";
+import {
+  EventLocationType,
+  EventTicketChannelType,
+  EventType,
+  type EditableEvent,
+  type EventItem,
+} from "@/types/event";
 import type { List } from "@/types/Request";
 import z from "zod";
 
@@ -16,7 +22,7 @@ export const EditEventApiBody = z.object({
     z.object({
       id: z.uuid(),
       isPrimary: z.boolean(),
-    })
+    }),
   ),
   regionId: z.uuid().optional(),
   address: z.string().nullish(),
@@ -28,7 +34,7 @@ export const EditEventApiBody = z.object({
         url: z.string(),
         name: z.string().nullish(),
         description: z.string().nullish(),
-      })
+      }),
     )
     .nullish(),
   ticketChannels: z
@@ -38,7 +44,7 @@ export const EditEventApiBody = z.object({
         name: z.string(),
         url: z.string(),
         available: z.boolean(),
-      })
+      }),
     )
     .nullish(),
 
@@ -51,7 +57,7 @@ export const EditEventApiBody = z.object({
             url: z.string(),
             title: z.string().nullish(),
             description: z.string().nullish(),
-          })
+          }),
         )
         .optional(),
       videos: z
@@ -60,7 +66,7 @@ export const EditEventApiBody = z.object({
             url: z.string(),
             title: z.string().nullish(),
             description: z.string().nullish(),
-          })
+          }),
         )
         .optional(),
       lives: z
@@ -69,7 +75,7 @@ export const EditEventApiBody = z.object({
             url: z.string(),
             title: z.string().nullish(),
             description: z.string().nullish(),
-          })
+          }),
         )
         .optional(),
     })

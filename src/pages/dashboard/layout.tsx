@@ -138,7 +138,7 @@ export default function DashboardLayout() {
         width={300}
         className={clsx(
           "bg-slate-100 z-50 fixed md:sticky shadow-md md:shadow-none",
-          collapsed ? "-translate-x-full md:translate-x-0" : "block"
+          collapsed ? "-translate-x-full md:translate-x-0" : "block",
         )}
         style={siderStyle}
         collapsible
@@ -149,7 +149,7 @@ export default function DashboardLayout() {
             <Header
               className={clsx(
                 "flex items-center bg-transparent p-0 md:p-2",
-                collapsed ? "justify-center" : "justify-end"
+                collapsed ? "justify-center" : "justify-end",
               )}
             >
               <Button onClick={() => setCollapsed(!collapsed)}>

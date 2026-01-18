@@ -26,12 +26,12 @@ export default function OrganizationSelector({
   const [searchValue, setSearchValue] = useState("");
 
   const { data, isLoading } = useSWR(["organization/list", searchValue], () =>
-    OrganizationAPI.getOrganizationList({ pageSize: 50, current: 1, name: searchValue })
+    OrganizationAPI.getOrganizationList({ pageSize: 50, current: 1, name: searchValue }),
   );
 
   const organizations = uniqBy(
     [...(selectedOptions || []), ...(data?.records || [])],
-    (organization) => organization.id
+    (organization) => organization.id,
   );
 
   const selectOptions = organizations.map((organization) => ({
@@ -43,7 +43,7 @@ export default function OrganizationSelector({
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    []
+    [],
   );
 
   const handleChange = (selectedValue: string[]) => {
