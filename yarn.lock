@@ -1596,13 +1596,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.23":
-  version: 4.17.23
-  resolution: "@types/lodash@npm:4.17.23"
-  checksum: 10c0/9d9cbfb684e064a2b78aab9e220d398c9c2a7d36bc51a07b184ff382fa043a99b3d00c16c7f109b4eb8614118f4869678dbae7d5c6700ed16fb9340e26cc0bf6
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^22.19.7":
   version: 22.19.7
   resolution: "@types/node@npm:22.19.7"
@@ -2482,7 +2475,6 @@ __metadata:
     "@tabler/icons-react": "npm:^3.36.1"
     "@tailwindcss/forms": "npm:^0.5.11"
     "@tanstack/react-query": "npm:^5.90.17"
-    "@types/lodash": "npm:^4.17.23"
     "@types/node": "npm:^22.19.7"
     "@types/react": "npm:^19.2.8"
     "@types/react-dom": "npm:^19.2.3"
@@ -2492,7 +2484,6 @@ __metadata:
     cos-js-sdk-v5: "npm:^1.10.1"
     dayjs: "npm:^1.11.19"
     es-toolkit: "npm:^1.44.0"
-    lodash: "npm:^4.17.21"
     nanoid: "npm:^5.1.6"
     nuqs: "npm:^2.8.6"
     react: "npm:^19.2.3"
@@ -2994,13 +2985,6 @@ __metadata:
   version: 3.3.1
   resolution: "loader-utils@npm:3.3.1"
   checksum: 10c0/f2af4eb185ac5bf7e56e1337b666f90744e9f443861ac521b48f093fb9e8347f191c8960b4388a3365147d218913bc23421234e7788db69f385bacfefa0b4758
-  languageName: node
-  linkType: hard
-
-"lodash@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "lodash@npm:4.17.21"
-  checksum: 10c0/d8cbea072bb08655bb4c989da418994b073a608dffa608b09ac04b43a791b12aeae7cd7ad919aa4c925f33b48490b5cfe6c1f71d827956071dae2e7bb3a6b74c
   languageName: node
   linkType: hard
 
