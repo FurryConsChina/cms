@@ -1,6 +1,6 @@
 import { cleanPageCache } from "@/api/dashboard/cache";
 import { OrganizationAPI } from "@/api/dashboard/organization";
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import { Organization, OrganizationStatusLabel, OrganizationTypeLabel } from "@/types/organization";
 import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
 import { App, Button, Dropdown, Flex, Input, MenuProps, Space, Table, TableColumnType, Tag, Typography } from "antd";

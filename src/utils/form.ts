@@ -1,4 +1,3 @@
-import { App } from "antd";
 import { isNil } from "es-toolkit";
 import { isObject, isArray } from "es-toolkit/compat";
 import z from "zod";
@@ -31,6 +30,7 @@ export const toNullable = <T>(val: T): T => {
 
 export const useZodValidateData = <T>(values: unknown, schema: z.ZodSchema<T>) => {
   const processedValues = toNullable(values);
+  console.info("去除空值后的数据:", processedValues);
 
   const validatedResult = schema.safeParse(processedValues);
   if (!validatedResult.success) {

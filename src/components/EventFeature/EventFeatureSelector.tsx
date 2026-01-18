@@ -1,125 +1,88 @@
 import { FeatureAPI } from "@/api/dashboard/feature";
 import type { Feature } from "@/types/feature";
 import { FeatureCategoryLabel } from "@/types/feature";
-import { Select, Spin, Form } from "antd";
-import { debounce } from "es-toolkit";
+import { Select, Spin, SelectProps } from "antd";
+import { debounce, uniqBy } from "es-toolkit";
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 
 interface EventFeatureSelectorProps {
+  id?: string;
   value?: string[];
-  onChange?: (value: string[] | null) => void;
-  onSelect?: (value: Feature[] | null) => void;
-  placeholder?: string;
-  label?: string;
-  required?: boolean;
-  disabled?: boolean;
-  error?: string;
-  description?: string;
-  selectedOptions?: Feature[] | null;
+  onChange?: (value?: string[]) => void;
+  onSelect?: (value?: Feature[]) => void;
+  selectedOptions?: Feature[];
+  antdSelectProps?: SelectProps;
 }
 
 export default function EventFeatureSelector({
+  id,
   value,
   onChange,
   onSelect,
-  placeholder = "请选择特色标签",
-  label = "特色标签",
-  required = false,
-  disabled = false,
-  error,
-  description,
   selectedOptions,
-  ...props
+  antdSelectProps,
 }: EventFeatureSelectorProps) {
   const [searchValue, setSearchValue] = useState("");
 
-  const {
-    data,
-    error: swrError,
-    isLoading,
-  } = useSWR(
-    searchValue
-      ? [`feature-list-search`, { pageSize: 50, current: 1, name: searchValue }]
-      : [`feature-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => FeatureAPI.getFeatureList(params),
+  const { data, isLoading } = useSWR(["feature/list", searchValue], () =>
+    FeatureAPI.getFeatureList({ pageSize: 50, current: 1, name: searchValue })
   );
 
-  const features = [...(selectedOptions || []), ...(data?.records || [])];
+  const features = uniqBy([...(selectedOptions || []), ...(data?.records || [])], (feature) => feature.id);
 
-  // 转换为 Select 组件需要的格式，按分类分组
-  const selectOptions = features.reduce(
-    (acc, feature) => {
-      const category = feature.category as keyof typeof FeatureCategoryLabel;
-      const groupLabel = FeatureCategoryLabel[category] || "其他";
+  const selectOptions = features.reduce((acc, feature) => {
+    const category = feature.category as keyof typeof FeatureCategoryLabel;
+    const groupLabel = FeatureCategoryLabel[category] || "其他";
 
-      const existingGroup = acc.find((group) => group.label === groupLabel);
-      if (existingGroup) {
-        existingGroup.options.push({
-          label: feature.name,
-          value: feature.id,
-          feature,
-        });
-      } else {
-        acc.push({
-          label: groupLabel,
-          options: [
-            {
-              label: feature.name,
-              value: feature.id,
-              feature,
-            },
-          ],
-        });
-      }
-      return acc;
-    },
-    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>,
-  );
+    const existingGroup = acc.find((group) => group.label === groupLabel);
+    if (existingGroup) {
+      existingGroup.options.push({
+        label: feature.name,
+        value: feature.id,
+        feature,
+      });
+    } else {
+      acc.push({
+        label: groupLabel,
+        options: [
+          {
+            label: feature.name,
+            value: feature.id,
+            feature,
+          },
+        ],
+      });
+    }
+    return acc;
+  }, [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>);
 
-  // 使用 useCallback 和 debounce 处理搜索
-  const debouncedSearch = useCallback(
+  const handleSearch = useCallback(
     debounce((value: string) => {
       setSearchValue(value);
     }, 300),
-    [],
+    []
   );
 
-  // 处理搜索
-  const handleSearch = (value: string) => {
-    debouncedSearch(value);
-  };
-
-  // 处理选择变化
   const handleChange = (selectedValue: string[]) => {
     onChange?.(selectedValue as string[]);
     onSelect?.(features.filter((feature) => selectedValue.includes(feature.id)));
   };
 
   return (
-    <Form.Item
-      label={label}
-      help={description}
-      validateStatus={error || swrError ? "error" : undefined}
-      required={required}
-    >
-      <Select
-        placeholder={placeholder}
-        value={value}
-        onChange={handleChange}
-        options={selectOptions}
-        optionFilterProp="label"
-        mode="multiple"
-        showSearch
-        onSearch={handleSearch}
-        disabled={disabled}
-        allowClear
-        loading={isLoading}
-        notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
-        style={{ width: "100%" }}
-        status={error || swrError ? "error" : undefined}
-        {...props}
-      />
-    </Form.Item>
+    <Select
+      {...antdSelectProps}
+      id={id}
+      value={value}
+      onChange={handleChange}
+      options={selectOptions}
+      showSearch={{
+        optionFilterProp: "label",
+        onSearch: handleSearch,
+      }}
+      mode="multiple"
+      loading={isLoading}
+      notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
+    />
   );
 }

@@ -1,5 +1,5 @@
 import { cleanPageCache } from "@/api/dashboard/cache";
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import { Button, Flex, Typography, Row, Col } from "antd";
 import { IconRefresh } from "@tabler/icons-react";
 

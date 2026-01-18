@@ -1,7 +1,7 @@
 import { Button, Flex, Typography, Space, App, Table, MenuProps, Dropdown } from "antd";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import { IconCirclePlus, IconEdit, IconMenu, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { RegionAPI } from "@/api/dashboard/region";

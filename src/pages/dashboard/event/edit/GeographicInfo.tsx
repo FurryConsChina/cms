@@ -1,104 +1,50 @@
-import { EditEventSchema, EventItem } from "@/types/event";
+import { EventItem } from "@/types/event";
 import { Region } from "@/types/region";
-import { UseFormReturn, Controller } from "react-hook-form";
 import { IconSearch } from "@tabler/icons-react";
 import RegionSelector from "@/components/Region/RegionSelector";
 import LocationSearch from "@/components/Event/LocationSearch";
 import { Typography, Button, Flex, Row, Col, App, Form, Input, AutoComplete } from "antd";
+import type { FormInstance } from "antd";
 import { useState } from "react";
-import { InferZodType } from "@/types/common";
 
 const { Title } = Typography;
 
 interface GeographicInfoProps {
-  form: UseFormReturn<InferZodType<typeof EditEventSchema>>;
+  form: FormInstance;
   event?: EventItem;
-  selectedRegion: Region | null;
-  setSelectedRegion: (region: Region | null) => void;
+  selectedRegion?: Region;
+  setSelectedRegion: (region?: Region) => void;
 }
 
 export default function GeographicInfo({ form, event, selectedRegion, setSelectedRegion }: GeographicInfoProps) {
   const { message } = App.useApp();
   const [isLocationSearchModalOpen, setIsLocationSearchModalOpen] = useState(false);
 
-  const address = form.watch("address");
+  const address = Form.useWatch("address", form);
 
   return (
     <div>
-      <h5 className="text-lg font-bold">地理信息</h5>
+      <Title level={5} style={{ margin: "12px 0" }}>
+        地理信息
+      </Title>
 
-      <Form.Item
-        label="展会地区"
-        validateStatus={form.formState.errors.regionId ? "error" : undefined}
-        help={form.formState.errors.regionId?.message}
-      >
-        <Controller
-          name="regionId"
-          control={form.control}
-          render={({ field, fieldState }) => (
-            <RegionSelector
-              placeholder="请选择展会地区"
-              selectedOption={event?.region}
-              value={field.value}
-              onChange={(value) => {
-                field.onChange(value);
-              }}
-              onSelect={(value) => {
-                setSelectedRegion(value);
-              }}
-              error={fieldState.error?.message}
-            />
-          )}
-        />
+      <Form.Item label="展会地区" name="regionId">
+        <RegionSelector selectedOption={event?.region} onSelect={(region) => setSelectedRegion(region)} />
       </Form.Item>
 
-      <Form.Item
-        label="展会地址"
-        validateStatus={form.formState.errors.address ? "error" : undefined}
-        help={form.formState.errors.address?.message}
-      >
-        <Controller
-          name="address"
-          control={form.control}
-          render={({ field }) => (
-            <AutoComplete
-              placeholder="请输入展会地址"
-              suffixIcon={<IconSearch size="14" className="cursor-pointer" />}
-              {...field}
-            />
-          )}
-        />
+      <Form.Item label="展会地址" name="address">
+        <Input placeholder="请输入展会地址" />
       </Form.Item>
 
       <Row gutter={8}>
-        <Col flex={1}>
-          <Form.Item
-            label="经度"
-            validateStatus={form.formState.errors.addressLon ? "error" : undefined}
-            help={form.formState.errors.addressLon?.message}
-          >
-            <Controller
-              name="addressLon"
-              control={form.control}
-              render={({ field }) => (
-                <Input placeholder="一般是三位整数" value={field.value || ""} onChange={field.onChange} />
-              )}
-            />
+        <Col span={12}>
+          <Form.Item label="经度" name="addressLon">
+            <Input placeholder="经度小数点前一般有三位整数" />
           </Form.Item>
         </Col>
-        <Col flex={1}>
-          <Form.Item
-            label="纬度"
-            validateStatus={form.formState.errors.addressLat ? "error" : undefined}
-            help={form.formState.errors.addressLat?.message}
-          >
-            <Controller
-              name="addressLat"
-              control={form.control}
-              render={({ field }) => (
-                <Input placeholder="一般是两位整数" value={field.value || ""} onChange={field.onChange} />
-              )}
-            />
+        <Col span={12}>
+          <Form.Item label="纬度" name="addressLat">
+            <Input placeholder="纬度小数点前一般有两位整数" />
           </Form.Item>
         </Col>
       </Row>
@@ -108,18 +54,22 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
           if (!selectedRegion) {
             return message.warning("请先选择展会地区");
           }
+          if (!address) {
+            return message.warning("请先输入展会地址");
+          }
+
           setIsLocationSearchModalOpen(true);
         }}
       >
-        搜索地址
+        按展会地址搜索经纬度
       </Button>
       <LocationSearch
         isModalOpen={isLocationSearchModalOpen}
         handleOk={(location) => {
           setIsLocationSearchModalOpen(false);
           if (location) {
-            form.setValue("addressLat", location.location.lat.toString());
-            form.setValue("addressLon", location.location.lng.toString());
+            form.setFieldValue("addressLat", location.location.lat.toString());
+            form.setFieldValue("addressLon", location.location.lng.toString());
           }
         }}
         handleCancel={() => {

@@ -1,5 +1,5 @@
 import { FeatureAPI } from "@/api/dashboard/feature";
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import FeatureEditor from "@/components/EventFeature/FeatureEditor";
 import { FeatureCategory, FeatureCategoryLabel, type Feature } from "@/types/feature";
 import { IconCirclePlus, IconEdit, IconMenu, IconTrash } from "@tabler/icons-react";

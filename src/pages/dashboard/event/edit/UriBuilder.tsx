@@ -1,23 +1,25 @@
 import { Region } from "@/types/region";
-import { Controller, UseFormReturn } from "react-hook-form";
 import { Typography, Button, Flex, App, Form, Input } from "antd";
-import { EditEventSchema } from "@/types/event";
-import { InferZodType } from "@/types/common";
+import type { FormInstance } from "antd";
+import dayjs from "dayjs";
 
 const { Title } = Typography;
 
 interface UriBuilderProps {
-  form: UseFormReturn<InferZodType<typeof EditEventSchema>>;
-  selectedRegion: Region | null;
+  form: FormInstance;
+  selectedRegion?: Region;
 }
 
 export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
   const { message } = App.useApp();
 
+  const startAtFormValue: dayjs.Dayjs | undefined = Form.useWatch("startAt", form);
+
   const generateEventSlug = () => {
-    const startAt = form.watch("startAt");
-    const selectedYear = new Date(startAt).getFullYear();
-    const selectedMonth = new Date(startAt).toLocaleString("en-us", { month: "short" }).toLocaleLowerCase();
+    const startAtValue =
+      startAtFormValue instanceof dayjs ? startAtFormValue.toDate() : dayjs(startAtFormValue).toDate();
+    const selectedYear = startAtValue.getFullYear();
+    const selectedMonth = startAtValue.toLocaleString("en-us", { month: "short" }).toLocaleLowerCase();
     const city = selectedRegion?.code;
 
     if (!selectedYear || !selectedMonth || !city) {
@@ -25,24 +27,18 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
       return;
     }
 
+    message.success("Slug生成成功");
     return `${selectedYear}-${selectedMonth}-${city.toLowerCase()}-con`;
   };
 
   return (
     <div>
-      <h5 className="text-lg font-bold">URI构建</h5>
+      <Title level={5} style={{ margin: "12px 0" }}>
+        URI构建
+      </Title>
       <Flex vertical>
-        <Form.Item
-          label="展会Slug"
-          required
-          validateStatus={form.formState.errors.slug ? "error" : undefined}
-          help={form.formState.errors.slug?.message}
-        >
-          <Controller
-            name="slug"
-            control={form.control}
-            render={({ field }) => <Input disabled placeholder="请输入展会Slug" {...field} />}
-          />
+        <Form.Item label="展会Slug" required name="slug" rules={[{ required: true, message: "请输入展会Slug" }]}>
+          <Input disabled placeholder="请输入展会Slug" />
         </Form.Item>
         <Button
           onClick={() => {
@@ -50,7 +46,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
             if (!slug) {
               return;
             }
-            form.setValue("slug", slug);
+            form.setFieldValue("slug", slug);
           }}
         >
           生成Slug

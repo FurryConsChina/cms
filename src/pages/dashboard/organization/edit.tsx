@@ -1,6 +1,6 @@
 import { EditOrganizationApiBody, OrganizationAPI } from "@/api/dashboard/organization";
-import DefaultContainer from "@/components/Container";
-import LoadError from "@/components/Error";
+import DefaultContainer from "@/components/Layout/Container";
+import LoadError from "@/components/Layout/LoadError";
 import UploadImage from "@/components/UploadImage";
 import { InferZodType } from "@/types/common";
 import {
@@ -178,7 +178,7 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
       <Divider dashed />
 
       <div>
-        <Title level={5}>展会附加信息</Title>
+        <Title level={5}>展商附加信息</Title>
         <Flex vertical gap={8}>
           <Form.Item label="展商描述" extra="可以是展商的自我简介之类的东西，不填也没关系。" name="description">
             <TextArea placeholder="请输入展商简介" autoSize={{ minRows: 10 }} />

@@ -1,4 +1,4 @@
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import { Typography, Button, Flex } from "antd";
 import { useNavigate } from "react-router-dom";
 

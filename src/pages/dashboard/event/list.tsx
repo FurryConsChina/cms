@@ -1,6 +1,6 @@
 import { cleanPageCache } from "@/api/dashboard/cache";
-import { deleteEvent, getEventList } from "@/api/dashboard/event";
-import DefaultContainer from "@/components/Container";
+import { EventAPI } from "@/api/dashboard/event";
+import DefaultContainer from "@/components/Layout/Container";
 import { EventScaleLabel, EventStatusColor, EventStatusLabel } from "@/consts/event";
 import { EventItem } from "@/types/event";
 import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
@@ -49,11 +49,11 @@ export default function EventPage() {
     pageSize: setPageSize,
   };
 
-  const { data, isLoading, mutate } = useSWR(["event-list", pagination], () => getEventList(pagination));
+  const { data, isLoading, mutate } = useSWR(["event-list", pagination], () => EventAPI.getEventList(pagination));
 
   const handleDeleteEvent = async (id: string) => {
     try {
-      await deleteEvent(id);
+      await EventAPI.deleteEvent(id);
       message.success("删除展商成功，如果是误操作请马上联系管理员。");
       mutate();
     } catch (error) {

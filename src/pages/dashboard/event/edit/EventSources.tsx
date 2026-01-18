@@ -1,104 +1,82 @@
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 import { IconArrowDown, IconArrowUp, IconPlus, IconTrash } from "@tabler/icons-react";
-import { Typography, Button, Flex, Row, Col, Form, Input, Card } from "antd";
-import { EditEventSchema } from "@/types/event";
-import { z } from "zod";
+import { Typography, Button, Flex, Row, Col, Form, Input } from "antd";
+import type { FormInstance } from "antd";
 
 const { Title, Text } = Typography;
 
-type EventFormValues = z.infer<typeof EditEventSchema>;
-
 interface EventSourcesProps {
-  form: UseFormReturn<EventFormValues>;
+  form: FormInstance;
 }
 
 export default function EventSources({ form }: EventSourcesProps) {
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
-    control: form.control,
-    name: "sources",
-  });
   return (
     <div>
-      <Title level={5}>展会信息来源</Title>
-      <Flex align="center" gap={8}>
-        <Button icon={<IconPlus size={14} />} onClick={() => append({ name: "", url: "", description: "" })}>
-          添加信息来源
-        </Button>
-      </Flex>
+      <Form.List name="sources">
+        {(fields, { add, remove, move }) => (
+          <>
+            <Title level={5} style={{ margin: "12px 0" }}>
+              <Flex justify="space-between" align="center">
+                展会信息来源
+                <Button icon={<IconPlus size={14} />} onClick={() => add({ name: "", url: "", description: "" })}>
+                  添加来源
+                </Button>
+              </Flex>
+            </Title>
 
-      {fields.map((field, index) => (
-        <div key={field.id}>
-          <Flex justify="space-between" align="center">
-            <Text strong>信息来源 {index + 1}</Text>
-            <Flex gap={4}>
-              <Button
-                icon={<IconArrowUp size={14} />}
-                onClick={() => {
-                  if (index > 0) {
-                    move(index, index - 1);
-                  }
-                }}
-                disabled={index === 0}
-              />
-              <Button
-                icon={<IconArrowDown size={14} />}
-                onClick={() => {
-                  move(index, index + 1);
-                }}
-                disabled={index === fields.length - 1}
-              />
-              <Button danger icon={<IconTrash size={14} />} onClick={() => remove(index)} />
-            </Flex>
-          </Flex>
-          <Row gutter={8} align="bottom">
-            <Col flex={1}>
-              <Form.Item
-                label="名称"
-                validateStatus={form.formState.errors.sources?.[index]?.name ? "error" : undefined}
-                help={form.formState.errors.sources?.[index]?.name?.message}
-              >
-                <Controller
-                  name={`sources.${index}.name`}
-                  control={form.control}
-                  render={({ field }) => (
-                    <Input placeholder="信息来源名称" value={field.value || ""} onChange={field.onChange} />
-                  )}
-                />
-              </Form.Item>
-            </Col>
-            <Col flex={1}>
-              <Form.Item
-                label="链接"
-                validateStatus={form.formState.errors.sources?.[index]?.url ? "error" : undefined}
-                help={form.formState.errors.sources?.[index]?.url?.message}
-              >
-                <Controller
-                  name={`sources.${index}.url`}
-                  control={form.control}
-                  render={({ field }) => (
-                    <Input placeholder="信息来源链接" value={field.value || ""} onChange={field.onChange} />
-                  )}
-                />
-              </Form.Item>
-            </Col>
-            <Col flex={1}>
-              <Form.Item
-                label="描述"
-                validateStatus={form.formState.errors.sources?.[index]?.description ? "error" : undefined}
-                help={form.formState.errors.sources?.[index]?.description?.message}
-              >
-                <Controller
-                  name={`sources.${index}.description`}
-                  control={form.control}
-                  render={({ field }) => (
-                    <Input placeholder="信息来源描述（可选）" value={field.value || ""} onChange={field.onChange} />
-                  )}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
-      ))}
+            {fields.map((field, index) => (
+              <div key={field.key}>
+                <Flex justify="space-between" align="center">
+                  <Text strong>信息来源 {index + 1}</Text>
+                  <Flex gap={4}>
+                    <Button
+                      icon={<IconArrowUp size={14} />}
+                      onClick={() => {
+                        if (index > 0) {
+                          move(index, index - 1);
+                        }
+                      }}
+                      disabled={index === 0}
+                    />
+                    <Button
+                      icon={<IconArrowDown size={14} />}
+                      onClick={() => {
+                        move(index, index + 1);
+                      }}
+                      disabled={index === fields.length - 1}
+                    />
+                    <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
+                  </Flex>
+                </Flex>
+                <Row gutter={8} align="bottom">
+                  <Col span={4}>
+                    <Form.Item
+                      label="名称"
+                      name={[field.name, "name"]}
+                      rules={[{ required: true, message: "请输入信息来源名称" }]}
+                    >
+                      <Input placeholder="信息来源名称" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={10}>
+                    <Form.Item
+                      label="链接"
+                      name={[field.name, "url"]}
+                      rules={[{ required: true, message: "请输入信息来源链接" }]}
+                    >
+                      <Input placeholder="信息来源链接" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={10}>
+                    <Form.Item label="描述" name={[field.name, "description"]}>
+                      <Input placeholder="信息来源描述" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </div>
+            ))}
+          </>
+        )}
+      </Form.List>
     </div>
   );
 }

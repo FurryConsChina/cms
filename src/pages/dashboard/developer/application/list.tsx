@@ -1,5 +1,5 @@
 import { getApplicationList } from "@/api/developer/application";
-import DefaultContainer from "@/components/Container";
+import DefaultContainer from "@/components/Layout/Container";
 import { Button, Dropdown, Flex, MenuProps, Popover, Space, Table, Tag, Typography } from "antd";
 import { IconCirclePlus, IconEdit, IconEye, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";

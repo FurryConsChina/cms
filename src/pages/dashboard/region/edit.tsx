@@ -1,6 +1,6 @@
 import { EditRegionApiBody, RegionAPI } from "@/api/dashboard/region";
-import DefaultContainer from "@/components/Container";
-import LoadError from "@/components/Error";
+import DefaultContainer from "@/components/Layout/Container";
+import LoadError from "@/components/Layout/LoadError";
 import RegionSelector from "@/components/Region/RegionSelector";
 import { InferZodType } from "@/types/common";
 import { Region, RegionType, RegionTypeLabel } from "@/types/region";

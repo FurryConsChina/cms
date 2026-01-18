@@ -39,3 +39,9 @@ export const EventLocationTypeLabel = {
   [EventLocationType.Venue]: "场馆",
   [EventLocationType.Online]: "线上",
 };
+
+export const EventDefaultThumbnail = {
+  default: "fec-event-default-cover.png",
+  blank: "fec-event-blank-cover.png",
+  cancel: "fec-event-cancel-cover.png",
+};

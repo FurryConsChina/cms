@@ -1,4 +1,4 @@
-import { EditEventSchema, EventItem } from "@/types/event";
+import { EventItem } from "@/types/event";
 import {
   EventLocationType,
   EventScale,
@@ -7,55 +7,40 @@ import {
   type EventStatusKeyType,
   EventType,
 } from "@/types/event";
-import { UseFormReturn, Controller } from "react-hook-form";
 import { EventLocationTypeLabel, EventScaleLabel, EventStatusLabel, EventTypeLabel } from "@/consts/event";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
-import { Typography, Flex, Form, Select, Input } from "antd";
-import { InferZodType } from "@/types/common";
+import { Typography, Flex, Form, Select, Input, Col, Row, Button, Space } from "antd";
+import type { FormInstance } from "antd";
+import { IconArrowDown, IconArrowUp, IconPlus, IconTrash } from "@tabler/icons-react";
 
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 interface EventAdditionalInfoProps {
-  form: UseFormReturn<InferZodType<typeof EditEventSchema>>;
+  form: FormInstance;
   event?: EventItem;
 }
 
 export default function EventAdditionalInfo({ form, event }: EventAdditionalInfoProps) {
   return (
     <div>
-      <h5 className="text-lg font-bold">展会附加信息</h5>
-      <Form.Item
-        label="展会状态"
-        required
-        validateStatus={form.formState.errors.status ? "error" : undefined}
-        help={form.formState.errors.status?.message}
-      >
-        <Controller
-          name="status"
-          control={form.control}
-          render={({ field }) => (
+      <Title level={5} style={{ margin: "12px 0" }}>
+        展会附加信息
+      </Title>
+      <Row gutter={8}>
+        <Col span={12}>
+          <Form.Item label="展会状态" required name="status" rules={[{ required: true, message: "请选择展会状态" }]}>
             <Select
-              placeholder="选一个"
+              placeholder="选择展会状态"
               options={Object.keys(EventStatus).map((key) => ({
                 label: EventStatusLabel[EventStatus[key as EventStatusKeyType]],
                 value: EventStatus[key as EventStatusKeyType],
               }))}
-              {...field}
             />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="展会规模"
-        required
-        validateStatus={form.formState.errors.scale ? "error" : undefined}
-        help={form.formState.errors.scale?.message}
-      >
-        <Controller
-          name="scale"
-          control={form.control}
-          render={({ field }) => (
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item label="展会规模" required name="scale" rules={[{ required: true, message: "请选择展会规模" }]}>
             <Select
               placeholder="选一个"
               options={Object.keys(EventScale).map((key) => ({
@@ -63,93 +48,101 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
                 value: EventScale[key as EventScaleKeyType],
                 disabled: ["Mega", "XXLarge"].includes(key),
               }))}
-              {...field}
             />
-          )}
-        />
-      </Form.Item>
+          </Form.Item>
+        </Col>
+      </Row>
 
-      <Form.Item
-        label="展会类型"
-        required
-        validateStatus={form.formState.errors.type ? "error" : undefined}
-        help={form.formState.errors.type?.message}
-      >
-        <Controller
-          name="type"
-          control={form.control}
-          render={({ field }) => (
+      <Row gutter={8}>
+        <Col span={12}>
+          <Form.Item label="展会类型" required name="type" rules={[{ required: true, message: "请选择展会类型" }]}>
             <Select
               placeholder="选一个"
               options={Object.keys(EventType).map((key) => ({
                 label: EventTypeLabel[EventType[key as keyof typeof EventType]],
                 value: EventType[key as keyof typeof EventType],
               }))}
-              {...field}
             />
-          )}
-        />
-      </Form.Item>
-
-      <Form.Item
-        label="展会场地"
-        required
-        validateStatus={form.formState.errors.locationType ? "error" : undefined}
-        help={form.formState.errors.locationType?.message}
-      >
-        <Controller
-          name="locationType"
-          control={form.control}
-          render={({ field }) => (
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            label="展会场地类型"
+            required
+            name="locationType"
+            rules={[{ required: true, message: "请选择展会场地" }]}
+          >
             <Select
               placeholder="选一个"
               options={Object.keys(EventLocationType).map((key) => ({
                 label: EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
                 value: EventLocationType[key as keyof typeof EventLocationType],
               }))}
-              {...field}
             />
-          )}
+          </Form.Item>
+        </Col>
+      </Row>
+
+      <Form.Item label="展会私有标签" name="features">
+        <Select mode="tags" placeholder="请输入展会专属的标签" />
+      </Form.Item>
+
+      <Form.Item label="展会公共标签" name="featureIds">
+        <EventFeatureSelector
+          antdSelectProps={{
+            placeholder: "请选择展会共有的标签",
+          }}
         />
       </Form.Item>
 
-      <Form.Item
-        label="展会专属标签"
-        validateStatus={form.formState.errors.features?.self ? "error" : undefined}
-        help={form.formState.errors.features?.self?.message}
-      >
-        <Controller
-          name="features.self"
-          control={form.control}
-          render={({ field }) => <Select mode="tags" placeholder="请输入展会专属的标签" {...field} />}
-        />
-      </Form.Item>
+      <Form.List name={["extra", "overrideOrganizationContact", "qqGroups"]}>
+        {(fields, { add, remove, move }) => (
+          <>
+            <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+              <Text strong>展会额外联系方式</Text>
 
-      <Controller
-        name="featureIds"
-        control={form.control}
-        render={({ field }) => (
-          <EventFeatureSelector label="展会公共标签" placeholder="请选择展会共有的标签" {...field} />
+              <Button icon={<IconPlus size={14} />} onClick={() => add({ label: "", value: "" })}>
+                添加QQ群
+              </Button>
+            </Flex>
+            {fields.map((field, index) => (
+              <div key={field.key}>
+                <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                  <Text strong>第{index + 1}个QQ群</Text>
+                  <Space>
+                    <Button icon={<IconArrowUp size={14} />} onClick={() => move(index, index - 1)} />
+                    <Button icon={<IconArrowDown size={14} />} onClick={() => move(index, index + 1)} />
+                    <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
+                  </Space>
+                </Flex>
+                <Row gutter={8}>
+                  <Col span={12}>
+                    <Form.Item
+                      required
+                      name={[field.name, "label"]}
+                      rules={[{ required: true, message: "请输入QQ群名称" }]}
+                    >
+                      <Input placeholder="请输入QQ群名称" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      required
+                      name={[field.name, "value"]}
+                      rules={[{ required: true, message: "请输入QQ群号" }]}
+                    >
+                      <Input placeholder="请输入QQ群号" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              </div>
+            ))}
+          </>
         )}
-      />
+      </Form.List>
 
-      <Form.Item
-        label="展会描述"
-        validateStatus={form.formState.errors.detail ? "error" : undefined}
-        help={form.formState.errors.detail?.message}
-      >
-        <Controller
-          name="detail"
-          control={form.control}
-          render={({ field }) => (
-            <TextArea
-              autoSize={{ minRows: 5, maxRows: 20 }}
-              placeholder="请输入展会描述"
-              value={field.value ?? ""}
-              onChange={field.onChange}
-            />
-          )}
-        />
+      <Form.Item label="展会描述" name="detail">
+        <TextArea autoSize={{ minRows: 5, maxRows: 30 }} placeholder="请输入展会描述" />
       </Form.Item>
     </div>
   );
