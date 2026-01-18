@@ -1,48 +1,100 @@
 import { cleanPageCache } from "@/api/dashboard/cache";
-import { OrganizationAPI } from "@/api/dashboard/organization";
+import { EventAPI } from "@/api/dashboard/event";
 import DefaultContainer from "@/components/Layout/Container";
-import { Organization, OrganizationStatusLabel, OrganizationTypeLabel } from "@/types/organization";
+import { EventScaleLabel, EventStatusColor, EventStatusLabel } from "@/consts/event";
+import { EventItem } from "@/types/event";
 import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
-import { App, Button, Dropdown, Flex, Input, MenuProps, Space, Table, TableColumnType, Tag, Typography } from "antd";
+import {
+  App,
+  Button,
+  Dropdown,
+  Flex,
+  Input,
+  MenuProps,
+  Space,
+  Table,
+  TableColumnType,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import { ColumnsType, FilterDropdownProps } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 
 const { Title } = Typography;
 
-export default function OrganizationPage() {
+export default function EventPage() {
   const navigate = useNavigate();
   const { message } = App.useApp();
 
+  const [search, setSearch] = useQueryState("search");
+  const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
   const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
-  const [filter, setFilter] = useState<{
-    name?: string;
-    slug?: string;
-  }>({});
-
-  const { data, isLoading } = useSWR(["organization/list", filter, currentPage, pageSize], () =>
-    OrganizationAPI.getOrganizationList({
+  const { data, isLoading, mutate } = useSWR(["event-list", currentPage, pageSize, search, orgSearch], () =>
+    EventAPI.getEventList({
       pageSize: pageSize,
       current: currentPage,
-      name: filter.name,
-      slug: filter.slug,
+      search: search || undefined,
+      orgSearch: orgSearch || undefined,
     }),
   );
 
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      await EventAPI.deleteEvent(id);
+      message.success("删除展商成功，如果是误操作请马上联系管理员。");
+      mutate();
+    } catch (error) {
+      message.error("删除展商失败，请稍后重试。");
+    }
+  };
+
   const handleRefreshPage = async (slug: string) => {
-    await cleanPageCache(slug);
+    await cleanPageCache(`${slug}`);
     message.success("刷新页面缓存成功");
   };
 
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"],
+    dataIndex: keyof EventItem,
+  ) => {
+    console.log(selectedKeys);
+    confirm();
+
+    if (dataIndex === "name") {
+      setSearch(selectedKeys[0]);
+    } else if (dataIndex === "organization") {
+      setOrgSearch(selectedKeys[0]);
+    }
+    setCurrentPage(1);
+  };
+
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: FilterDropdownProps["confirm"],
+    dataIndex: keyof EventItem,
+  ) => {
+    clearFilters();
+    confirm();
+
+    if (dataIndex === "name") {
+      setSearch(null);
+    } else if (dataIndex === "organization") {
+      setOrgSearch(null);
+    }
+    setCurrentPage(1);
+  };
+
   const getColumnSearchProps = (
-    dataIndex: keyof Organization,
+    dataIndex: keyof EventItem,
     searchPlaceholder?: string,
-  ): TableColumnType<Organization> => ({
+  ): TableColumnType<EventItem> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Space orientation="vertical">
@@ -82,37 +134,56 @@ export default function OrganizationPage() {
     filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
   });
 
-  const columns: ColumnsType<Organization> = [
+  const columns: ColumnsType<EventItem> = [
     {
-      title: "展方名称",
+      title: "展商",
+      dataIndex: ["organization", "name"],
+      key: "organizationName",
+      ...getColumnSearchProps("organization", "请输入展商名称"),
+    },
+    {
+      title: "展会名称",
       dataIndex: "name",
       key: "name",
-      ...getColumnSearchProps("name", "请输入展方名称"),
+      ...getColumnSearchProps("name", "请输入展会名称"),
+    },
+    {
+      title: "日期",
+      key: "date",
+      render: (_, record) => (
+        <Space>
+          <Tag>
+            {dayjs(record.startAt).format("YYYY/MM/DD")}-{dayjs(record.endAt).format("MM/DD")}
+          </Tag>
+        </Space>
+      ),
     },
     {
       title: "状态",
       dataIndex: "status",
       key: "status",
-      render: (status) => OrganizationStatusLabel[status],
-    },
-    {
-      title: "类型",
-      dataIndex: "type",
-      key: "type",
-      render: (type) => <Tag>{OrganizationTypeLabel[type] || "未配置"}</Tag>,
-    },
-    {
-      title: "Slug",
-      dataIndex: "slug",
-      key: "slug",
-      ...getColumnSearchProps("slug", "请输入展方 Slug"),
-    },
-    {
-      title: "创立日期",
-      key: "date",
-      render: (_, record) => (
-        <Space>{record.creationTime ? dayjs(record.creationTime).format("YYYY年MM月DD日") : "未配置"}</Space>
+      render: (status) => (
+        <Tooltip title={EventStatusLabel[status]}>
+          <Tag color={EventStatusColor[status]}>{EventStatusLabel[status]}</Tag>
+        </Tooltip>
       ),
+    },
+    {
+      title: "规模",
+      dataIndex: "scale",
+      key: "scale",
+      render: (scale) => EventScaleLabel[scale],
+    },
+    {
+      title: "城市",
+      dataIndex: ["region", "name"],
+      key: "city",
+    },
+
+    {
+      title: "地址",
+      dataIndex: "address",
+      key: "address",
     },
     {
       title: "操作",
@@ -124,15 +195,15 @@ export default function OrganizationPage() {
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
-              handleRefreshPage(record.slug);
+              handleRefreshPage(`/${record.organization.slug}/${record.slug}`);
             },
           },
           {
-            key: "view-domestic",
+            key: "view",
             icon: <IconLink style={{ width: 14, height: 14 }} />,
             label: "在网站上查看",
             onClick: () => {
-              window.open(`https://www.furrycons.cn/${record.slug}`, "_blank");
+              window.open(`https://www.furrycons.cn/${record.organization.slug}/${record.slug}`, "_blank");
             },
           },
           { type: "divider" },
@@ -141,7 +212,9 @@ export default function OrganizationPage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: true,
+            onClick: () => {
+              handleDeleteEvent(record.id);
+            },
           },
         ];
 
@@ -151,7 +224,7 @@ export default function OrganizationPage() {
               type="primary"
               ghost
               onClick={() => {
-                window.open(`/dashboard/organization/${record.id}/edit`);
+                window.open(`/dashboard/event/${record.id}/edit`);
               }}
               icon={<IconEdit size={14} />}
             >
@@ -167,51 +240,22 @@ export default function OrganizationPage() {
     },
   ];
 
-  const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization,
-  ) => {
-    confirm();
-    setFilter((exist) => ({
-      ...exist,
-      ...(dataIndex === "name" ? { name: selectedKeys[0] } : {}),
-      ...(dataIndex === "slug" ? { slug: selectedKeys[0] } : {}),
-    }));
-    setCurrentPage(1);
-  };
-
-  const handleReset = (
-    clearFilters: () => void,
-    confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof Organization,
-  ) => {
-    clearFilters();
-    confirm();
-    setFilter((exist) => ({
-      ...exist,
-      ...(dataIndex === "name" ? { name: undefined } : {}),
-      ...(dataIndex === "slug" ? { slug: undefined } : {}),
-      current: 1,
-    }));
-  };
-
   return (
     <>
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
           <Title level={3} className="m-0">
-            展商列表
+            展会列表
           </Title>
 
           <Button
             type="primary"
             icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
-              navigate("/dashboard/organization/create");
+              navigate("/dashboard/event/create");
             }}
           >
-            添加展商
+            添加展会
           </Button>
         </Flex>
       </DefaultContainer>
@@ -222,17 +266,19 @@ export default function OrganizationPage() {
           columns={columns}
           loading={isLoading}
           dataSource={data?.records || []}
-          scroll={{
-            x: "max-content",
-          }}
+          scroll={{ x: "max-content" }}
           pagination={{
             pageSize: pageSize,
             total: data?.total,
             current: currentPage,
           }}
-          onChange={(pagination) => {
-            setPageSize(pagination.pageSize || pageSize);
-            setCurrentPage(pagination.current || currentPage);
+          onChange={(tablePagination) => {
+            if (tablePagination.current) {
+              setCurrentPage(tablePagination.current);
+            }
+            if (tablePagination.pageSize) {
+              setPageSize(tablePagination.pageSize);
+            }
           }}
         />
       </div>

@@ -1,9 +1,4 @@
-import {
-  EventLocationType,
-  EventScale,
-  EventStatus,
-  EventType,
-} from "@/types/event";
+import { EventLocationType, EventScale, EventStatus, EventType } from "@/types/event";
 
 export const EventStatusLabel = {
   [EventStatus.EventScheduled]: "正常",
@@ -43,4 +38,10 @@ export const EventLocationTypeLabel = {
   [EventLocationType.Hotel]: "酒店",
   [EventLocationType.Venue]: "场馆",
   [EventLocationType.Online]: "线上",
+};
+
+export const EventDefaultThumbnail = {
+  default: "fec-event-default-cover.png",
+  blank: "fec-event-blank-cover.png",
+  cancel: "fec-event-cancel-cover.png",
 };

@@ -1,35 +1,33 @@
 import Axios from "@/api";
-import type {
-  CrateFeatureType,
-  EditableFeatureType,
-  FeatureType,
-} from "@/types/feature";
+import { InferZodType } from "@/types/common";
+import type { Feature } from "@/types/feature";
 import type { List } from "@/types/Request";
+import { z } from "zod";
 
-export async function getFeatureList(params: {
-  pageSize: number;
-  current: number;
-  name?: string;
-}) {
-  const res = await Axios.get<List<FeatureType>>("/internal/cms/event/feature", {
-    params,
-  });
+export const EditFeatureApiBody = z.object({
+  name: z.string().min(1),
+  category: z.string().min(1),
+  description: z.string().nullish(),
+});
 
-  return res.data;
-}
+export class FeatureAPI {
+  static async getFeatureList(params: { pageSize: number; current: number; name?: string }) {
+    const res = await Axios.get<List<Feature>>("/internal/cms/event/feature", {
+      params,
+    });
 
-export async function createFeature(feature: CrateFeatureType) {
-  const res = await Axios.post<FeatureType>("/internal/cms/event/feature/create", {
-    feature,
-  });
+    return res.data;
+  }
 
-  return res.data;
-}
+  static async createFeature(feature: InferZodType<typeof EditFeatureApiBody>) {
+    const res = await Axios.post<Feature>("/internal/cms/event/feature", feature);
 
-export async function updateFeature(feature: EditableFeatureType) {
-  const res = await Axios.post<FeatureType>("/internal/cms/event/feature/update", {
-    feature,
-  });
+    return res.data;
+  }
 
-  return res.data;
+  static async updateFeature(id: string, feature: InferZodType<typeof EditFeatureApiBody>) {
+    const res = await Axios.post<Feature>(`/internal/cms/event/feature/${id}`, feature);
+
+    return res.data;
+  }
 }

@@ -1,47 +1,47 @@
-import { cleanPageCache } from '@/api/dashboard/cache';
-import DefaultContainer from '@/components/Container';
-import { Button, Grid, Group, SimpleGrid, Title } from '@mantine/core';
-import { IconRefresh } from '@tabler/icons-react';
+import { cleanPageCache } from "@/api/dashboard/cache";
+import DefaultContainer from "@/components/Layout/Container";
+import { Button, Flex, Typography, Row, Col } from "antd";
+import { IconRefresh } from "@tabler/icons-react";
+
+const { Title } = Typography;
 
 export default function CacheManager() {
   return (
     <>
-      <DefaultContainer className="sticky top-0 z-10">
-        <Group justify="space-between">
-          <Title order={2}>缓存刷新控制台</Title>
-        </Group>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center">
+          <Title level={2} style={{ margin: 0 }}>
+            缓存刷新控制台
+          </Title>
+        </Flex>
       </DefaultContainer>
 
       <DefaultContainer className="mt-4">
-        <SimpleGrid cols={4}>
-          <Button
-            leftSection={<IconRefresh size={16} stroke={1.5} />}
-            onClick={() => refreshPage('/')}
-          >
-            刷新首页
-          </Button>
+        <Row gutter={[16, 16]}>
+          <Col span={6}>
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => refreshPage("/")} block>
+              刷新首页
+            </Button>
+          </Col>
 
-          <Button
-            leftSection={<IconRefresh size={16} stroke={1.5} />}
-            onClick={() => refreshPage('/city')}
-          >
-            刷新城市页面
-          </Button>
+          <Col span={6}>
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => refreshPage("/city")} block>
+              刷新城市页面
+            </Button>
+          </Col>
 
-          <Button
-            leftSection={<IconRefresh size={16} stroke={1.5} />}
-            onClick={() => refreshPage('/organization')}
-          >
-            刷新组织页面
-          </Button>
+          <Col span={6}>
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => refreshPage("/organization")} block>
+              刷新组织页面
+            </Button>
+          </Col>
 
-          <Button
-            leftSection={<IconRefresh size={16} stroke={1.5} />}
-            onClick={() => refreshPage('/year')}
-          >
-            刷新年份页面
-          </Button>
-        </SimpleGrid>
+          <Col span={6}>
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => refreshPage("/year")} block>
+              刷新年份页面
+            </Button>
+          </Col>
+        </Row>
       </DefaultContainer>
     </>
   );

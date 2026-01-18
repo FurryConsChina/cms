@@ -1,10 +1,9 @@
 import { getTencentLocation } from "@/api/dashboard/map";
 import { TencentLocation } from "@/types/map";
 import { Region } from "@/types/region";
-import { Center, SimpleGrid, Stack } from "@mantine/core";
+import { Flex, Row, Col } from "antd";
 import { useMutation } from "@tanstack/react-query";
 import { Card, Modal, Spin } from "antd";
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 export default function LocationSearch({
@@ -20,8 +19,7 @@ export default function LocationSearch({
   region: Region;
   keyword?: string | null;
 }) {
-  const [selectedLocation, setSelectedLocation] =
-    useState<TencentLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<TencentLocation | null>(null);
   return (
     <Modal
       title="搜索地址"
@@ -72,20 +70,17 @@ function ModalContent({
   }, [keyword, region]);
 
   return isPending ? (
-    <Center>
+    <Flex justify="center" align="center">
       <Spin />
-    </Center>
+    </Flex>
   ) : (
-    <SimpleGrid cols={2}>
+    <Row gutter={[16, 16]}>
       {addressSearchResult?.data.map((location) => (
-        <LocationItem
-          key={location.id}
-          location={location}
-          onSelect={onSelect}
-          selected={selectedLocation?.id === location.id}
-        />
+        <Col span={12} key={location.id}>
+          <LocationItem location={location} onSelect={onSelect} selected={selectedLocation?.id === location.id} />
+        </Col>
       ))}
-    </SimpleGrid>
+    </Row>
   );
 }
 

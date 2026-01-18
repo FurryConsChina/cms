@@ -1,91 +1,53 @@
 import useAuthStore from "@/stores/auth";
-import { useForm } from "@mantine/form";
 import { useMutation } from "@tanstack/react-query";
-
-import { login as userLogin } from "@/api/auth";
-import {
-  Anchor,
-  Button,
-  Center,
-  Container,
-  Flex,
-  Group,
-  Paper,
-  PasswordInput,
-  TextInput,
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { IconHome } from "@tabler/icons-react";
-import { Segmented } from "antd";
-import { zodResolver } from "mantine-form-zod-resolver";
+import { AuthAPI } from "@/api/auth";
+import { Button, Card, Flex, App, Typography, Form, Input, Segmented } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import z from "zod";
+import { IconFileDescription } from "@tabler/icons-react";
+
+const { Link } = Typography;
 
 export default function Auth() {
   const { login, refreshToken } = useAuthStore();
   const navigate = useNavigate();
+  const { message } = App.useApp();
+  const [form] = Form.useForm();
 
-  const [currentSegment, setCurrentSegment] = useState<
-    "login" | "register" | "reset"
-  >("login");
+  const [currentSegment, setCurrentSegment] = useState<"login" | "register" | "reset">("login");
 
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      email: "",
-      password: "",
-    },
-
-    validate: zodResolver(
-      z.object({
-        email: z.string().email("无效的邮箱"),
-        password: z.string().min(6, "密码长度至少为6位"),
-      })
-    ),
-  });
-
-  const { mutate } = useMutation({
-    mutationFn: userLogin,
+  const { mutate, isPending } = useMutation({
+    mutationFn: AuthAPI.login,
     onSuccess: (data) => {
       login(data.user);
       refreshToken(data.token);
       navigate("/dashboard");
-      notifications.show({
-        message: "登录成功",
-      });
+      message.success("登录成功");
+    },
+    onError: (error) => {
+      message.error(`登录失败: ${error instanceof Error ? error.message : "未知错误"}`);
     },
   });
 
+  const handleFinish = (values: { email: string; password: string }) => {
+    mutate(values);
+  };
+
   return (
-    <Container
-      fluid
+    <div
       className="h-screen"
       style={{
         background: "radial-gradient(#e0f2fe,transparent)",
-        // backgroundImage: `url("http://s-sh-11810-static.oss.dogecdn.com/jesse.jpg")`,
-        // backgroundSize: "cover",
-        // backgroundPosition: "center",
-        // backgroundRepeat: "no-repeat",
-        // backgroundAttachment: "fixed",
         backdropFilter: "blur(5px)",
       }}
     >
-      <Flex
-        justify={"center"}
-        align={"flex-end"}
-        style={{ height: "100%" }}
-        direction="column"
-      >
-        <Paper
-          withBorder
-          shadow="sm"
-          p={20}
-          radius="md"
-          my="20"
+      <Flex justify="center" className="items-center md:items-end" style={{ height: "100%" }} vertical>
+        <Card
           className="w-full md:w-96 h-full"
+          style={{ margin: 20, borderRadius: 8 }}
+          styles={{ body: { height: "100%" } }}
         >
-          <Flex direction="column" justify="space-between" h="100%">
+          <Flex vertical justify="space-between" style={{ height: "100%" }}>
             <div>
               <Segmented
                 value={currentSegment}
@@ -99,53 +61,45 @@ export default function Auth() {
                 ]}
               />
 
-              <form
-                onSubmit={form.onSubmit((values) => {
-                  mutate(values);
-                })}
-                className="space-y-6"
-              >
-                <TextInput
-                  type="email"
-                  required
-                  autoComplete="email"
+              <Form form={form} onFinish={handleFinish} layout="vertical">
+                <Form.Item
                   label="邮箱"
-                  placeholder="请输入您的注册邮箱"
-                  radius="md"
-                  mt="lg"
-                  key={form.key("email")}
-                  {...form.getInputProps("email")}
-                />
-                <PasswordInput
+                  name="email"
+                  rules={[
+                    { required: true, message: "请输入邮箱" },
+                    { type: "email", message: "无效的邮箱" },
+                  ]}
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input type="email" autoComplete="email" placeholder="请输入您的注册邮箱" />
+                </Form.Item>
+                <Form.Item
                   label="密码"
-                  placeholder="请输入您的密码"
-                  required
-                  mt="lg"
-                  radius="md"
-                  key={form.key("password")}
-                  {...form.getInputProps("password")}
-                />
-                <Group justify="space-between" mt="sm">
-                  <Anchor component="button" size="sm">
-                    忘记密码了吗？
-                  </Anchor>
-                  {/* <Anchor component="button" size="sm">
-                    使用一次性登录代码
-                  </Anchor> */}
-                </Group>
-                <Button type="submit" fullWidth mt="xl" radius="md">
+                  name="password"
+                  rules={[
+                    { required: true, message: "请输入密码" },
+                    { min: 6, message: "密码长度至少为6位" },
+                  ]}
+                  style={{ marginBottom: 16 }}
+                >
+                  <Input.Password placeholder="请输入您的密码" />
+                </Form.Item>
+                <Flex justify="space-between" style={{ marginTop: 8 }}>
+                  <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
+                </Flex>
+                <Button type="primary" htmlType="submit" block loading={isPending} style={{ marginTop: 24 }}>
                   登录
                 </Button>
-              </form>
+              </Form>
             </div>
-            <Center>
-              <Anchor href="https://docs.furrycons.cn" target="_blank">
-                <IconHome color="gray" size="18" />
-              </Anchor>
-            </Center>
+            <Flex justify="center">
+              <Link href="https://docs.furrycons.cn" target="_blank">
+                <IconFileDescription color="gray" size="18" />
+              </Link>
+            </Flex>
           </Flex>
-        </Paper>
+        </Card>
       </Flex>
-    </Container>
+    </div>
   );
 }

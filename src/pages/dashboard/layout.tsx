@@ -1,149 +1,191 @@
 import useAuthStore from "@/stores/auth";
-import {
-  AppShell,
-  AppShellMain,
-  AppShellNavbar,
-  AppShellSection,
-  Divider,
-  NavLink,
-} from "@mantine/core";
+import { Layout, Menu, Button, Flex } from "antd";
+import type { MenuProps } from "antd";
 import {
   IconApps,
   IconHome,
   IconLogout,
   IconMapPin,
+  IconMenu2,
   IconTag,
   IconTicket,
   IconTrademark,
   IconUser,
   IconUserCode,
 } from "@tabler/icons-react";
-import clsx from "clsx";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
+import { useState } from "react";
+import clsx from "clsx";
 
-const linksData = [
-  { link: "/dashboard", label: "首页", icon: IconHome },
-  { link: "/dashboard/event", label: "展会", icon: IconTicket },
-  { link: "/dashboard/organization", label: "展商", icon: IconTrademark },
-  { link: "/dashboard/feature", label: "展会标签", icon: IconTag },
-  { link: "/dashboard/region", label: "区域管理", icon: IconMapPin },
+const { Sider, Content, Header } = Layout;
+
+type MenuItem = Required<MenuProps>["items"][number];
+
+const menuItems: MenuItem[] = [
   {
-    link: "/developer",
+    key: "/dashboard",
+    icon: <IconHome size="1.1rem" stroke={1.5} />,
+    label: "首页",
+  },
+  {
+    key: "/dashboard/event",
+    icon: <IconTicket size="1.1rem" stroke={1.5} />,
+    label: "展会",
+  },
+  {
+    key: "/dashboard/organization",
+    icon: <IconTrademark size="1.1rem" stroke={1.5} />,
+    label: "展商",
+  },
+  {
+    key: "/dashboard/feature",
+    icon: <IconTag size="1.1rem" stroke={1.5} />,
+    label: "展会标签",
+  },
+  {
+    key: "/dashboard/region",
+    icon: <IconMapPin size="1.1rem" stroke={1.5} />,
+    label: "地区管理",
+  },
+  {
+    type: "divider",
+  },
+  {
+    key: "/developer",
+    icon: <IconUserCode size="1.1rem" stroke={1.5} />,
     label: "开发者",
-    icon: IconUserCode,
-    links: [
-      { link: "/developer/application", label: "应用管理", icon: IconApps },
+    children: [
+      {
+        key: "/developer/application",
+        icon: <IconApps size="1.1rem" stroke={1.5} />,
+        label: "应用管理",
+      },
     ],
   },
-  // {
-  //   link: '/dashboard/cache-manager',
-  //   label: '缓存管理',
-  //   icon: IconCloudStorm,
-  // },
 ];
+
+const bottomMenuItems: MenuItem[] = [
+  {
+    key: "/dashboard/user/me",
+    icon: <IconUser size="1rem" stroke={1.5} />,
+    label: "个人设置",
+  },
+  {
+    key: "logout",
+    icon: <IconLogout size="1rem" stroke={1.5} />,
+    label: "退出登录",
+  },
+];
+
+const siderStyle: React.CSSProperties = {
+  overflow: "auto",
+  height: "100vh",
+  // position: "sticky",
+  insetInlineStart: 0,
+  top: 0,
+  scrollbarWidth: "thin",
+  scrollbarGutter: "stable",
+};
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [collapsed, setCollapsed] = useState(false);
+
   const { logout } = useAuthStore();
 
-  const isLinkActive = (linkPath: string) => {
+  const getSelectedKeys = () => {
     const currentPath = location.pathname;
 
-    // // 特殊处理首页路径
-    if (linkPath === "/dashboard") {
-      return currentPath === "/dashboard";
+    // 特殊处理首页路径
+    if (currentPath === "/dashboard") {
+      return ["/dashboard"];
     }
 
-    // 检查是否为精确匹配
-    if (currentPath === linkPath) {
-      return true;
+    // 查找最匹配的路径
+    const allKeys = [
+      "/dashboard",
+      "/dashboard/event",
+      "/dashboard/organization",
+      "/dashboard/feature",
+      "/dashboard/region",
+      "/developer/application",
+    ];
+
+    for (const key of allKeys) {
+      if (key !== "/dashboard" && currentPath.startsWith(key)) {
+        return [key];
+      }
     }
 
-    // 检查是否为子路径匹配，但排除更深层的子路径
-    if (currentPath.startsWith(`${linkPath}/`)) {
-      // 获取当前路径在 linkPath 之后的剩余部分
-      const remainingPath = currentPath.slice(linkPath.length + 1);
-
-      // 如果剩余路径不包含更多斜杠，说明是直接子路径
-      // 如果包含更多斜杠，说明是更深层的子路径，不应该激活父路径
-      return !remainingPath.includes("/");
-    }
-
-    return false;
+    return [currentPath];
   };
 
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === "logout") {
+      logout();
+    } else if (e.key !== "user-settings") {
+      navigate(e.key);
+    }
+  };
+  console.log(collapsed);
   return (
-    <AppShell navbar={{ width: 300, breakpoint: "sm" }} padding="xl">
-      <AppShellNavbar withBorder={false} p="xl" className="bg-slate-100">
-        <AppShellSection grow>
-          <nav className="flex flex-col gap-2">
-            {linksData.map((link) => (
-              <NavLink
-                key={link.link}
-                active={isLinkActive(link.link)}
-                onClick={() => {
-                  if (link.links) {
-                    return;
-                  }
-                  navigate(link.link);
-                }}
-                label={link.label}
-                leftSection={<link.icon size="1.1rem" stroke={1.5} />}
-                className={clsx(
-                  "rounded",
-                  isLinkActive(link.link) && "shadow shadow-blue-500/20"
-                )}
-              >
-                {link.links?.map((subLink) => (
-                  <NavLink
-                    key={subLink.link}
-                    active={isLinkActive(subLink.link)}
-                    onClick={() => {
-                      navigate(subLink.link);
-                    }}
-                    label={subLink.label}
-                    leftSection={<subLink.icon size="1.1rem" stroke={1.5} />}
-                    className={clsx(
-                      "rounded",
-                      isLinkActive(subLink.link) && "shadow shadow-blue-500/20"
-                    )}
-                  />
-                ))}
-              </NavLink>
-            ))}
-          </nav>
-        </AppShellSection>
-
-        <AppShellSection my="xs">
-          <Divider />
-        </AppShellSection>
-
-        <AppShellSection>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        trigger={null}
+        collapsedWidth="100"
+        width={300}
+        className={clsx(
+          "bg-slate-100 z-50 fixed md:sticky shadow-md md:shadow-none",
+          collapsed ? "-translate-x-full md:translate-x-0" : "block",
+        )}
+        style={siderStyle}
+        collapsible
+        collapsed={collapsed}
+      >
+        <Flex justify="space-between" vertical className="px-2 h-full">
           <div>
-            <NavLink
-              label="个人设置"
-              leftSection={<IconUser size="1rem" stroke={1.5} />}
-              className="rounded"
-              disabled
-            />
-            <NavLink
-              onClick={logout}
-              label="退出登录"
-              leftSection={<IconLogout size="1rem" stroke={1.5} />}
-              className="rounded"
+            <Header
+              className={clsx(
+                "flex items-center bg-transparent p-0 md:p-2",
+                collapsed ? "justify-center" : "justify-end",
+              )}
+            >
+              <Button onClick={() => setCollapsed(!collapsed)}>
+                <IconMenu2 size="1.1rem" stroke={1.5} />
+              </Button>
+            </Header>
+
+            <Menu
+              mode="inline"
+              selectedKeys={getSelectedKeys()}
+              items={menuItems}
+              onClick={handleMenuClick}
+              style={{ background: "transparent", border: "none" }}
             />
           </div>
-        </AppShellSection>
-      </AppShellNavbar>
 
-      <AppShellMain className="bg-slate-100">
-        <NuqsAdapter>
+          <Menu
+            mode="inline"
+            selectedKeys={[]}
+            items={bottomMenuItems}
+            onClick={handleMenuClick}
+            style={{ background: "transparent", border: "none" }}
+          />
+        </Flex>
+      </Sider>
+
+      <Layout>
+        <Header className={clsx("flex items-center bg-transparent p-2 md:hidden")}>
+          <Button onClick={() => setCollapsed(!collapsed)}>
+            <IconMenu2 size="1.1rem" stroke={1.5} />
+          </Button>
+        </Header>
+        <Content className="bg-slate-100 p-2">
           <Outlet />
-        </NuqsAdapter>
-      </AppShellMain>
-    </AppShell>
+        </Content>
+      </Layout>
+    </Layout>
   );
 }

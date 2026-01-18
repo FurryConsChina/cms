@@ -2,25 +2,10 @@ import COS from "cos-js-sdk-v5";
 
 import { getUploadSignature } from "@/api/dashboard/upload";
 
-export async function uploadToCOS({
-  pathKey,
-  file,
-}: {
-  pathKey: string;
-  file: File;
-}) {
+export async function uploadToCOS({ pathKey, file }: { pathKey: string; file: File }) {
   const signedKey = await getUploadSignature({ pathKey });
 
-  const {
-    tempSecretId,
-    tempSecretKey,
-    sessionToken,
-    startTime,
-    expiredTime,
-    bucket,
-    region,
-    key,
-  } = signedKey;
+  const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } = signedKey;
   const cos = new COS({
     SecretId: tempSecretId,
     SecretKey: tempSecretKey,

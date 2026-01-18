@@ -6,16 +6,16 @@
 
 - **前端框架**: React 19 + TypeScript
 - **构建工具**: Rsbuild
-- **UI 组件库**: Mantine + Ant Design + Tailwind CSS
+- **UI 组件库**: Ant Design + Tailwind CSS
 - **状态管理**: Zustand + TanStack Query
-- **表单处理**: Mantine Form + Zod
+- **表单处理**: React Hook Form + Zod
 - **路由**: React Router DOM
 - **样式**: Tailwind CSS + PostCSS
 
 ## 开发环境要求
 
-- Node.js 18+ 
-- Yarn 4.4.1+
+- Node.js 22+
+- Yarn 4.6.1+
 
 ## 快速开始
 
