@@ -270,7 +270,7 @@ export default function EventPage() {
         </Flex>
       </DefaultContainer>
 
-      <div className="shadow mt-4 p-4 rounded-xl bg-white">
+      <div className="shadow-sm mt-4 p-4 rounded-xl bg-white">
         <Table
           rowKey={(row) => row.id}
           columns={columns}

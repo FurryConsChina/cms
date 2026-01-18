@@ -5,7 +5,7 @@ export default function DefaultContainer(
 ) {
   const { children, className, ...reset } = props;
   return (
-    <div {...reset} className={twMerge("shadow p-4 rounded-xl bg-white", className)}>
+    <div {...reset} className={twMerge("shadow-sm p-4 rounded-xl bg-white", className)}>
       {children}
     </div>
   );
