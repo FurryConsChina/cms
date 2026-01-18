@@ -64,10 +64,9 @@ const menuItems: MenuItem[] = [
 
 const bottomMenuItems: MenuItem[] = [
   {
-    key: "user-settings",
+    key: "/dashboard/user/me",
     icon: <IconUser size="1rem" stroke={1.5} />,
     label: "个人设置",
-    disabled: true,
   },
   {
     key: "logout",

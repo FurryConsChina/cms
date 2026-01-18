@@ -12,6 +12,7 @@ import OrganizationPage from "@/pages/dashboard/organization/page";
 import RegionPage from "@/pages/dashboard/region";
 import RegionEditPage from "@/pages/dashboard/region/edit";
 import ErrorPage from "@/pages/error";
+import UserDetail from "@/pages/user/detail";
 import useAuthStore from "@/stores/auth";
 import React from "react";
 import { createBrowserRouter, redirect } from "react-router-dom";
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
       {
         path: "cache-manager",
         Component: CacheManagerPage,
+      },
+      {
+        path: "user/me",
+        Component: UserDetail,
       },
     ],
   },

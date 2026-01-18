@@ -1,15 +1,10 @@
 import useAuthStore from "@/stores/auth";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-
-import { login as userLogin } from "@/api/auth";
-import { Button, Card, Flex, App, Typography, Form, Input } from "antd";
-import { IconHome } from "@tabler/icons-react";
-import { Segmented } from "antd";
+import { AuthAPI } from "@/api/auth";
+import { Button, Card, Flex, App, Typography, Form, Input, Segmented } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import z from "zod";
+import { IconFileDescription } from "@tabler/icons-react";
 
 const { Link } = Typography;
 
@@ -17,35 +12,26 @@ export default function Auth() {
   const { login, refreshToken } = useAuthStore();
   const navigate = useNavigate();
   const { message } = App.useApp();
+  const [form] = Form.useForm();
 
   const [currentSegment, setCurrentSegment] = useState<"login" | "register" | "reset">("login");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-    resolver: zodResolver(
-      z.object({
-        email: z.string().email("无效的邮箱"),
-        password: z.string().min(6, "密码长度至少为6位"),
-      }),
-    ),
-  });
-
-  const { mutate } = useMutation({
-    mutationFn: userLogin,
+  const { mutate, isPending } = useMutation({
+    mutationFn: AuthAPI.login,
     onSuccess: (data) => {
       login(data.user);
       refreshToken(data.token);
       navigate("/dashboard");
       message.success("登录成功");
     },
+    onError: (error) => {
+      message.error(`登录失败: ${error instanceof Error ? error.message : "未知错误"}`);
+    },
   });
+
+  const handleFinish = (values: { email: string; password: string }) => {
+    mutate(values);
+  };
 
   return (
     <div
@@ -56,7 +42,11 @@ export default function Auth() {
       }}
     >
       <Flex justify="center" align="flex-end" style={{ height: "100%" }} vertical>
-        <Card className="w-full md:w-96 h-full" style={{ margin: 20, borderRadius: 8 }}>
+        <Card
+          className="w-full md:w-96 h-full"
+          style={{ margin: 20, borderRadius: 8 }}
+          styles={{ body: { height: "100%" } }}
+        >
           <Flex vertical justify="space-between" style={{ height: "100%" }}>
             <div>
               <Segmented
@@ -71,41 +61,40 @@ export default function Auth() {
                 ]}
               />
 
-              <form
-                onSubmit={handleSubmit((values) => {
-                  mutate(values);
-                })}
-                className="space-y-6"
-              >
+              <Form form={form} onFinish={handleFinish} layout="vertical">
                 <Form.Item
                   label="邮箱"
-                  required
-                  validateStatus={errors.email ? "error" : undefined}
-                  help={errors.email?.message}
+                  name="email"
+                  rules={[
+                    { required: true, message: "请输入邮箱" },
+                    { type: "email", message: "无效的邮箱" },
+                  ]}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input type="email" autoComplete="email" placeholder="请输入您的注册邮箱" {...register("email")} />
+                  <Input type="email" autoComplete="email" placeholder="请输入您的注册邮箱" />
                 </Form.Item>
                 <Form.Item
                   label="密码"
-                  required
-                  validateStatus={errors.password ? "error" : undefined}
-                  help={errors.password?.message}
+                  name="password"
+                  rules={[
+                    { required: true, message: "请输入密码" },
+                    { min: 6, message: "密码长度至少为6位" },
+                  ]}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input.Password placeholder="请输入您的密码" {...register("password")} />
+                  <Input.Password placeholder="请输入您的密码" />
                 </Form.Item>
                 <Flex justify="space-between" style={{ marginTop: 8 }}>
                   <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
                 </Flex>
-                <Button type="primary" htmlType="submit" block style={{ marginTop: 24, borderRadius: 8 }}>
+                <Button type="primary" htmlType="submit" block loading={isPending} style={{ marginTop: 24 }}>
                   登录
                 </Button>
-              </form>
+              </Form>
             </div>
             <Flex justify="center">
               <Link href="https://docs.furrycons.cn" target="_blank">
-                <IconHome color="gray" size="18" />
+                <IconFileDescription color="gray" size="18" />
               </Link>
             </Flex>
           </Flex>
