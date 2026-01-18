@@ -6,7 +6,7 @@ import CacheManagerPage from "@/pages/dashboard/cacheManager";
 import ApplicationPage from "@/pages/dashboard/developer/application";
 import EventEditPage from "@/pages/dashboard/event/edit/page";
 import EventPage from "@/pages/dashboard/event/page";
-import FeaturePage from "@/pages/dashboard/feature";
+import FeaturePage from "@/pages/dashboard/feature/list";
 import OrganizationEditPage from "@/pages/dashboard/organization/edit";
 import OrganizationPage from "@/pages/dashboard/organization/page";
 import RegionPage from "@/pages/dashboard/region";

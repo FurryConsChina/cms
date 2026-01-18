@@ -23,19 +23,4 @@ export const FeatureSchema = z.object({
   deletedAt: z.date().nullable(),
 });
 
-export const CreateFeatureSchema = FeatureSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
-export const EditableFeatureSchema = FeatureSchema.omit({
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
-export type FeatureType = z.infer<typeof FeatureSchema>;
-export type CrateFeatureType = z.infer<typeof CreateFeatureSchema>;
-export type EditableFeatureType = z.infer<typeof EditableFeatureSchema>;
+export type Feature = z.infer<typeof FeatureSchema>;

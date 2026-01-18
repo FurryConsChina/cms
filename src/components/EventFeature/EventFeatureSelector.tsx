@@ -1,5 +1,5 @@
-import { getFeatureList } from "@/api/dashboard/feature";
-import type { FeatureType } from "@/types/feature";
+import { FeatureAPI } from "@/api/dashboard/feature";
+import type { Feature } from "@/types/feature";
 import { FeatureCategoryLabel } from "@/types/feature";
 import { Select, Spin, Form } from "antd";
 import { debounce } from "es-toolkit";
@@ -9,14 +9,14 @@ import useSWR from "swr";
 interface EventFeatureSelectorProps {
   value?: string[];
   onChange?: (value: string[] | null) => void;
-  onSelect?: (value: FeatureType[] | null) => void;
+  onSelect?: (value: Feature[] | null) => void;
   placeholder?: string;
   label?: string;
   required?: boolean;
   disabled?: boolean;
   error?: string;
   description?: string;
-  selectedOptions?: FeatureType[] | null;
+  selectedOptions?: Feature[] | null;
 }
 
 export default function EventFeatureSelector({
@@ -42,7 +42,7 @@ export default function EventFeatureSelector({
     searchValue
       ? [`feature-list-search`, { pageSize: 50, current: 1, name: searchValue }]
       : [`feature-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getFeatureList(params),
+    ([_, params]: [string, any]) => FeatureAPI.getFeatureList(params),
   );
 
   const features = [...(selectedOptions || []), ...(data?.records || [])];
@@ -74,7 +74,7 @@ export default function EventFeatureSelector({
       }
       return acc;
     },
-    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: FeatureType }> }>,
+    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>,
   );
 
   // 使用 useCallback 和 debounce 处理搜索
