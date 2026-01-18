@@ -10,7 +10,7 @@ import { ColumnsType } from "antd/es/table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import useSWR from "swr";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 export default function RegionPage() {
   const navigate = useNavigate();
@@ -25,23 +25,28 @@ export default function RegionPage() {
 
   const columns: ColumnsType<Region> = [
     {
-      title: "区域名称",
+      title: "地区名称",
       dataIndex: "name",
       key: "name",
     },
     {
-      title: "区域代码",
+      title: "地区代码",
       dataIndex: "code",
       key: "code",
     },
     {
-      title: "区域类型",
+      title: "地区类型",
       dataIndex: "type",
       key: "type",
       render: (_, record) => RegionTypeLabel[record.type],
     },
     {
-      title: "父级区域",
+      title: "排序顺序",
+      dataIndex: "sortOrder",
+      key: "sortOrder",
+    },
+    {
+      title: "父级地区",
       dataIndex: "parent",
       key: "parent",
       render: (_, record) => record.parent?.name,
@@ -88,7 +93,7 @@ export default function RegionPage() {
   const handleRefreshRegionSort = async () => {
     try {
       await RegionAPI.recreateRegionOrder(RegionType.CITY);
-      message.success("刷新区域排序成功");
+      message.success("刷新地区排序成功");
     } catch (error) {
       console.error(error);
     }
@@ -99,19 +104,19 @@ export default function RegionPage() {
       <DefaultContainer className="sticky top-0 z-20">
         <Flex justify="space-between" align="center">
           <Title level={3} className="m-0">
-            区域列表
+            地区列表
           </Title>
 
           <Space>
             <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={handleRefreshRegionSort}>
-              刷新区域排序
+              刷新地区排序
             </Button>
             <Button
               type="primary"
               icon={<IconCirclePlus size={16} stroke={1.5} />}
               onClick={() => navigate("/dashboard/region/create")}
             >
-              添加区域
+              添加地区
             </Button>
           </Space>
         </Flex>

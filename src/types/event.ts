@@ -206,7 +206,7 @@ export const EditEventSchema = z.object({
     common: z.array(z.uuid()).nullable(),
   }),
   featureIds: z.array(z.string()),
-  regionId: z.uuid({ message: "请选择展会区域" }),
+  regionId: z.uuid({ message: "请选择展会地区" }),
 });
 
 export type EventItem = IEvent;

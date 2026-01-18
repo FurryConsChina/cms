@@ -28,7 +28,7 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
       <h5 className="text-lg font-bold">地理信息</h5>
 
       <Form.Item
-        label="展会区域"
+        label="展会地区"
         validateStatus={form.formState.errors.regionId ? "error" : undefined}
         help={form.formState.errors.regionId?.message}
       >
@@ -37,7 +37,7 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
           control={form.control}
           render={({ field, fieldState }) => (
             <RegionSelector
-              placeholder="请选择展会区域"
+              placeholder="请选择展会地区"
               selectedOption={event?.region}
               value={field.value}
               onChange={(value) => {
@@ -106,7 +106,7 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
       <Button
         onClick={() => {
           if (!selectedRegion) {
-            return message.warning("请先选择展会区域");
+            return message.warning("请先选择展会地区");
           }
           setIsLocationSearchModalOpen(true);
         }}

@@ -43,7 +43,7 @@ const menuItems: MenuItem[] = [
   {
     key: "/dashboard/region",
     icon: <IconMapPin size="1.1rem" stroke={1.5} />,
-    label: "区域管理",
+    label: "地区管理",
   },
   {
     type: "divider",

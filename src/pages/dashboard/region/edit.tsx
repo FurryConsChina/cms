@@ -32,7 +32,7 @@ export default function RegionEditPage() {
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
         <Title level={2} style={{ margin: 0 }}>
-          {regionId ? "编辑区域" : "新建区域"}
+          {regionId ? "编辑地区" : "新建地区"}
         </Title>
       </DefaultContainer>
 
@@ -81,10 +81,10 @@ function RegionEditorContent({ region }: { region?: Region }) {
     try {
       if (region?.id) {
         await RegionAPI.updateRegion(region.id, value);
-        message.success("更新区域数据成功");
+        message.success("更新地区数据成功");
       } else {
         const res = await RegionAPI.createRegion(value);
-        message.success("创建区域数据成功");
+        message.success("创建地区数据成功");
         navigate(`/dashboard/region/${res.id}/edit`);
       }
     } catch (error) {
@@ -115,13 +115,13 @@ function RegionEditorContent({ region }: { region?: Region }) {
         <Row gutter={8}>
           <Col span={12}>
             <Form.Item
-              label="区域名称"
+              label="地区名称"
               required
               name="name"
-              rules={[{ required: true, message: "请输入区域名称" }]}
-              extra="区域名称是指该地区在简体中文中的称呼。"
+              rules={[{ required: true, message: "请输入地区名称" }]}
+              extra="地区名称是指该地区在简体中文中的称呼。"
             >
-              <Input placeholder="请输入区域名称" />
+              <Input placeholder="请输入地区名称" />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -138,20 +138,20 @@ function RegionEditorContent({ region }: { region?: Region }) {
         </Row>
 
         <Form.Item
-          label="区域代码"
+          label="地区代码"
           required
           name="code"
-          rules={[{ required: true, message: "请输入区域代码" }]}
+          rules={[{ required: true, message: "请输入地区代码" }]}
           extra="这个代码可以看作是活动和组织的slug，会拼进URL里，中国的城市就用拼音，比如北京就是beijing，而国外的城市就用英文，比如纽约就是new-york。"
         >
-          <Input placeholder="请输入区域代码" />
+          <Input placeholder="请输入地区代码" />
         </Form.Item>
 
         <Row gutter={8}>
           <Col span={8}>
-            <Form.Item label="区域类型" required name="type" rules={[{ required: true, message: "请选择区域类型" }]}>
+            <Form.Item label="地区类型" required name="type" rules={[{ required: true, message: "请选择地区类型" }]}>
               <Select
-                placeholder="请选择区域类型"
+                placeholder="请选择地区类型"
                 options={[
                   { label: RegionTypeLabel[RegionType.COUNTRY], value: RegionType.COUNTRY, disabled: true },
                   { label: RegionTypeLabel[RegionType.STATE], value: RegionType.STATE },
@@ -161,9 +161,9 @@ function RegionEditorContent({ region }: { region?: Region }) {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="区域级别" required name="level" rules={[{ required: true, message: "请选择区域级别" }]}>
+            <Form.Item label="地区级别" required name="level" rules={[{ required: true, message: "请选择地区级别" }]}>
               <Select
-                placeholder="请选择区域级别"
+                placeholder="请选择地区级别"
                 options={[
                   { label: "省份/直辖市", value: 2 },
                   { label: "城市", value: 3 },
@@ -172,8 +172,8 @@ function RegionEditorContent({ region }: { region?: Region }) {
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="父级区域" name="parentId">
-              <RegionSelector placeholder="请选择父级区域" />
+            <Form.Item label="父级地区" name="parentId">
+              <RegionSelector placeholder="请选择父级地区" />
             </Form.Item>
           </Col>
         </Row>
@@ -242,7 +242,7 @@ function RegionEditorContent({ region }: { region?: Region }) {
 
       <div>
         <Title level={5} style={{ margin: "12px 0" }}>
-          区域信息
+          地区信息
         </Title>
         <Row gutter={8}>
           <Col span={12}>
@@ -316,7 +316,7 @@ function RegionEditorContent({ region }: { region?: Region }) {
           其他信息
         </Title>
         <Form.Item label="备注" name="remark">
-          <TextArea placeholder="请输入区域描述" autoSize={{ minRows: 4 }} />
+          <TextArea placeholder="请输入地区描述" autoSize={{ minRows: 4 }} />
         </Form.Item>
       </div>
 
