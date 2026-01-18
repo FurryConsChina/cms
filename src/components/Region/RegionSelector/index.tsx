@@ -1,4 +1,4 @@
-import { getRegionList } from "@/api/dashboard/region";
+import { RegionAPI } from "@/api/dashboard/region";
 import type { Region } from "@/types/region";
 import { Select, Spin, Form } from "antd";
 import { debounce } from "es-toolkit";
@@ -41,7 +41,7 @@ export default function RegionSelector({
     searchValue
       ? [`region-list-search`, { pageSize: 50, current: 1, code: searchValue }]
       : [`region-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getRegionList(params)
+    ([_, params]: [string, any]) => RegionAPI.getRegionList(params)
   );
 
   const regions = [...(selectedOption ? [selectedOption] : []), ...(data?.records || [])];

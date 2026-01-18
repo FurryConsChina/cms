@@ -15,20 +15,20 @@ export const RegionTypeLabel = {
 };
 
 export const RegionSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
   code: z.string(),
-  type: z.nativeEnum(RegionType),
+  type: z.enum(RegionType),
   level: z.number(),
   parentId: z.string().uuid().nullish(),
   parent: z
     .object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       name: z.string(),
       code: z.string(),
-      type: z.nativeEnum(RegionType),
+      type: z.enum(RegionType),
       level: z.number(),
-      parentId: z.string().uuid().nullish(),
+      parentId: z.uuid().nullish(),
       countryCode: z.string().nullish(),
       isOverseas: z.boolean(),
       addressFormat: z.string().nullish(),
@@ -41,9 +41,9 @@ export const RegionSchema = z.object({
       longitude: z.number().nullish(),
       sortOrder: z.number().nullish(),
       remark: z.string().nullish(),
-      createdAt: z.string().datetime(),
-      updatedAt: z.string().datetime(),
-      deletedAt: z.string().datetime().nullish(),
+      createdAt: z.iso.datetime(),
+      updatedAt: z.iso.datetime(),
+      deletedAt: z.iso.datetime().nullish(),
       version: z.number(),
     })
     .nullable(),
@@ -55,24 +55,15 @@ export const RegionSchema = z.object({
   languageCode: z.string().nullish(),
   currencyCode: z.string().nullish(),
   phoneCode: z.string().nullish(),
+  isoCode: z.string().nullish(),
   latitude: z.number().nullish(),
   longitude: z.number().nullish(),
   sortOrder: z.number().nullish(),
   remark: z.string().nullish(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
-  deletedAt: z.string().datetime().nullish(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+  deletedAt: z.iso.datetime().nullish(),
   version: z.number(),
 });
 
-export const EditableRegionSchema = RegionSchema.omit({
-  parent: true,
-  id: true,
-  version: true,
-  createdAt: true,
-  updatedAt: true,
-  deletedAt: true,
-});
-
 export type Region = z.infer<typeof RegionSchema>;
-export type EditableRegion = z.infer<typeof EditableRegionSchema>;

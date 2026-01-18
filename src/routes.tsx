@@ -84,7 +84,7 @@ const router = createBrowserRouter([
             Component: RegionEditPage,
           },
           {
-            path: ":id/edit",
+            path: ":regionId/edit",
             Component: RegionEditPage,
           },
         ],
