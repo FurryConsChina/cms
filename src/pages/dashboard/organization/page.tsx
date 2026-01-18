@@ -87,13 +87,11 @@ export default function OrganizationPage() {
       title: "展方名称",
       dataIndex: "name",
       key: "name",
-      fixed: "left",
       ...getColumnSearchProps("name", "请输入展方名称"),
     },
     {
       title: "状态",
       dataIndex: "status",
-      width: 100,
       key: "status",
       render: (status) => OrganizationStatusLabel[status],
     },
@@ -119,8 +117,6 @@ export default function OrganizationPage() {
     {
       title: "操作",
       key: "action",
-      fixed: "right",
-      width: 250,
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           {

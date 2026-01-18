@@ -35,21 +35,14 @@ export default function EventPage() {
   const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
-  const pagination = {
-    search,
-    orgSearch,
-    current: currentPage,
-    pageSize,
-  };
-
-  const setPagination = {
-    search: setSearch,
-    orgSearch: setOrgSearch,
-    current: setCurrentPage,
-    pageSize: setPageSize,
-  };
-
-  const { data, isLoading, mutate } = useSWR(["event-list", pagination], () => EventAPI.getEventList(pagination));
+  const { data, isLoading, mutate } = useSWR(["event-list", currentPage, pageSize, search, orgSearch], () =>
+    EventAPI.getEventList({
+      pageSize: pageSize,
+      current: currentPage,
+      search: search || undefined,
+      orgSearch: orgSearch || undefined,
+    })
+  );
 
   const handleDeleteEvent = async (id: string) => {
     try {
@@ -69,38 +62,38 @@ export default function EventPage() {
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem,
+    dataIndex: keyof EventItem
   ) => {
     console.log(selectedKeys);
     confirm();
 
     if (dataIndex === "name") {
-      setPagination.search(selectedKeys[0]);
+      setSearch(selectedKeys[0]);
     } else if (dataIndex === "organization") {
-      setPagination.orgSearch(selectedKeys[0]);
+      setOrgSearch(selectedKeys[0]);
     }
-    setPagination.current(1);
+    setCurrentPage(1);
   };
 
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem,
+    dataIndex: keyof EventItem
   ) => {
     clearFilters();
     confirm();
 
     if (dataIndex === "name") {
-      setPagination.search(null);
+      setSearch(null);
     } else if (dataIndex === "organization") {
-      setPagination.orgSearch(null);
+      setOrgSearch(null);
     }
-    setPagination.current(1);
+    setCurrentPage(1);
   };
 
   const getColumnSearchProps = (
     dataIndex: keyof EventItem,
-    searchPlaceholder?: string,
+    searchPlaceholder?: string
   ): TableColumnType<EventItem> => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -146,14 +139,12 @@ export default function EventPage() {
       title: "展商",
       dataIndex: ["organization", "name"],
       key: "organizationName",
-      fixed: "left",
       ...getColumnSearchProps("organization", "请输入展商名称"),
     },
     {
       title: "展会名称",
       dataIndex: "name",
       key: "name",
-      fixed: "left",
       ...getColumnSearchProps("name", "请输入展会名称"),
     },
     {
@@ -197,7 +188,6 @@ export default function EventPage() {
     {
       title: "操作",
       key: "action",
-      fixed: "right",
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           {
@@ -276,18 +266,18 @@ export default function EventPage() {
           columns={columns}
           loading={isLoading}
           dataSource={data?.records || []}
-          scroll={{ x: "max-content" }}
+          scroll={{ x: 'max-content' }}
           pagination={{
-            pageSize: pagination.pageSize,
+            pageSize: pageSize,
             total: data?.total,
-            current: pagination.current,
+            current: currentPage,
           }}
           onChange={(tablePagination) => {
             if (tablePagination.current) {
-              setPagination.current(tablePagination.current);
+              setCurrentPage(tablePagination.current);
             }
             if (tablePagination.pageSize) {
-              setPagination.pageSize(tablePagination.pageSize);
+              setPageSize(tablePagination.pageSize);
             }
           }}
         />

@@ -1,11 +1,12 @@
 import useAuthStore from "@/stores/auth";
-import { Layout, Menu, Divider } from "antd";
+import { Layout, Menu, Button, Flex } from "antd";
 import type { MenuProps } from "antd";
 import {
   IconApps,
   IconHome,
   IconLogout,
   IconMapPin,
+  IconMenu2,
   IconTag,
   IconTicket,
   IconTrademark,
@@ -13,9 +14,10 @@ import {
   IconUserCode,
 } from "@tabler/icons-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
+import { useState } from "react";
+import clsx from "clsx";
 
-const { Sider, Content } = Layout;
+const { Sider, Content, Header } = Layout;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -78,7 +80,7 @@ const bottomMenuItems: MenuItem[] = [
 const siderStyle: React.CSSProperties = {
   overflow: "auto",
   height: "100vh",
-  position: "sticky",
+  // position: "sticky",
   insetInlineStart: 0,
   top: 0,
   scrollbarWidth: "thin",
@@ -88,6 +90,8 @@ const siderStyle: React.CSSProperties = {
 export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [collapsed, setCollapsed] = useState(false);
 
   const { logout } = useAuthStore();
 
@@ -125,12 +129,34 @@ export default function DashboardLayout() {
       navigate(e.key);
     }
   };
-
+  console.log(collapsed);
   return (
     <Layout style={{ minHeight: "100vh" }}>
-      <Sider width={300} className="bg-slate-100" style={siderStyle}>
-        <div className="flex flex-col h-full p-6">
-          <div className="flex-1">
+      <Sider
+        trigger={null}
+        collapsedWidth="100"
+        width={300}
+        className={clsx(
+          "bg-slate-100 z-50 fixed md:sticky shadow-md md:shadow-none",
+          collapsed ? "-translate-x-full md:translate-x-0" : "block"
+        )}
+        style={siderStyle}
+        collapsible
+        collapsed={collapsed}
+      >
+        <Flex justify="space-between" vertical className="px-2 h-full">
+          <div>
+            <Header
+              className={clsx(
+                "flex items-center bg-transparent p-0 md:p-2",
+                collapsed ? "justify-center" : "justify-end"
+              )}
+            >
+              <Button onClick={() => setCollapsed(!collapsed)}>
+                <IconMenu2 size="1.1rem" stroke={1.5} />
+              </Button>
+            </Header>
+
             <Menu
               mode="inline"
               selectedKeys={getSelectedKeys()}
@@ -140,23 +166,26 @@ export default function DashboardLayout() {
             />
           </div>
 
-          <div>
-            <Menu
-              mode="inline"
-              selectedKeys={[]}
-              items={bottomMenuItems}
-              onClick={handleMenuClick}
-              style={{ background: "transparent", border: "none" }}
-            />
-          </div>
-        </div>
+          <Menu
+            mode="inline"
+            selectedKeys={[]}
+            items={bottomMenuItems}
+            onClick={handleMenuClick}
+            style={{ background: "transparent", border: "none" }}
+          />
+        </Flex>
       </Sider>
 
-      <Content className="bg-slate-100 p-6">
-        <NuqsAdapter>
+      <Layout>
+        <Header className={clsx("flex items-center bg-transparent p-2 md:hidden")}>
+          <Button onClick={() => setCollapsed(!collapsed)}>
+            <IconMenu2 size="1.1rem" stroke={1.5} />
+          </Button>
+        </Header>
+        <Content className="bg-slate-100 p-2">
           <Outlet />
-        </NuqsAdapter>
-      </Content>
+        </Content>
+      </Layout>
     </Layout>
   );
 }

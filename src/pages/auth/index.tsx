@@ -41,7 +41,7 @@ export default function Auth() {
         backdropFilter: "blur(5px)",
       }}
     >
-      <Flex justify="center" align="flex-end" style={{ height: "100%" }} vertical>
+      <Flex justify="center" className="items-center md:items-end" style={{ height: "100%" }} vertical>
         <Card
           className="w-full md:w-96 h-full"
           style={{ margin: 20, borderRadius: 8 }}

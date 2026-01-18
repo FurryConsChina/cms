@@ -55,7 +55,6 @@ export default function RegionPage() {
     {
       title: "操作",
       key: "action",
-      fixed: "right",
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           { type: "divider" },
@@ -102,7 +101,7 @@ export default function RegionPage() {
   return (
     <>
       <DefaultContainer className="sticky top-0 z-20">
-        <Flex justify="space-between" align="center">
+        <Flex className="md:flex-row flex-col gap-2" justify="space-between" align="center">
           <Title level={3} className="m-0">
             地区列表
           </Title>
@@ -133,6 +132,7 @@ export default function RegionPage() {
             total: data?.total,
             current: current,
           }}
+          scroll={{ x: "max-content" }}
           onChange={(pagination) => {
             setPageSize(pagination.pageSize || pageSize);
             setCurrent(pagination.current || current);

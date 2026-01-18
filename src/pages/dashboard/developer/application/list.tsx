@@ -89,7 +89,6 @@ export default function ApplicationPage() {
     {
       title: "操作",
       key: "action",
-      fixed: "right",
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           {
@@ -159,6 +158,7 @@ export default function ApplicationPage() {
             total: data?.total,
             current: pagination.current,
           }}
+          scroll={{ x: "max-content" }}
           onChange={(tablePagination) => {
             if (tablePagination.current) {
               setPagination.current(tablePagination.current);

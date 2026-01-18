@@ -40,13 +40,11 @@ export default function FeaturePage() {
       title: "标签名称",
       dataIndex: "name",
       key: "name",
-      width: 200,
     },
     {
       title: "类别",
       dataIndex: "category",
       key: "category",
-      width: 100,
       render: (_, record) => <Tag color="blue">{FeatureCategoryLabel[record.category as FeatureCategory]}</Tag>,
     },
     {
@@ -57,8 +55,6 @@ export default function FeaturePage() {
     {
       title: "操作",
       key: "action",
-      fixed: "right",
-      width: 250,
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           { type: "divider" },
@@ -121,12 +117,7 @@ export default function FeaturePage() {
           columns={columns}
           loading={isPending}
           dataSource={data?.records || []}
-          scroll={
-            {
-              // x: 1500,
-              // y: 600
-            }
-          }
+          scroll={{ x: "max-content" }}
           pagination={{
             pageSize: pagination.pageSize,
             total: data?.total,

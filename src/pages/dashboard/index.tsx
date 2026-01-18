@@ -18,32 +18,26 @@ export default function Dashboard() {
     <div>
       <Title level={2}>欢迎回来，{user?.name || user?.email}</Title>
       <div className="mt-4">
-        <Row gutter={16}>
-          <Col flex={1}>
-            <Card style={{ borderRadius: 8 }}>
-              <Flex justify="space-between" align="center" gap={10}>
-                {UserRoleText[user?.role as UserRole]}
-                <IconUsers />
-              </Flex>
-            </Card>
-          </Col>
-          <Col flex={1}>
-            <Card style={{ borderRadius: 8 }}>
-              <Flex justify="space-between" align="center" gap={10}>
-                {applicationList?.total || 0} 个应用
-                <IconApps />
-              </Flex>
-            </Card>
-          </Col>
-          <Col flex={1}>
-            <Card style={{ borderRadius: 8 }}>
-              <Flex justify="space-between" align="center" gap={10}>
-                {user?.disabledAt ? "账户已禁用" : "账户正常"}
-                <IconUser />
-              </Flex>
-            </Card>
-          </Col>
-        </Row>
+        <Flex gap={16}>
+          <Card className="grow">
+            <Flex justify="space-between" align="center" gap={10}>
+              {UserRoleText[user?.role as UserRole]}
+              <IconUsers />
+            </Flex>
+          </Card>
+          <Card className="grow">
+            <Flex justify="space-between" align="center" gap={10}>
+              {applicationList?.total || 0} 个应用
+              <IconApps />
+            </Flex>
+          </Card>
+          <Card className="grow">
+            <Flex justify="space-between" align="center" gap={10}>
+              {user?.disabledAt ? "账户已禁用" : "账户正常"}
+              <IconUser />
+            </Flex>
+          </Card>
+        </Flex>
       </div>
     </div>
   );

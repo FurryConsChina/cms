@@ -7,6 +7,7 @@ import zhCN from "antd/locale/zh_CN";
 import { StyleProvider } from "@ant-design/cssinjs";
 import * as z from "zod";
 import { zhCN as zhCNZod } from "zod/locales";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 
 z.config(zhCNZod());
 
@@ -41,9 +42,11 @@ if (rootEl) {
           }}
         >
           <AntdApp>
-            <QueryClientProvider client={queryClient}>
-              <RouterProvider router={router} />
-            </QueryClientProvider>
+            <NuqsAdapter>
+              <QueryClientProvider client={queryClient}>
+                <RouterProvider router={router} />
+              </QueryClientProvider>
+            </NuqsAdapter>
           </AntdApp>
         </ConfigProvider>
       </StyleProvider>

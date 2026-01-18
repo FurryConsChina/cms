@@ -37,7 +37,7 @@ export default function EventMedia({ form, pathPrefix, disabled }: EventMediaPro
             name="thumbnail"
             rules={[{ required: true, message: "请上传活动海报，或者选一个默认海报" }]}
             extra={
-              <Space style={{ marginTop: 8 }}>
+              <Space style={{ marginTop: 8 }} wrap>
                 <Button
                   onClick={() => {
                     form.setFieldValue("thumbnail", EventDefaultThumbnail.default);
@@ -81,8 +81,6 @@ export default function EventMedia({ form, pathPrefix, disabled }: EventMediaPro
               </Button>
             </Flex>
             {fields.map((field, index) => {
-              // const imageUrl = Form.useWatch(["media", "images", field.name, "url"], form);
-
               return (
                 <div key={field.key}>
                   <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
@@ -107,12 +105,17 @@ export default function EventMedia({ form, pathPrefix, disabled }: EventMediaPro
                       <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
                     </Flex>
                   </Flex>
-                  <Flex gap={16}>
+                  <Flex className="md:flex-row flex-col" gap={16}>
                     <Form.Item
                       name={[field.name, "url"]}
+                      className="mb-0"
                       getValueProps={(value) => ({ src: `https://images.furrycons.cn/${value}?format=jpg` })}
                     >
-                      <Image width={140} height={340} style={{ objectFit: "cover" }} fallback={IMAGE_FALLBACK} />
+                      <Image
+                        className="w-lvw h-30 md:w-[140] md:h-[340]"
+                        style={{ objectFit: "cover" }}
+                        fallback={IMAGE_FALLBACK}
+                      />
                     </Form.Item>
                     <Flex vertical flex={1}>
                       <Form.Item
