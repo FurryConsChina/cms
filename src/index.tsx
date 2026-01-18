@@ -5,6 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntdApp } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { StyleProvider } from "@ant-design/cssinjs";
+import * as z from "zod";
+import { zhCN as zhCNZod } from "zod/locales";
+
+z.config(zhCNZod());
 
 import router from "@/routes";
 
@@ -43,6 +47,6 @@ if (rootEl) {
           </AntdApp>
         </ConfigProvider>
       </StyleProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }

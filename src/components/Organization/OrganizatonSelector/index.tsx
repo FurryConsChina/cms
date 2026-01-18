@@ -1,4 +1,4 @@
-import { getOrganizationList } from "@/api/dashboard/organization";
+import { OrganizationAPI } from "@/api/dashboard/organization";
 import type { Organization } from "@/types/organization";
 import { Select, Spin } from "antd";
 import { useState, useCallback } from "react";
@@ -43,7 +43,7 @@ export default function OrganizationSelector({
     searchValue
       ? [`organization-list-search`, { pageSize: 50, current: 1, name: searchValue }]
       : [`organization-list`, { pageSize: 50, current: 1 }],
-    ([_, params]: [string, any]) => getOrganizationList(params),
+    ([_, params]: [string, any]) => OrganizationAPI.getOrganizationList(params),
   );
 
   const organizations = [...(selectedOptions || []), ...(data?.records || [])];
