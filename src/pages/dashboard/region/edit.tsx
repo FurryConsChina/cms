@@ -119,20 +119,19 @@ function RegionEditorContent({ region }: { region?: Region }) {
               required
               name="name"
               rules={[{ required: true, message: "请输入地区名称" }]}
-              extra="地区名称是指该地区在简体中文中的称呼。"
+              extra="北京的名称称是北京，而纽约的名称是New York。"
             >
               <Input placeholder="请输入地区名称" />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
-              label="本地名称"
+              label="中文名称"
               name="localName"
               required
-              extra="本地化名称是指当地人怎么称呼该地区，比如北京的本地名称是北京，而纽约的本地名称是New York。"
-              rules={[{ required: true, message: "请输入本地化名称" }]}
+              rules={[{ required: true, message: "请输入中文名称" }]}
             >
-              <Input placeholder="请输入本地化名称" />
+              <Input placeholder="请输入中文名称" />
             </Form.Item>
           </Col>
         </Row>
