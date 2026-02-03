@@ -91,7 +91,7 @@ export const EditEventApiBody = z.object({
     .object({
       overrideOrganizationContact: z
         .object({
-          qqGroups: z.array(z.object({ label: z.string(), value: z.string() })).optional(),
+          qqGroups: z.array(z.object({ label: z.string().optional(), value: z.string() })).optional(),
         })
         .optional(),
     })
