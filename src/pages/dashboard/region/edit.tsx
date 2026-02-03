@@ -172,7 +172,7 @@ function RegionEditorContent({ region }: { region?: Region }) {
           </Col>
           <Col span={8}>
             <Form.Item label="父级地区" name="parentId">
-              <RegionSelector placeholder="请选择父级地区" />
+              <RegionSelector antdSelectProps={{ placeholder: "请选择父级地区" }} />
             </Form.Item>
           </Col>
         </Row>

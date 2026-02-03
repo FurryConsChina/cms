@@ -53,9 +53,7 @@ export class OrganizationAPI {
   }
 
   static async createOrganization(organization: InferZodType<typeof EditOrganizationApiBody>) {
-    const res = await Axios.post<Organization>("/internal/cms/organization", {
-      organization,
-    });
+    const res = await Axios.post<Organization>("/internal/cms/organization", organization);
 
     return res.data;
   }
