@@ -2,9 +2,11 @@ import useAuthStore from "@/stores/auth";
 import { useMutation } from "@tanstack/react-query";
 import { AuthAPI } from "@/api/auth";
 import { Button, Card, Flex, App, Typography, Form, Input, Segmented } from "antd";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconFileDescription } from "@tabler/icons-react";
+import { CapWidget, CapWidgetRef } from "@/components/CapWidget";
+import { AxiosError } from "axios";
 
 const { Link } = Typography;
 
@@ -13,10 +15,11 @@ export default function Auth() {
   const navigate = useNavigate();
   const { message } = App.useApp();
   const [form] = Form.useForm();
+  const capWidgetRef = useRef<CapWidgetRef>(null);
 
   const [currentSegment, setCurrentSegment] = useState<"login" | "register" | "reset">("login");
 
-  const { mutate, isPending } = useMutation({
+  const loginMutation = useMutation({
     mutationFn: AuthAPI.login,
     onSuccess: (data) => {
       login(data.user);
@@ -25,12 +28,54 @@ export default function Auth() {
       message.success("登录成功");
     },
     onError: (error) => {
-      message.error(`登录失败: ${error instanceof Error ? error.message : "未知错误"}`);
+      capWidgetRef.current?.reset();
+      form.setFieldValue("captchaToken", undefined);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 404) {
+          message.error("邮箱或密码错误");
+          return;
+        }
+        message.error(error.response?.data?.message || "登录失败");
+      } else {
+        message.error("登录失败: 未知错误");
+      }
     },
   });
 
-  const handleFinish = (values: { email: string; password: string }) => {
-    mutate(values);
+  const registerMutation = useMutation({
+    mutationFn: AuthAPI.register,
+    onSuccess: (data) => {
+      login(data.user);
+      refreshToken(data.token);
+      navigate("/dashboard");
+      message.success("注册成功");
+    },
+    onError: (error) => {
+      capWidgetRef.current?.reset();
+      form.setFieldValue("captchaToken", undefined);
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 409) {
+          message.error("该邮箱已被注册");
+          return;
+        }
+        message.error(error.response?.data?.message || "注册失败");
+      } else {
+        message.error("注册失败: 未知错误");
+      }
+    },
+  });
+
+  const handleFinish = (values: { name: string; email: string; password: string; captchaToken: string }) => {
+    if (currentSegment === "login") {
+      loginMutation.mutate(values);
+    } else if (currentSegment === "register") {
+      registerMutation.mutate({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        captchaToken: values.captchaToken,
+      });
+    }
   };
 
   return (
@@ -54,7 +99,10 @@ export default function Auth() {
                 block
                 size="middle"
                 style={{ marginBottom: 8 }}
-                onChange={setCurrentSegment}
+                onChange={(value) => {
+                  setCurrentSegment(value as "login" | "register" | "reset");
+                  form.resetFields();
+                }}
                 options={[
                   { label: "登录", value: "login" },
                   { label: "注册", value: "register" },
@@ -62,6 +110,20 @@ export default function Auth() {
               />
 
               <Form form={form} onFinish={handleFinish} layout="vertical">
+                {currentSegment === "register" && (
+                  <Form.Item
+                    label="用户名"
+                    name="name"
+                    rules={[
+                      { required: true, message: "请输入您的昵称" },
+                      { min: 2, message: "昵称至少2个字符" },
+                      { max: 20, message: "昵称最多20个字符" },
+                    ]}
+                    style={{ marginBottom: 16 }}
+                  >
+                    <Input autoComplete="username" placeholder="请输入您的昵称" />
+                  </Form.Item>
+                )}
                 <Form.Item
                   label="邮箱"
                   name="email"
@@ -71,7 +133,7 @@ export default function Auth() {
                   ]}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input type="email" autoComplete="email" placeholder="请输入您的注册邮箱" />
+                  <Input type="email" autoComplete="email" placeholder="请输入您的邮箱" />
                 </Form.Item>
                 <Form.Item
                   label="密码"
@@ -82,13 +144,49 @@ export default function Auth() {
                   ]}
                   style={{ marginBottom: 16 }}
                 >
-                  <Input.Password placeholder="请输入您的密码" />
+                  <Input.Password
+                    placeholder="请输入您的密码"
+                    autoComplete={currentSegment === "register" ? "new-password" : "current-password"}
+                  />
                 </Form.Item>
-                <Flex justify="space-between" style={{ marginTop: 8 }}>
-                  <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
-                </Flex>
-                <Button type="primary" htmlType="submit" block loading={isPending} style={{ marginTop: 24 }}>
-                  登录
+                {currentSegment === "login" && (
+                  <Flex justify="space-between" style={{ marginTop: 8 }}>
+                    <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
+                  </Flex>
+                )}
+                <Form.Item
+                  name="captchaToken"
+                  hidden
+                  rules={[
+                    {
+                      validator: (_, value) => {
+                        if (!value) {
+                          message.error("请先完成人机验证");
+                          return Promise.reject();
+                        }
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
+                />
+                <CapWidget
+                  ref={capWidgetRef}
+                  apiEndpoint="https://cap.furrycons.cn/98300af613/"
+                  onSolve={(token) => {
+                    console.log("token:", token);
+                    form.setFieldValue("captchaToken", token);
+                  }}
+                  onProgress={(progress) => console.log(progress)}
+                  onCapError={(message) => console.error(message)}
+                />
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loginMutation.isPending || registerMutation.isPending}
+                  style={{ marginTop: 24 }}
+                >
+                  {currentSegment === "login" ? "登录" : "注册"}
                 </Button>
               </Form>
             </div>

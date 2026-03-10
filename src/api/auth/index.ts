@@ -8,8 +8,18 @@ export const UpdatePasswordApiBody = z.object({
   newPassword: z.string().min(8, "密码长度至少为8位"),
 });
 export class AuthAPI {
-  static async login(data: { email: string; password: string }) {
+  static async login(data: { email: string; password: string; captchaToken: string }) {
     const res = await Axios.post<{ token: string; user: User }>("/auth/login", data);
+    return res.data;
+  }
+
+  static async register(data: {
+    name: string;
+    password: string;
+    email: string;
+    captchaToken: string;
+  }) {
+    const res = await Axios.post<{ token: string; user: User }>("/auth/register", data);
     return res.data;
   }
 

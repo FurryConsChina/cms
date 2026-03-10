@@ -304,6 +304,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cap.js/widget@npm:^0.1.41":
+  version: 0.1.41
+  resolution: "@cap.js/widget@npm:0.1.41"
+  checksum: 10c0/bfaa90339c31199b3aafc46280b7879996d7c649f210ae30aa36b04d5330cd071e20e7cc7220278431fd5d839d01a7aae43ddec121d67f8c8106a532e95885a2
+  languageName: node
+  linkType: hard
+
 "@emnapi/core@npm:^1.5.0, @emnapi/core@npm:^1.7.1":
   version: 1.8.1
   resolution: "@emnapi/core@npm:1.8.1"
@@ -2261,6 +2268,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "fcc-dashboard@workspace:."
   dependencies:
+    "@cap.js/widget": "npm:^0.1.41"
     "@hookform/resolvers": "npm:^5.2.2"
     "@rsbuild/core": "npm:1.7.2"
     "@rsbuild/plugin-react": "npm:1.4.3"
