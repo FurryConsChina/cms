@@ -16,9 +16,22 @@ export default function FeatureEditor({
   onClose: () => void;
   editingFeature: Feature | null;
 }) {
+  return (
+    <Modal open={opened} onCancel={onClose} title="标签编辑" centered destroyOnHidden footer={null}>
+      <EditorContent editingFeature={editingFeature} onClose={onClose} />
+    </Modal>
+  );
+}
+
+function EditorContent({
+  editingFeature,
+  onClose,
+}: {
+  editingFeature: Feature | null;
+  onClose: () => void;
+}) {
   const { message, modal } = App.useApp();
   const cleanedFeature = editingFeature ? pickBy(editingFeature, (v) => v !== "" && v != null) : {};
-
   const [form] = Form.useForm();
 
   const initialValues = {
@@ -55,33 +68,32 @@ export default function FeatureEditor({
     }
     return;
   };
+
   return (
-    <Modal open={opened} onCancel={onClose} title="标签编辑" centered destroyOnHidden footer={null}>
-      <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-        <Form.Item label="标签名称" required name="name" rules={[{ required: true, message: "请输入标签名称" }]}>
-          <Input placeholder="请输入标签名称" />
-        </Form.Item>
+    <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
+      <Form.Item label="标签名称" required name="name" rules={[{ required: true, message: "请输入标签名称" }]}>
+        <Input placeholder="请输入标签名称" />
+      </Form.Item>
 
-        <Form.Item label="标签分类" required name="category" rules={[{ required: true, message: "请选择标签分类" }]}>
-          <Select
-            placeholder="请选择标签分类"
-            options={Object.values(FeatureCategory).map((item) => ({
-              label: FeatureCategoryLabel[item],
-              value: item,
-            }))}
-          />
-        </Form.Item>
+      <Form.Item label="标签分类" required name="category" rules={[{ required: true, message: "请选择标签分类" }]}>
+        <Select
+          placeholder="请选择标签分类"
+          options={Object.values(FeatureCategory).map((item) => ({
+            label: FeatureCategoryLabel[item],
+            value: item,
+          }))}
+        />
+      </Form.Item>
 
-        <Form.Item label="标签简述" name="description" extra="标签简述可能会在未来展示于筛选设置中。">
-          <TextArea placeholder="请输入标签简述" />
-        </Form.Item>
+      <Form.Item label="标签简述" name="description" extra="标签简述可能会在未来展示于筛选设置中。">
+        <TextArea placeholder="请输入标签简述" />
+      </Form.Item>
 
-        <Flex justify="flex-end" style={{ marginTop: 16 }}>
-          <Button type="primary" htmlType="submit">
-            提交
-          </Button>
-        </Flex>
-      </Form>
-    </Modal>
+      <Flex justify="flex-end" style={{ marginTop: 16 }}>
+        <Button type="primary" htmlType="submit">
+          提交
+        </Button>
+      </Flex>
+    </Form>
   );
 }
