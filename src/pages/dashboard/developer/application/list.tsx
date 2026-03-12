@@ -1,18 +1,21 @@
-import { getApplicationList } from "@/api/developer/application";
+import { ApplicationApi } from "@/api/developer/application";
+import ApplicationEditor from "@/components/Application/ApplicationEditor";
 import DefaultContainer from "@/components/Layout/Container";
-import { Button, Dropdown, Flex, MenuProps, Popover, Space, Table, Tag, Typography } from "antd";
+import { App, Button, Dropdown, Flex, MenuProps, Popover, Space, Table, Tag, Typography } from "antd";
 import { IconCirclePlus, IconEdit, IconEye, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, useQueryState } from "nuqs";
-import { useNavigate } from "react-router-dom";
 import { ColumnsType } from "antd/es/table";
 import { Application } from "@/types/application";
 import dayjs from "dayjs";
+import { useRef, useState } from "react";
 
 const { Title, Text } = Typography;
 
 export default function ApplicationPage() {
-  const navigate = useNavigate();
+  const editingApplication = useRef<Application>(null);
+  const [opened, setOpened] = useState(false);
+  const { message, modal } = App.useApp();
 
   const [search, setSearch] = useQueryState("search");
   const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
@@ -34,10 +37,31 @@ export default function ApplicationPage() {
     pageSize: setPageSize,
   };
 
-  const { isPending, isError, data, error, refetch } = useQuery({
+  const { isPending, data, refetch } = useQuery({
     queryKey: ["application-list", pagination],
-    queryFn: () => getApplicationList(),
+    queryFn: () =>
+      ApplicationApi.getApplicationList({
+        pageSize: pagination.pageSize,
+        current: pagination.current,
+        search: pagination.search || undefined,
+        orgSearch: pagination.orgSearch || undefined,
+      }),
   });
+
+  const onDelete = (id: string) => {
+    modal.confirm({
+      title: "确认删除这个应用吗？",
+      content: "删除后不可恢复，请谨慎操作。",
+      okText: "确认删除",
+      okButtonProps: { danger: true },
+      cancelText: "取消",
+      onOk: async () => {
+        await ApplicationApi.deleteApplication(id);
+        message.success("删除应用成功");
+        refetch();
+      },
+    });
+  };
 
   const columns: ColumnsType<Application> = [
     {
@@ -49,6 +73,15 @@ export default function ApplicationPage() {
       title: "应用描述",
       dataIndex: "description",
       key: "description",
+    },
+    {
+      title: "访问令牌",
+      dataIndex: "accessToken",
+      key: "accessToken",
+      width: 200,
+      render: (_, record) => {
+        return <Text copyable ellipsis>{record.accessToken}</Text>;
+      },
     },
     {
       title: "权限",
@@ -98,7 +131,7 @@ export default function ApplicationPage() {
             danger: true,
             disabled: true,
             onClick: () => {
-              // onDelete(record.id);
+              onDelete(record.id);
             },
           },
         ];
@@ -108,9 +141,9 @@ export default function ApplicationPage() {
             <Button
               type="primary"
               ghost
-              disabled
               onClick={() => {
-                navigate(`/developer/application/${record.id}/edit`);
+                editingApplication.current = record;
+                setOpened(true);
               }}
               icon={<IconEdit size={14} />}
             >
@@ -135,11 +168,11 @@ export default function ApplicationPage() {
           </Title>
 
           <Button
-            disabled
             type="primary"
             icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
-              navigate("/developer/application/create");
+              editingApplication.current = null;
+              setOpened(true);
             }}
           >
             添加应用
@@ -169,6 +202,15 @@ export default function ApplicationPage() {
           }}
         />
       </div>
+
+      <ApplicationEditor
+        opened={opened}
+        onClose={() => {
+          setOpened(false);
+          refetch();
+        }}
+        editingApplication={editingApplication.current}
+      />
     </>
   );
 }

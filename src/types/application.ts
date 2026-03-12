@@ -8,6 +8,7 @@ export const ApplicationSchema = z.object({
     read: z.boolean(),
     write: z.boolean(),
   }),
+  accessToken: z.string(),
   createdAt: z.string(),
   updatedAt: z.string().nullable(),
   disabledAt: z.string().nullable(),

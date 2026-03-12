@@ -1,4 +1,5 @@
 import useAuthStore from "@/stores/auth";
+import { UserRole } from "@/types/User";
 import { Layout, Menu, Button, Flex } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -14,55 +15,65 @@ import {
   IconUserCode,
 } from "@tabler/icons-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import clsx from "clsx";
 
 const { Sider, Content, Header } = Layout;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const menuItems: MenuItem[] = [
-  {
-    key: "/dashboard",
-    icon: <IconHome size="1.1rem" stroke={1.5} />,
-    label: "首页",
-  },
-  {
-    key: "/dashboard/event",
-    icon: <IconTicket size="1.1rem" stroke={1.5} />,
-    label: "展会",
-  },
-  {
-    key: "/dashboard/organization",
-    icon: <IconTrademark size="1.1rem" stroke={1.5} />,
-    label: "展商",
-  },
-  {
-    key: "/dashboard/feature",
-    icon: <IconTag size="1.1rem" stroke={1.5} />,
-    label: "展会标签",
-  },
-  {
-    key: "/dashboard/region",
-    icon: <IconMapPin size="1.1rem" stroke={1.5} />,
-    label: "地区管理",
-  },
-  {
-    type: "divider",
-  },
-  {
-    key: "/developer",
-    icon: <IconUserCode size="1.1rem" stroke={1.5} />,
-    label: "开发者",
-    children: [
-      {
-        key: "/developer/application",
-        icon: <IconApps size="1.1rem" stroke={1.5} />,
-        label: "应用管理",
-      },
-    ],
-  },
-];
+const getMenuItems = (role?: string): MenuItem[] => {
+  const developerMenu: MenuItem[] = [
+    {
+      key: "/developer",
+      icon: <IconUserCode size="1.1rem" stroke={1.5} />,
+      label: "开发者",
+      children: [
+        {
+          key: "/developer/application",
+          icon: <IconApps size="1.1rem" stroke={1.5} />,
+          label: "应用管理",
+        },
+      ],
+    },
+  ];
+
+  if (role === UserRole.Developer) {
+    return developerMenu;
+  }
+
+  return [
+    {
+      key: "/dashboard",
+      icon: <IconHome size="1.1rem" stroke={1.5} />,
+      label: "首页",
+    },
+    {
+      key: "/dashboard/event",
+      icon: <IconTicket size="1.1rem" stroke={1.5} />,
+      label: "展会",
+    },
+    {
+      key: "/dashboard/organization",
+      icon: <IconTrademark size="1.1rem" stroke={1.5} />,
+      label: "展商",
+    },
+    {
+      key: "/dashboard/feature",
+      icon: <IconTag size="1.1rem" stroke={1.5} />,
+      label: "展会标签",
+    },
+    {
+      key: "/dashboard/region",
+      icon: <IconMapPin size="1.1rem" stroke={1.5} />,
+      label: "地区管理",
+    },
+    {
+      type: "divider",
+    },
+    ...developerMenu,
+  ];
+};
 
 const bottomMenuItems: MenuItem[] = [
   {
@@ -93,7 +104,9 @@ export default function DashboardLayout() {
 
   const [collapsed, setCollapsed] = useState(false);
 
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+
+  const menuItems = useMemo(() => getMenuItems(user?.role), [user?.role]);
 
   const getSelectedKeys = () => {
     const currentPath = location.pathname;

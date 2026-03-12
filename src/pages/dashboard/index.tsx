@@ -1,4 +1,4 @@
-import { getApplicationList } from "@/api/developer/application";
+import { ApplicationApi } from "@/api/developer/application";
 import useAuthStore from "@/stores/auth";
 import { UserRole, UserRoleText } from "@/types/User";
 import { Card, Typography, Row, Col, Flex } from "antd";
@@ -11,7 +11,7 @@ export default function Dashboard() {
   const { user } = useAuthStore();
   const { data: applicationList } = useQuery({
     queryKey: ["application-list"],
-    queryFn: () => getApplicationList(),
+    queryFn: () => ApplicationApi.getApplicationList(),
   });
 
   return (
