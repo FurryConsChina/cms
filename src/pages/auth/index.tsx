@@ -171,7 +171,7 @@ export default function Auth() {
                 />
                 <CapWidget
                   ref={capWidgetRef}
-                  apiEndpoint="https://cap.furrycons.cn/98300af613/"
+                  apiEndpoint="https://cap.furrycons.cn/5ddbdcfd4c/"
                   onSolve={(token) => {
                     console.log("token:", token);
                     form.setFieldValue("captchaToken", token);
