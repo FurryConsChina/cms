@@ -140,7 +140,8 @@ export default function Auth() {
                   name="password"
                   rules={[
                     { required: true, message: "请输入密码" },
-                    { min: 6, message: "密码长度至少为6位" },
+                    { min: currentSegment === "register" ? 8 : 1, message: "注册密码至少8位" },
+                    { max: 64, message: "密码最多64位" },
                   ]}
                   style={{ marginBottom: 16 }}
                 >
@@ -151,7 +152,9 @@ export default function Auth() {
                 </Form.Item>
                 {currentSegment === "login" && (
                   <Flex justify="space-between" style={{ marginTop: 8 }}>
-                    <Link style={{ fontSize: 14 }}>忘记密码了吗？</Link>
+                    <Link href="/auth/reset-password" style={{ fontSize: 14 }}>
+                      忘记密码了吗？
+                    </Link>
                   </Flex>
                 )}
                 <Form.Item

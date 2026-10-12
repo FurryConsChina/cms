@@ -27,7 +27,6 @@ export default function BasicInfo({ selectedOrganizations, setSelectedOrganizati
         <Col span={12}>
           <Form.Item
             label="展会主办方"
-            help="展会目前只能通过主办方的 slug 进行访问"
             required
             name="organization"
             rules={[{ required: true, message: "请选择展会主办方" }]}

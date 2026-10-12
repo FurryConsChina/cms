@@ -12,21 +12,25 @@ export const EditFeatureApiBody = z.object({
 
 export class FeatureAPI {
   static async getFeatureList(params: { pageSize: number; current: number; name?: string }) {
-    const res = await Axios.get<List<Feature>>("/internal/cms/event/feature", {
+    const res = await Axios.get<List<Feature>>("/cms/event/feature", {
       params,
     });
 
     return res.data;
   }
 
+  static async deleteFeature(id: string) {
+    return (await Axios.delete(`/cms/event/feature/${id}`)).data;
+  }
+
   static async createFeature(feature: InferZodType<typeof EditFeatureApiBody>) {
-    const res = await Axios.post<Feature>("/internal/cms/event/feature", feature);
+    const res = await Axios.post<Feature>("/cms/event/feature", feature);
 
     return res.data;
   }
 
   static async updateFeature(id: string, feature: InferZodType<typeof EditFeatureApiBody>) {
-    const res = await Axios.post<Feature>(`/internal/cms/event/feature/${id}`, feature);
+    const res = await Axios.post<Feature>(`/cms/event/feature/${id}`, feature);
 
     return res.data;
   }

@@ -3,12 +3,12 @@ import { z } from "zod";
 export const ApplicationSchema = z.object({
   id: z.string(),
   name: z.string(),
-  description: z.string(),
+  description: z.string().nullable(),
   permission: z.object({
     read: z.boolean(),
     write: z.boolean(),
   }),
-  accessToken: z.string(),
+  accessToken: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string().nullable(),
   disabledAt: z.string().nullable(),

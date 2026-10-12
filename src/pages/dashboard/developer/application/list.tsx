@@ -4,7 +4,6 @@ import DefaultContainer from "@/components/Layout/Container";
 import { App, Button, Dropdown, Flex, MenuProps, Popover, Space, Table, Tag, Typography } from "antd";
 import { IconCirclePlus, IconEdit, IconEye, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { parseAsInteger, useQueryState } from "nuqs";
 import { ColumnsType } from "antd/es/table";
 import { Application } from "@/types/application";
 import dayjs from "dayjs";
@@ -17,35 +16,9 @@ export default function ApplicationPage() {
   const [opened, setOpened] = useState(false);
   const { message, modal } = App.useApp();
 
-  const [search, setSearch] = useQueryState("search");
-  const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
-  const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
-
-  const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
-
-  const pagination = {
-    search,
-    orgSearch,
-    current: currentPage,
-    pageSize,
-  };
-
-  const setPagination = {
-    search: setSearch,
-    orgSearch: setOrgSearch,
-    current: setCurrentPage,
-    pageSize: setPageSize,
-  };
-
   const { isPending, data, refetch } = useQuery({
-    queryKey: ["application-list", pagination],
-    queryFn: () =>
-      ApplicationApi.getApplicationList({
-        pageSize: pagination.pageSize,
-        current: pagination.current,
-        search: pagination.search || undefined,
-        orgSearch: pagination.orgSearch || undefined,
-      }),
+    queryKey: ["application-list"],
+    queryFn: () => ApplicationApi.getApplicationList(),
   });
 
   const onDelete = (id: string) => {
@@ -80,7 +53,11 @@ export default function ApplicationPage() {
       key: "accessToken",
       width: 200,
       render: (_, record) => {
-        return <Text copyable ellipsis>{record.accessToken}</Text>;
+        return (
+          <Text copyable={!!record.accessToken} ellipsis>
+            {record.accessToken || "暂无可用令牌"}
+          </Text>
+        );
       },
     },
     {
@@ -129,7 +106,6 @@ export default function ApplicationPage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: true,
             onClick: () => {
               onDelete(record.id);
             },
@@ -186,20 +162,9 @@ export default function ApplicationPage() {
           columns={columns}
           loading={isPending}
           dataSource={data?.records || []}
-          pagination={{
-            pageSize: pagination.pageSize,
-            total: data?.total,
-            current: pagination.current,
-          }}
+          footer={() => `共 ${data?.total ?? 0} 个应用，当前后端仅返回前 20 条`}
+          pagination={false}
           scroll={{ x: "max-content" }}
-          onChange={(tablePagination) => {
-            if (tablePagination.current) {
-              setPagination.current(tablePagination.current);
-            }
-            if (tablePagination.pageSize) {
-              setPagination.pageSize(tablePagination.pageSize);
-            }
-          }}
         />
       </div>
 

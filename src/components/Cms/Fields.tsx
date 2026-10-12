@@ -1,6 +1,8 @@
-import { Button, Flex, Form, Input, Select } from "antd";
+import { Button, DatePicker, Flex, Form, Input, Select } from "antd";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import dayjs from "dayjs";
 import { linkTypeLabels, toOptions } from "@/consts/labels";
+import type { Dayjs } from "dayjs";
 
 export function LinkFields({ name = "links", label = "联系方式与链接" }: { name?: string; label?: string }) {
   return (
@@ -33,5 +35,34 @@ export function LinkFields({ name = "links", label = "联系方式与链接" }: 
         )}
       </Form.List>
     </Form.Item>
+  );
+}
+
+export function IsoDateTimeInput({
+  value,
+  onChange,
+}: {
+  value?: string | null;
+  onChange?: (value: string | null) => void;
+}) {
+  return (
+    <DatePicker
+      showTime
+      style={{ width: "100%" }}
+      value={value ? dayjs(value) : null}
+      onChange={(v) => onChange?.(v?.toISOString() ?? null)}
+    />
+  );
+}
+
+export function DateListInput({ value, onChange }: { value?: string[] | null; onChange?: (value: string[]) => void }) {
+  return (
+    <DatePicker
+      multiple
+      value={(value ?? []).map((v) => dayjs(v))}
+      style={{ width: "100%" }}
+      format="YYYY-MM-DD"
+      onChange={(dates: Dayjs[] | null) => onChange?.((dates ?? []).map((v) => v.format("YYYY-MM-DD")))}
+    />
   );
 }

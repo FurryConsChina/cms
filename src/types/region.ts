@@ -2,68 +2,30 @@ import { z } from "zod";
 
 export enum RegionType {
   COUNTRY = "country",
-  STATE = "state",
+  STATE = "administrative_area",
   CITY = "city",
   DISTRICT = "district",
 }
-
 export const RegionTypeLabel = {
   [RegionType.COUNTRY]: "国家",
-  [RegionType.STATE]: "省份",
+  [RegionType.STATE]: "行政区",
   [RegionType.CITY]: "城市",
   [RegionType.DISTRICT]: "区县",
 };
-
-export const RegionSchema = z.object({
+const regionFields = {
   id: z.uuid(),
   name: z.string(),
-  code: z.string(),
-  type: z.enum(RegionType),
-  level: z.number(),
-  parentId: z.string().uuid().nullish(),
-  parent: z
-    .object({
-      id: z.uuid(),
-      name: z.string(),
-      code: z.string(),
-      type: z.enum(RegionType),
-      level: z.number(),
-      parentId: z.uuid().nullish(),
-      countryCode: z.string().nullish(),
-      isOverseas: z.boolean(),
-      addressFormat: z.string().nullish(),
-      localName: z.string().nullish(),
-      timezone: z.string().nullish(),
-      languageCode: z.string().nullish(),
-      currencyCode: z.string().nullish(),
-      phoneCode: z.string().nullish(),
-      latitude: z.number().nullish(),
-      longitude: z.number().nullish(),
-      sortOrder: z.number().nullish(),
-      remark: z.string().nullish(),
-      createdAt: z.iso.datetime(),
-      updatedAt: z.iso.datetime(),
-      deletedAt: z.iso.datetime().nullish(),
-      version: z.number(),
-    })
-    .nullable(),
-  countryCode: z.string().nullish(),
-  isOverseas: z.boolean(),
-  addressFormat: z.string().nullish(),
+  slug: z.string(),
+  kind: z.enum(RegionType),
+  parentId: z.uuid().nullish(),
   localName: z.string().nullish(),
   timezone: z.string().nullish(),
-  languageCode: z.string().nullish(),
-  currencyCode: z.string().nullish(),
-  phoneCode: z.string().nullish(),
   isoCode: z.string().nullish(),
-  latitude: z.number().nullish(),
-  longitude: z.number().nullish(),
-  sortOrder: z.number().nullish(),
-  remark: z.string().nullish(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-  deletedAt: z.iso.datetime().nullish(),
-  version: z.number(),
-});
-
+  displayOrder: z.number(),
+  heatScore: z.number().optional(),
+  createdAt: z.string().nullish(),
+  updatedAt: z.string().nullish(),
+  deletedAt: z.string().nullish(),
+};
+export const RegionSchema = z.object({ ...regionFields, parent: z.object(regionFields).nullish() });
 export type Region = z.infer<typeof RegionSchema>;

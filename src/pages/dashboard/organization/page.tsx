@@ -1,3 +1,6 @@
+import useAuthStore from "@/stores/auth";
+import { isAdmin, isPlatform } from "@/utils/permissions";
+import { apiErrorMessage } from "@/utils/apiError";
 import { cleanPageCache } from "@/api/dashboard/cache";
 import { OrganizationAPI } from "@/api/dashboard/organization";
 import DefaultContainer from "@/components/Layout/Container";
@@ -15,7 +18,9 @@ const { Title } = Typography;
 
 export default function OrganizationPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
+  const role = useAuthStore((state) => state.user?.role);
+  const admin = isAdmin(role);
 
   const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
@@ -25,7 +30,7 @@ export default function OrganizationPage() {
     slug?: string;
   }>({});
 
-  const { data, isLoading } = useSWR(["organization/list", filter, currentPage, pageSize], () =>
+  const { data, isLoading, mutate } = useSWR(["organization/list", filter, currentPage, pageSize], () =>
     OrganizationAPI.getOrganizationList({
       pageSize: pageSize,
       current: currentPage,
@@ -121,6 +126,7 @@ export default function OrganizationPage() {
         const menuItems: MenuProps["items"] = [
           {
             key: "refresh",
+            disabled: !isPlatform(role),
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
@@ -141,12 +147,30 @@ export default function OrganizationPage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: true,
+            disabled: !admin,
+            onClick: () =>
+              modal.confirm({
+                title: `确认删除“${record.name}”？`,
+                content: "相关引用可能阻止删除。",
+                onOk: async () => {
+                  try {
+                    await OrganizationAPI.deleteOrganization(record.id);
+                    message.success("删除成功");
+                    await mutate();
+                  } catch (error) {
+                    message.error(apiErrorMessage(error));
+                    throw error;
+                  }
+                },
+              }),
           },
         ];
 
         return (
-          <Space size="middle">
+          <Space size="middle" wrap>
+            {/* 暂不开放，后续恢复。
+            <Button onClick={() => navigate(`/dashboard/organization/${record.id}/access`)}>成员与邀请</Button>
+            */}
             <Button
               type="primary"
               ghost

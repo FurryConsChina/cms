@@ -25,7 +25,7 @@ export default function RegionSelector({
   const [searchValue, setSearchValue] = useState("");
 
   const { data, isLoading } = useSWR(["region/list", searchValue], () =>
-    RegionAPI.getRegionList({ pageSize: 50, current: 1, code: searchValue }),
+    RegionAPI.getRegionList({ pageSize: 50, current: 1, name: searchValue || undefined }),
   );
 
   const regions = uniqBy(
@@ -35,7 +35,7 @@ export default function RegionSelector({
 
   const selectOptions = regions.map((region) => ({
     value: region.id,
-    label: `${region.name} (${region.code})`,
+    label: `${region.name} (${region.slug})`,
   }));
 
   const handleSearch = useCallback(

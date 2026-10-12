@@ -1,3 +1,5 @@
+import useAuthStore from "@/stores/auth";
+import { isPlatform } from "@/utils/permissions";
 import { cleanPageCache } from "@/api/dashboard/cache";
 import { EventAPI } from "@/api/dashboard/event";
 import DefaultContainer from "@/components/Layout/Container";
@@ -28,7 +30,8 @@ const { Title } = Typography;
 
 export default function EventPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const platform = isPlatform(useAuthStore((state) => state.user?.role));
+  const { message, modal } = App.useApp();
 
   const [search, setSearch] = useQueryState("search");
   const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
@@ -47,10 +50,10 @@ export default function EventPage() {
   const handleDeleteEvent = async (id: string) => {
     try {
       await EventAPI.deleteEvent(id);
-      message.success("删除展商成功，如果是误操作请马上联系管理员。");
+      message.success("删除活动成功，如果是误操作请马上联系管理员。");
       mutate();
     } catch (error) {
-      message.error("删除展商失败，请稍后重试。");
+      message.error("删除活动失败，请稍后重试。");
     }
   };
 
@@ -64,7 +67,6 @@ export default function EventPage() {
     confirm: FilterDropdownProps["confirm"],
     dataIndex: keyof EventItem,
   ) => {
-    console.log(selectedKeys);
     confirm();
 
     if (dataIndex === "name") {
@@ -192,6 +194,7 @@ export default function EventPage() {
         const menuItems: MenuProps["items"] = [
           {
             key: "refresh",
+            disabled: !platform,
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
@@ -209,17 +212,21 @@ export default function EventPage() {
           { type: "divider" },
           {
             key: "delete",
+            disabled: !platform,
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
             onClick: () => {
-              handleDeleteEvent(record.id);
+              modal.confirm({ title: `确认删除活动“${record.name}”？`, onOk: () => handleDeleteEvent(record.id) });
             },
           },
         ];
 
         return (
-          <Space size="middle">
+          <Space size="middle" wrap>
+            {/* 暂不开放，后续恢复。
+            <Button onClick={() => navigate(`/dashboard/event/${record.id}/manage`)}>参加者与票档</Button>
+            */}
             <Button
               type="primary"
               ghost

@@ -7,8 +7,8 @@ import { debounce, uniqBy } from "es-toolkit";
 
 interface OrganizationSelectorProps {
   id?: string;
-  value?: string[];
-  onChange?: (value: string[] | undefined) => void;
+  value?: string | string[];
+  onChange?: (value: string | string[] | undefined) => void;
   onSelect?: (value: Organization[] | undefined) => void;
   selectedOptionId?: string;
   selectedOptions?: Organization[];
@@ -46,9 +46,15 @@ export default function OrganizationSelector({
     [],
   );
 
-  const handleChange = (selectedValue: string[]) => {
+  const handleChange = (selectedValue: string | string[] | undefined) => {
     onChange?.(selectedValue);
-    onSelect?.(organizations.filter((organization) => selectedValue.includes(organization.id)));
+    const ids = Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : [];
+    onSelect?.(
+      uniqBy(
+        [...(selectedOptions ?? []), ...organizations.filter((organization) => ids.includes(organization.id))],
+        (organization) => organization.id,
+      ),
+    );
   };
 
   return (
