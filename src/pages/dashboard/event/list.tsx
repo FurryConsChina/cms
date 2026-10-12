@@ -195,7 +195,7 @@ export default function EventPage() {
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
-              handleRefreshPage(`/${record.organization.slug}/${record.slug}`);
+              handleRefreshPage(`/event/${record.eventKey}`);
             },
           },
           {
@@ -203,7 +203,7 @@ export default function EventPage() {
             icon: <IconLink style={{ width: 14, height: 14 }} />,
             label: "在网站上查看",
             onClick: () => {
-              window.open(`https://www.furrycons.cn/${record.organization.slug}/${record.slug}`, "_blank");
+              window.open(`https://www.furrycons.cn/event/${record.eventKey}`, "_blank");
             },
           },
           { type: "divider" },

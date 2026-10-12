@@ -34,7 +34,7 @@ const useAuthStore = create<UserStore>()(
         set({
           token,
         });
-        Axios.defaults.headers.common.Authorization = `${token}`;
+        Axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       },
       logout: () => {
         set({
@@ -49,7 +49,7 @@ const useAuthStore = create<UserStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
         if (state?.token) {
-          Axios.defaults.headers.common.Authorization = `${state.token}`;
+          Axios.defaults.headers.common.Authorization = `Bearer ${state.token}`;
         }
       },
     },

@@ -1,21 +1,31 @@
 import Axios from "@/api";
 import {
+  EventScale,
+  EventStatus,
   EventLocationType,
   EventTicketChannelType,
   EventType,
   type EditableEvent,
-  type EventItem,
 } from "@/types/event";
 import type { List } from "@/types/Request";
 import z from "zod";
+import { getMediaUsages } from "./upload";
+import type { EventResponse } from "@/types/event";
+import { toEventItem } from "./eventAdapter";
+
+import { mediaBindingSchema, singleMediaBindingSchema } from "./mediaSchema";
 
 export const EditEventApiBody = z.object({
-  name: z.string(),
-  slug: z.string(),
+  name: z.string().min(1).max(256),
+  slug: z
+    .string()
+    .min(1)
+    .max(256)
+    .regex(/^[a-zA-Z0-9-]+$/),
   startAt: z.iso.datetime().nullish(),
   endAt: z.iso.datetime().nullish(),
-  status: z.string(),
-  scale: z.string(),
+  status: z.enum(EventStatus),
+  scale: z.enum(EventScale),
   type: z.enum(EventType).optional(),
   locationType: z.enum(EventLocationType).optional(),
   organizations: z.array(
@@ -24,10 +34,9 @@ export const EditEventApiBody = z.object({
       isPrimary: z.boolean(),
     }),
   ),
-  regionId: z.uuid().optional(),
-  address: z.string().nullish(),
-  addressLat: z.string().nullish(),
-  addressLon: z.string().nullish(),
+  regionId: z.uuid().nullish(),
+  placeId: z.uuid().nullish(),
+  locationNotes: z.string().nullish(),
   sources: z
     .array(
       z.object({
@@ -48,50 +57,18 @@ export const EditEventApiBody = z.object({
     )
     .nullish(),
 
-  thumbnail: z.string().optional(),
-  media: z
-    .object({
-      images: z
-        .array(
-          z.object({
-            url: z.string(),
-            title: z.string().nullish(),
-            description: z.string().nullish(),
-          }),
-        )
-        .optional(),
-      videos: z
-        .array(
-          z.object({
-            url: z.string(),
-            title: z.string().nullish(),
-            description: z.string().nullish(),
-          }),
-        )
-        .optional(),
-      lives: z
-        .array(
-          z.object({
-            url: z.string(),
-            title: z.string().nullish(),
-            description: z.string().nullish(),
-          }),
-        )
-        .optional(),
-    })
-    .optional(),
+  cover: singleMediaBindingSchema,
+  poster: z.array(mediaBindingSchema).nullish(),
+  gallery: z.array(mediaBindingSchema).nullish(),
+  videos: z.array(mediaBindingSchema).nullish(),
+  lives: z.array(mediaBindingSchema).nullish(),
   detail: z.string().nullish(),
-  features: z
-    .object({
-      self: z.array(z.string()).optional(),
-    })
-    .nullish(),
-  featureIds: z.array(z.string()).nullish(),
+  features: z.array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })])).nullish(),
   extra: z
     .object({
       overrideOrganizationContact: z
         .object({
-          qqGroups: z.array(z.object({ label: z.string().optional(), value: z.string() })).optional(),
+          qqGroups: z.array(z.object({ label: z.string().nullish(), value: z.string() })).optional(),
         })
         .optional(),
     })
@@ -100,37 +77,48 @@ export const EditEventApiBody = z.object({
 
 export class EventAPI {
   static async getEventList(params: { pageSize: number; current: number; search?: string; orgSearch?: string }) {
-    const res = await Axios.get<List<EventItem>>("/internal/cms/event/list", {
+    const res = await Axios.get<List<EventResponse>>("/cms/event/list", {
       params,
     });
 
-    return res.data;
+    return { ...res.data, records: res.data.records.map((event) => toEventItem(event)) };
   }
 
   static async getEventDetail(params: { id: string }) {
-    const res = await Axios.get<EventItem>(`/internal/cms/event/detail/${params.id}`);
+    const res = await Axios.get<EventResponse>(`/cms/event/detail/${params.id}`);
 
-    return res.data;
+    if (!res.data) throw new Error("展会不存在或已被删除");
+    const usages = await getMediaUsages({ entityType: "event", entityId: params.id });
+    return toEventItem(res.data, usages);
   }
 
   static async createEvent(event: EditableEvent) {
-    const res = await Axios.post<EventItem>("/internal/cms/event", {
-      event,
+    const { cover, poster, gallery, videos, lives, ...attributes } = event;
+    if (cover || poster?.length || gallery?.length || videos?.length || lives?.length) {
+      throw new Error("请先保存活动，再编辑媒体资源");
+    }
+    const res = await Axios.post<{ id: string }>("/cms/event", {
+      event: attributes,
     });
 
     return res.data;
   }
 
-  static async updateEvent(eventId: string, event: EditableEvent) {
-    const res = await Axios.post<EventItem>(`/internal/cms/event/${eventId}`, {
+  static async updateEvent(eventId: string, event: EditableEvent, expectedContentVersion?: number) {
+    const res = await Axios.patch<EventResponse>(`/cms/event/${eventId}`, {
       event,
+      expectedContentVersion,
     });
 
     return res.data;
+  }
+
+  static async setVisibility(id: string, input: { isPublished?: boolean; isSuspended?: boolean }) {
+    return (await Axios.patch<EventResponse>(`/cms/event/${id}/visibility`, input)).data;
   }
 
   static async deleteEvent(id: string) {
-    const res = await Axios.delete<{ success: boolean }>(`/internal/cms/event/${id}`);
+    const res = await Axios.delete<{ success: boolean }>(`/cms/event/${id}`);
 
     return res.data;
   }

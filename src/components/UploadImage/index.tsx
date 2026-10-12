@@ -1,7 +1,7 @@
+import type { MediaOwner, MediaBinding } from "@/types/media";
 import { uploadToCOS } from "@/utils/cos";
 import { Button, Card, Modal, Flex, Input, Image, Typography, Alert, Upload, App } from "antd";
-import type { UploadFile, RcFile } from "antd/es/upload/interface";
-import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
+import { IconPhoto } from "@tabler/icons-react";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 
@@ -13,10 +13,12 @@ export default function UploadImage({
   defaultImageName,
   onUploadSuccess,
   disabled,
+  owner,
 }: {
   pathPrefix: string;
   defaultImageName?: string;
-  onUploadSuccess: (imagePath: string) => void;
+  onUploadSuccess: (asset: MediaBinding) => void;
+  owner?: MediaOwner;
   disabled?: boolean;
 }) {
   const { message } = App.useApp();
@@ -62,26 +64,36 @@ export default function UploadImage({
         return;
       }
 
+      if (!owner) throw new Error("请先保存后再上传图片");
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
 
       const uploadRes = await uploadToCOS({
         pathKey: imagePath,
         file: images[0],
+        owner,
       });
-      console.log("uploadRes", uploadRes);
       if (uploadRes?.ETag) {
         setLoading(false);
-        onUploadSuccess(imagePath);
+        onUploadSuccess({ mediaAssetId: uploadRes.mediaAssetId, url: uploadRes.url });
         message.success("图片上传成功");
         onClose();
       }
     } catch (error) {
+      message.error(error instanceof Error ? error.message : "图片上传失败");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleBeforeUpload = (file: RcFile) => {
+  const handleBeforeUpload = (file: File) => {
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif", "image/bmp"].includes(file.type)) {
+      message.error("请选择 JPEG、PNG、GIF、WebP、AVIF 或 BMP 图片");
+      return Upload.LIST_IGNORE;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      message.error("图片不能超过 50 MB");
+      return Upload.LIST_IGNORE;
+    }
     setImages([file]);
     setImageMINE(file.type.replace("image/", ""));
     return false; // 阻止自动上传
@@ -89,7 +101,7 @@ export default function UploadImage({
 
   return (
     <>
-      <Button disabled={disabled} onClick={() => setOpened(true)}>
+      <Button disabled={disabled || !owner} onClick={() => setOpened(true)}>
         上传
       </Button>
       <Modal open={opened} onCancel={onClose} title="上传图片" centered width={800} footer={null}>
@@ -100,8 +112,7 @@ export default function UploadImage({
                 if (e.clipboardData.files.length) {
                   const file = e.clipboardData.files[0];
                   if (file) {
-                    setImages([file]);
-                    setImageMINE(file.type.replace("image/", ""));
+                    handleBeforeUpload(file);
                   }
                 }
               }}

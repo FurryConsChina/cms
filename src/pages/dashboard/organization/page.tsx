@@ -111,7 +111,7 @@ export default function OrganizationPage() {
       title: "创立日期",
       key: "date",
       render: (_, record) => (
-        <Space>{record.creationTime ? dayjs(record.creationTime).format("YYYY年MM月DD日") : "未配置"}</Space>
+        <Space>{record.foundedOn ? dayjs(record.foundedOn).format("YYYY年MM月DD日") : "未配置"}</Space>
       ),
     },
     {
