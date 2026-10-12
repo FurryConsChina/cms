@@ -15,6 +15,7 @@ import UploadImage from "@/components/UploadImage";
 import { mediaOwnerLabels, mediaRoleLabels, toOptions } from "@/consts/labels";
 import type { MediaAsset, MediaOwner, MediaUsage } from "@/types/media";
 import { apiErrorMessage } from "@/utils/apiError";
+import { imageUrl } from "@/utils/imageLoader";
 
 const statusLabels = { pending: "待确认", ready: "可用", failed: "失败", deleting: "删除中", deleted: "已删除" };
 const statusColors = { pending: "orange", ready: "green", failed: "red", deleting: "default", deleted: "default" };
@@ -115,11 +116,7 @@ export default function MediaPage() {
           <div>
             <Typography.Text strong>或者添加外部链接</Typography.Text>
             <Space.Compact style={{ width: "100%", maxWidth: 640 }} className="mt-2">
-              <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="图片、视频或直播的 https 链接"
-              />
+              <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="图片、视频或直播的 https 链接" />
               <Button
                 loading={busy}
                 disabled={!url.trim()}
@@ -159,7 +156,7 @@ export default function MediaPage() {
             title: "预览",
             render: (_, v) =>
               isImageAsset(v) ? (
-                <Image width={90} height={70} style={{ objectFit: "contain" }} src={v.url} />
+                <Image width={90} height={70} style={{ objectFit: "contain" }} src={imageUrl(v.url)} />
               ) : (
                 <Typography.Text type="secondary">外部媒体</Typography.Text>
               ),
@@ -216,7 +213,11 @@ export default function MediaPage() {
             {
               title: "预览",
               render: (_, v) =>
-                v.url && isImageAsset(v) ? <Image width={80} height={60} style={{ objectFit: "contain" }} src={v.url} /> : "—",
+                v.url && isImageAsset(v) ? (
+                  <Image width={80} height={60} style={{ objectFit: "contain" }} src={imageUrl(v.url)} />
+                ) : (
+                  "—"
+                ),
             },
             { title: "用途", render: (_, v) => mediaRoleLabels[v.role] ?? v.role },
             { title: "标题", dataIndex: "title" },

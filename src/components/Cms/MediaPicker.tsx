@@ -5,6 +5,7 @@ import type { MediaBinding, MediaOwner } from "@/types/media";
 import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/dashboard/upload";
 import UploadImage from "@/components/UploadImage";
 import { apiErrorMessage } from "@/utils/apiError";
+import { imageUrl } from "@/utils/imageLoader";
 
 export default function MediaPicker({
   value,
@@ -32,7 +33,7 @@ export default function MediaPicker({
   return (
     <div className="space-y-2">
       {value?.url ? (
-        <Image src={value.url} width={120} height={100} style={{ objectFit: "contain" }} />
+        <Image src={imageUrl(value.url)} width={120} height={100} style={{ objectFit: "contain" }} />
       ) : value?.mediaAssetId ? (
         <Typography.Text>已选择媒体资源</Typography.Text>
       ) : null}
@@ -89,7 +90,7 @@ export default function MediaPicker({
           {(data?.records ?? []).map((asset) => (
             <Card key={asset.id} size="small" style={{ width: 180 }}>
               {isImageAsset(asset) ? (
-                <Image src={asset.url} width={150} height={100} style={{ objectFit: "contain" }} />
+                <Image src={imageUrl(asset.url)} width={150} height={100} style={{ objectFit: "contain" }} />
               ) : (
                 <Typography.Paragraph ellipsis={{ rows: 3 }}>{asset.url}</Typography.Paragraph>
               )}

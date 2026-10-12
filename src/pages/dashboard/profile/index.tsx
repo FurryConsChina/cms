@@ -8,6 +8,7 @@ import { ProfileAPI, profileSchema, type ProfileInput } from "@/api/dashboard/pr
 import { toOptions } from "@/consts/labels";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
+import { imageUrl } from "@/utils/imageLoader";
 import type { Profile } from "@/types/profile";
 
 const kindLabels = { individual: "个人", group: "团体", brand: "品牌", media: "媒体" };
@@ -29,7 +30,7 @@ export default function ProfilePage() {
           title: "名称",
           render: (_, v) => (
             <Space>
-              <Avatar src={v.avatarUrl ?? undefined}>{v.name.slice(0, 1)}</Avatar>
+              <Avatar src={v.avatarUrl ? imageUrl(v.avatarUrl) : undefined}>{v.name.slice(0, 1)}</Avatar>
               {v.name}
             </Space>
           ),
@@ -69,9 +70,7 @@ export default function ProfilePage() {
           />
         </Space>
       }
-      actions={(record) => (
-        <Button onClick={() => navigate(`/dashboard/profile/${record.id}/access`)}>成员</Button>
-      )}
+      actions={(record) => <Button onClick={() => navigate(`/dashboard/profile/${record.id}/access`)}>成员</Button>}
       editor={(_, record) => {
         const owner = record ? { entityType: "profile" as const, entityId: record.id } : undefined;
         return (
