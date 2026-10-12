@@ -36,7 +36,7 @@ export async function getMediaUsages(owner: MediaOwner) {
   const res = await Axios.get<(MediaUsage & { asset?: { url: string } })[]>(
     `/cms/media/usages/${owner.entityType}/${owner.entityId}`,
   );
-  return res.data.map((usage) => ({ ...usage, url: usage.asset?.url }));
+  return res.data.map((usage) => ({ ...usage, url: usage.asset?.url ?? usage.url }));
 }
 
 export async function createExternalMedia(url: string) {
