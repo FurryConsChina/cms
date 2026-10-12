@@ -10,30 +10,29 @@ export const EditApplicationApiBody = z.object({
 });
 
 export class ApplicationApi {
-  static async getApplicationList(params?: { pageSize?: number; current?: number; search?: string; orgSearch?: string }) {
-    const res = await Axios.get<List<Application>>("/developer/application", {
-      params,
-    });
+  static async getApplicationList() {
+    // 后端当前固定返回第 1 页、每页 20 条，不接受分页或搜索参数。
+    const res = await Axios.get<List<Application>>("/cms/application");
     return res.data;
   }
 
   static async getApplicationDetail(id: string) {
-    const res = await Axios.get<Application>(`/developer/application/${id}`);
+    const res = await Axios.get<Application>(`/cms/application/${id}`);
     return res.data;
   }
 
   static async createApplication(application: InferZodType<typeof EditApplicationApiBody>) {
-    const res = await Axios.post<Application>("/developer/application", application);
+    const res = await Axios.post<Application>("/cms/application", application);
     return res.data;
   }
 
   static async updateApplication(id: string, application: InferZodType<typeof EditApplicationApiBody>) {
-    const res = await Axios.post<Application>(`/developer/application/${id}`, application);
+    const res = await Axios.post<Application>(`/cms/application/${id}`, application);
     return res.data;
   }
 
   static async deleteApplication(id: string) {
-    const res = await Axios.delete<{ success: boolean }>(`/developer/application/${id}`);
+    const res = await Axios.delete<{ success: boolean }>(`/cms/application/${id}`);
     return res.data;
   }
 }

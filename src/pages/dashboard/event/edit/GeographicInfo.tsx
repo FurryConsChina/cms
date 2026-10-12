@@ -1,13 +1,11 @@
-import { EventItem } from "@/types/event";
-import { Region } from "@/types/region";
-import { IconSearch } from "@tabler/icons-react";
+import type { EventItem } from "@/types/event";
+import type { Region } from "@/types/region";
 import RegionSelector from "@/components/Region/RegionSelector";
-import LocationSearch from "@/components/Event/LocationSearch";
-import { Typography, Button, Flex, Row, Col, App, Form, Input, AutoComplete } from "antd";
+import { PlaceAPI } from "@/api/dashboard/place";
+import { Typography, Form, Input, Select, Alert } from "antd";
 import type { FormInstance } from "antd";
 import { useState } from "react";
-
-const { Title } = Typography;
+import useSWR from "swr";
 
 interface GeographicInfoProps {
   form: FormInstance;
@@ -17,67 +15,45 @@ interface GeographicInfoProps {
 }
 
 export default function GeographicInfo({ form, event, selectedRegion, setSelectedRegion }: GeographicInfoProps) {
-  const { message } = App.useApp();
-  const [isLocationSearchModalOpen, setIsLocationSearchModalOpen] = useState(false);
-
-  const address = Form.useWatch("address", form);
-
+  const [search, setSearch] = useState("");
+  const { data, isLoading, error } = useSWR(["places", selectedRegion?.id, search], () =>
+    PlaceAPI.list({ current: 1, pageSize: 100, regionId: selectedRegion?.id, name: search || undefined }),
+  );
+  const places = data?.records || [];
+  const options = (
+    event?.place && event.place.regionId === selectedRegion?.id && !places.some((p) => p.id === event.place?.id)
+      ? [event.place, ...places]
+      : places
+  ).map((p) => ({ value: p.id, label: `${p.name}${p.address ? `（${p.address}）` : ""}` }));
   return (
     <div>
-      <Title level={5} style={{ margin: "12px 0" }}>
-        地理信息
-      </Title>
-
+      <Typography.Title level={5}>地理信息</Typography.Title>
       <Form.Item label="展会地区" name="regionId">
-        <RegionSelector selectedOption={event?.region} onSelect={(region) => setSelectedRegion(region)} />
+        <RegionSelector
+          selectedOption={event?.region ?? undefined}
+          onSelect={(region) => {
+            setSelectedRegion(region);
+            form.setFieldValue("placeId", null);
+          }}
+        />
       </Form.Item>
-
-      <Form.Item label="展会地址" name="address">
-        <Input placeholder="请输入展会地址" />
+      {error && <Alert type="error" title="场地加载失败，请稍后重试" />}
+      <Form.Item label="活动场地" name="placeId" extra="地址与经纬度由所选场地提供。">
+        <Select
+          disabled={!selectedRegion}
+          allowClear
+          showSearch
+          filterOption={false}
+          loading={isLoading}
+          options={options}
+          onSearch={setSearch}
+          onClear={() => form.setFieldValue("placeId", null)}
+          placeholder="搜索并选择场地"
+        />
       </Form.Item>
-
-      <Row gutter={8}>
-        <Col span={12}>
-          <Form.Item label="经度" name="addressLon">
-            <Input placeholder="经度小数点前一般有三位整数" />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item label="纬度" name="addressLat">
-            <Input placeholder="纬度小数点前一般有两位整数" />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Button
-        onClick={() => {
-          if (!selectedRegion) {
-            return message.warning("请先选择展会地区");
-          }
-          if (!address) {
-            return message.warning("请先输入展会地址");
-          }
-
-          setIsLocationSearchModalOpen(true);
-        }}
-      >
-        按展会地址搜索经纬度
-      </Button>
-      <LocationSearch
-        isModalOpen={isLocationSearchModalOpen}
-        handleOk={(location) => {
-          setIsLocationSearchModalOpen(false);
-          if (location) {
-            form.setFieldValue("addressLat", location.location.lat.toString());
-            form.setFieldValue("addressLon", location.location.lng.toString());
-          }
-        }}
-        handleCancel={() => {
-          setIsLocationSearchModalOpen(false);
-        }}
-        region={selectedRegion!}
-        keyword={address}
-      />
+      <Form.Item label="场地补充说明" name="locationNotes">
+        <Input.TextArea />
+      </Form.Item>
     </div>
   );
 }

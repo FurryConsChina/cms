@@ -11,7 +11,7 @@ interface UserStore {
   setHasHydrated: (state: boolean) => void;
   login: (user: User) => void;
   refreshToken: (token: string) => void;
-  logout: () => void;
+  logout: (revoke?: boolean) => Promise<void>;
 }
 
 const useAuthStore = create<UserStore>()(
@@ -34,11 +34,19 @@ const useAuthStore = create<UserStore>()(
         set({
           token,
         });
-        Axios.defaults.headers.common.Authorization = `${token}`;
+        Axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       },
-      logout: () => {
+      logout: async (revoke = true) => {
+        if (revoke && get().token) {
+          try {
+            await Axios.post("/cms/auth/logout");
+          } catch {
+            /* 本地退出仍需完成。 */
+          }
+        }
         set({
           user: null,
+          token: null,
         });
         Axios.defaults.headers.common.Authorization = null;
         window.location.href = "/auth";
@@ -49,7 +57,7 @@ const useAuthStore = create<UserStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
         if (state?.token) {
-          Axios.defaults.headers.common.Authorization = `${state.token}`;
+          Axios.defaults.headers.common.Authorization = `Bearer ${state.token}`;
         }
       },
     },

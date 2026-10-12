@@ -1,3 +1,4 @@
+import { apiErrorMessage } from "@/utils/apiError";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { pickBy, uniqBy } from "es-toolkit";
@@ -69,7 +70,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const { message, modal } = App.useApp();
   const cleanedEvent = event ? pickBy(event, (v) => v !== "" && v != null) : {};
 
-  const [selectedRegion, setSelectedRegion] = useState<Region | undefined>(event?.region);
+  const [selectedRegion, setSelectedRegion] = useState<Region | undefined>(event?.region ?? undefined);
   const [selectedOrganizations, setSelectedOrganizations] = useState<Organization[]>(() => {
     return uniqBy([...(event?.organization ? [event.organization] : []), ...(event?.organizations || [])], (o) => o.id);
   });
@@ -84,19 +85,18 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
   const initialValues = {
     name: cleanedEvent.name,
-    startAt: cleanedEvent.startAt ? dayjs(cleanedEvent.startAt) : dayjs(defaultStartAt),
-    endAt: cleanedEvent.endAt ? dayjs(cleanedEvent.endAt) : dayjs(defaultEndAt),
-    address: cleanedEvent.address,
+    startAt: cleanedEvent.startAt ? dayjs(cleanedEvent.startAt) : event ? null : dayjs(defaultStartAt),
+    endAt: cleanedEvent.endAt ? dayjs(cleanedEvent.endAt) : event ? null : dayjs(defaultEndAt),
+    placeId: cleanedEvent.placeId,
+    locationNotes: cleanedEvent.locationNotes,
     regionId: cleanedEvent.regionId,
     features: cleanedEvent.features?.self || [],
     featureIds: cleanedEvent.features?.common || [],
-    source: cleanedEvent.source,
-    thumbnail: cleanedEvent.thumbnail || "fec-event-default-cover.png",
-    media: {
-      images: cleanedEvent.media?.images || [],
-      videos: cleanedEvent.media?.videos || [],
-      lives: cleanedEvent.media?.lives || [],
-    },
+    cover: cleanedEvent.cover || null,
+    poster: cleanedEvent.poster || [],
+    gallery: cleanedEvent.gallery || [],
+    videos: cleanedEvent.videos || [],
+    lives: cleanedEvent.lives || [],
     organization: cleanedEvent.organization?.id,
     organizations: cleanedEvent.organizations?.map((o) => o.id) || [],
     slug: cleanedEvent.slug,
@@ -105,45 +105,51 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     type: cleanedEvent.type || EventType.AllInCon,
     scale: cleanedEvent.scale || EventScale.Cosy,
     locationType: cleanedEvent.locationType || EventLocationType.Hotel,
-    addressLat: cleanedEvent.addressLat,
-    addressLon: cleanedEvent.addressLon,
     sources: cleanedEvent.sources || [],
     ticketChannels: cleanedEvent.ticketChannels || [],
     extra: cleanedEvent.extra || {},
   };
 
+  const [saving, setSaving] = useState(false);
+  const [contentVersion, setContentVersion] = useState(event?.contentVersion);
   const onSubmit = async (value: EditableEvent) => {
+    if (saving) return;
+    setSaving(true);
     try {
       if (event?.id) {
-        await EventAPI.updateEvent(event.id, value);
-        message.success("更新展会数据成功");
+        const res = await EventAPI.updateEvent(event.id, value, contentVersion);
+        setContentVersion(res.contentVersion);
+        message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
-        message.success("创建展会数据成功");
+        message.success("活动已创建，现在可以上传封面和海报");
         navigate(`/dashboard/event/${res.id}/edit`);
       }
     } catch (error) {
-      message.error(`有错误发生: ${JSON.stringify(error)}`);
+      message.error(apiErrorMessage(error));
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleFinish = (value: typeof initialValues) => {
-    console.info("表单原始数据:", value);
     const processedValues = useZodValidateData(
       {
         ...value,
         startAt: value.startAt instanceof dayjs ? value.startAt.toISOString() : value.startAt,
         endAt: value.endAt instanceof dayjs ? value.endAt.toISOString() : value.endAt,
-        features: {
-          self: value.features || [],
-        },
-        featureIds: value.featureIds || [],
+        features: [
+          ...(value.features || []).map((name) => ({ name })),
+          ...(value.featureIds || []).map((id) => ({ id })),
+        ],
         organizations: [
           { id: value.organization, isPrimary: true },
-          ...value.organizations.map((id) => ({
-            id,
-            isPrimary: false,
-          })),
+          ...(value.organizations || [])
+            .filter((id) => id !== value.organization)
+            .map((id) => ({
+              id,
+              isPrimary: false,
+            })),
         ],
       },
       EditEventApiBody,
@@ -192,13 +198,14 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
       <EventMedia
         form={form}
+        owner={event?.id ? { entityType: "event", entityId: event.id } : undefined}
         pathPrefix={`organizations/${organization?.slug}/${slugValue}/`}
         disabled={!organization?.slug || !slugValue}
       />
 
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
-        <Button type="primary" htmlType="submit">
-          提交
+        <Button type="primary" htmlType="submit" loading={saving}>
+          {event?.id ? "保存" : "创建活动"}
         </Button>
       </Flex>
     </Form>

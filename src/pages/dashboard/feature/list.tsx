@@ -1,10 +1,11 @@
+import { apiErrorMessage } from "@/utils/apiError";
 import { FeatureAPI } from "@/api/dashboard/feature";
 import DefaultContainer from "@/components/Layout/Container";
 import FeatureEditor from "@/components/EventFeature/FeatureEditor";
 import { FeatureCategory, FeatureCategoryLabel, type Feature } from "@/types/feature";
 import { IconCirclePlus, IconEdit, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Dropdown, Flex, MenuProps, Space, Tag, Typography } from "antd";
+import { App, Button, Dropdown, Flex, MenuProps, Space, Tag, Typography } from "antd";
 import Table, { ColumnsType } from "antd/es/table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useRef, useState } from "react";
@@ -13,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 const { Title } = Typography;
 
 export default function FeaturePage() {
-  const navigate = useNavigate();
+  const { message, modal } = App.useApp();
   const editingFeature = useRef<Feature>(null);
 
   const [opened, setOpened] = useState(false);
@@ -63,7 +64,21 @@ export default function FeaturePage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: true,
+            onClick: () =>
+              modal.confirm({
+                title: `确认删除“${record.name}”？`,
+                content: "相关引用可能阻止删除。",
+                onOk: async () => {
+                  try {
+                    await FeatureAPI.deleteFeature(record.id);
+                    message.success("删除成功");
+                    await refetch();
+                  } catch (error) {
+                    message.error(apiErrorMessage(error));
+                    throw error;
+                  }
+                },
+              }),
           },
         ];
 
@@ -134,7 +149,14 @@ export default function FeaturePage() {
         />
       </div>
 
-      <FeatureEditor opened={opened} onClose={() => setOpened(false)} editingFeature={editingFeature.current} />
+      <FeatureEditor
+        opened={opened}
+        onClose={() => {
+          setOpened(false);
+          void refetch();
+        }}
+        editingFeature={editingFeature.current}
+      />
     </>
   );
 }

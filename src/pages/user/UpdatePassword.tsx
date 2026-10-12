@@ -22,14 +22,14 @@ export default function UpdatePassword({ user }: UpdatePasswordProps) {
       await AuthAPI.updatePassword(value);
       message.success("密码更新成功");
       form.resetFields();
-      auth.logout();
+      void auth.logout(false);
     } catch (error) {
       message.error(`更新密码失败: ${JSON.stringify(error)}`);
     }
   };
 
-  const handleFinish = (value: { newPassword: string }) => {
-    const processedValues = useZodValidateData({ newPassword: value.newPassword }, UpdatePasswordApiBody);
+  const handleFinish = (value: InferZodType<typeof UpdatePasswordApiBody>) => {
+    const processedValues = useZodValidateData(value, UpdatePasswordApiBody);
 
     if (processedValues.errors.length > 0) {
       return modal.warning({
@@ -46,6 +46,9 @@ export default function UpdatePassword({ user }: UpdatePasswordProps) {
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical">
+      <Form.Item label="当前密码" name="currentPassword" rules={[{ required: true, message: "请输入当前密码" }]}>
+        <Input.Password autoComplete="current-password" />
+      </Form.Item>
       <Form.Item
         label="新密码"
         required

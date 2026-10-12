@@ -1,9 +1,10 @@
 import COS from "cos-js-sdk-v5";
 
-import { getUploadSignature } from "@/api/dashboard/upload";
+import type { MediaOwner } from "@/types/media";
+import { confirmUpload, getUploadSignature } from "@/api/dashboard/upload";
 
-export async function uploadToCOS({ pathKey, file }: { pathKey: string; file: File }) {
-  const signedKey = await getUploadSignature({ pathKey });
+export async function uploadToCOS({ pathKey, file, owner }: { pathKey: string; file: File; owner: MediaOwner }) {
+  const signedKey = await getUploadSignature({ pathKey, owner });
 
   const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } = signedKey;
   const cos = new COS({
@@ -18,6 +19,7 @@ export async function uploadToCOS({ pathKey, file }: { pathKey: string; file: Fi
     Bucket: bucket,
     Region: region,
     Key: key,
+    ContentType: file.type,
     Body: file, // 要上传的文件对象。
     SliceSize: 1024 * 1024 * 50, // 分片大小，单位 B，默认 1MB。
     onProgress: (progressData) => {
@@ -25,5 +27,7 @@ export async function uploadToCOS({ pathKey, file }: { pathKey: string; file: Fi
     },
   });
 
-  return uploadRes;
+  if (!uploadRes.ETag) throw new Error("文件上传失败");
+  await confirmUpload(signedKey.mediaAssetId);
+  return { ...uploadRes, mediaAssetId: signedKey.mediaAssetId, url: signedKey.url };
 }

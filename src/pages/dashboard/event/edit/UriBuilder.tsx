@@ -20,7 +20,7 @@ export default function UriBuilder({ form, selectedRegion }: UriBuilderProps) {
       startAtFormValue instanceof dayjs ? startAtFormValue.toDate() : dayjs(startAtFormValue).toDate();
     const selectedYear = startAtValue.getFullYear();
     const selectedMonth = startAtValue.toLocaleString("en-us", { month: "short" }).toLocaleLowerCase();
-    const city = selectedRegion?.code;
+    const city = selectedRegion?.slug;
 
     if (!selectedYear || !selectedMonth || !city) {
       message.warning("活动日期或活动地区没有选择");

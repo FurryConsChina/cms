@@ -1,6 +1,8 @@
 import { EditEventApiBody } from "@/api/dashboard/event";
 import { BaseModel, InferZodType } from "@/types/common";
 import { Organization } from "@/types/organization";
+import type { Place } from "@/types/place";
+import type { MediaBinding } from "@/types/media";
 import { Region } from "@/types/region";
 
 /** Sync with https://schema.org/EventStatusType */
@@ -80,53 +82,40 @@ export interface IEvent extends BaseModel {
   slug: string;
   startAt: string | null;
   endAt: string | null;
-  status: EventStatusKeyType;
-  scale: EventScaleKeyType;
-  type: (typeof EventType)[keyof typeof EventType];
-  locationType: (typeof EventLocationType)[keyof typeof EventLocationType];
-  source: string | null;
-  sources: {
-    url: string;
-    name: string | null;
-    description: string | null;
-  }[];
-  ticketChannels: {
-    type: "wxMiniProgram" | "url" | "qrcode" | "app";
-    name: string;
-    url: string;
-    available: boolean;
-  }[];
+  status: (typeof EventStatus)[keyof typeof EventStatus];
+  scale: (typeof EventScale)[keyof typeof EventScale];
+  type: (typeof EventType)[keyof typeof EventType] | null;
+  locationType: (typeof EventLocationType)[keyof typeof EventLocationType] | null;
+  sources: { url: string; name?: string | null; description?: string | null }[] | null;
+  ticketChannels:
+    { type: "wxMiniProgram" | "url" | "qrcode" | "app"; name: string; url: string; available: boolean }[] | null;
   address: string | null;
   addressLat: string | null;
   addressLon: string | null;
   thumbnail: string | null;
-  media: {
-    images: {
-      url: string;
-      title: string | null;
-      description: string | null;
-    }[];
-    videos: {
-      url: string;
-      title: string | null;
-      description: string | null;
-    }[];
-    lives: {
-      url: string;
-      title: string | null;
-      description: string | null;
-    }[];
-  };
+  media: Record<string, unknown> | null;
   detail: string | null;
-  organization: Organization;
+  organization: Organization | null;
   organizations: Organization[];
   features: {
     self: string[];
     common: string[];
   };
   featureIds: string[];
-  regionId: string;
-  region: Region;
+  regionId: string | null;
+  region: Region | null;
+  place: Place | null;
+  placeId: string | null;
+  locationNotes: string | null;
+  eventKey: string;
+  contentVersion: number;
+  isPublished: boolean;
+  isSuspended: boolean;
+  cover: MediaBinding | null;
+  poster: MediaBinding[];
+  gallery: MediaBinding[];
+  videos: MediaBinding[];
+  lives: MediaBinding[];
   extra?: {
     overrideOrganizationContact?: {
       qqGroups?: { label: string; value: string }[];
@@ -136,3 +125,24 @@ export interface IEvent extends BaseModel {
 
 export type EventItem = IEvent;
 export type EditableEvent = InferZodType<typeof EditEventApiBody>;
+
+export type EventResponse = Omit<
+  IEvent,
+  | "organization"
+  | "organizations"
+  | "features"
+  | "featureIds"
+  | "regionId"
+  | "placeId"
+  | "address"
+  | "addressLat"
+  | "addressLon"
+  | "cover"
+  | "poster"
+  | "gallery"
+  | "videos"
+  | "lives"
+> & {
+  organizers: { isPrimary: boolean; organization: Organization }[];
+  features: { id: string; name: string; isPublic: boolean }[];
+};

@@ -24,39 +24,13 @@ export const OrganizationSchema = z.object({
   id: z.string().uuid(),
   slug: z.string().min(1),
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   status: z.enum(["active", "inactive"]),
-  type: z.enum(["personal", "agency"]).optional(),
-  logoUrl: z.string().optional(),
-  richMediaConfig: z.any().optional(),
-  contactMail: z.string().email().optional(),
-  website: z.string().url().optional(),
-  twitter: z.string().url().optional(),
-  weibo: z.string().url().optional(),
-  qqGroup: z.string().optional(),
-  bilibili: z.string().url().optional(),
-  rednote: z.string().url().optional(),
-  wikifur: z.string().url().optional(),
-  facebook: z.string().url().optional(),
-  plurk: z.string().url().optional(),
-  extraMedia: z
-    .object({
-      qqGroups: z
-        .array(
-          z.object({
-            label: z.string(),
-            value: z.string(),
-          }),
-        )
-        .optional(),
-    })
-    .optional(),
-  creationTime: z
-    .string()
-    .refine((date) => !isNaN(Date.parse(date)), {
-      message: "Invalid date format",
-    })
-    .optional(),
+  type: z.enum(["personal", "agency"]).nullish(),
+  logoUrl: z.string().nullish(),
+  contactMail: z.string().nullish(),
+  links: z.array(z.object({ type: z.string(), label: z.string().nullish(), value: z.string() })).optional(),
+  foundedOn: z.string().nullish(),
 });
 
 export type Organization = z.infer<typeof OrganizationSchema>;

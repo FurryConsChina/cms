@@ -1,19 +1,8 @@
+import { visibleNavigation } from "@/consts/navigation";
 import useAuthStore from "@/stores/auth";
-import { UserRole } from "@/types/User";
 import { Layout, Menu, Button, Flex } from "antd";
 import type { MenuProps } from "antd";
-import {
-  IconApps,
-  IconHome,
-  IconLogout,
-  IconMapPin,
-  IconMenu2,
-  IconTag,
-  IconTicket,
-  IconTrademark,
-  IconUser,
-  IconUserCode,
-} from "@tabler/icons-react";
+import { IconLogout, IconMenu2, IconUser } from "@tabler/icons-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import clsx from "clsx";
@@ -22,58 +11,17 @@ const { Sider, Content, Header } = Layout;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const getMenuItems = (role?: string): MenuItem[] => {
-  const developerMenu: MenuItem[] = [
-    {
-      key: "/developer",
-      icon: <IconUserCode size="1.1rem" stroke={1.5} />,
-      label: "开发者",
-      children: [
-        {
-          key: "/developer/application",
-          icon: <IconApps size="1.1rem" stroke={1.5} />,
-          label: "应用管理",
-        },
-      ],
-    },
-  ];
+const isMobile = () => window.innerWidth < 768;
 
-  if (role === UserRole.Developer) {
-    return developerMenu;
-  }
-
-  return [
-    {
-      key: "/dashboard",
-      icon: <IconHome size="1.1rem" stroke={1.5} />,
-      label: "首页",
-    },
-    {
-      key: "/dashboard/event",
-      icon: <IconTicket size="1.1rem" stroke={1.5} />,
-      label: "展会",
-    },
-    {
-      key: "/dashboard/organization",
-      icon: <IconTrademark size="1.1rem" stroke={1.5} />,
-      label: "展商",
-    },
-    {
-      key: "/dashboard/feature",
-      icon: <IconTag size="1.1rem" stroke={1.5} />,
-      label: "展会标签",
-    },
-    {
-      key: "/dashboard/region",
-      icon: <IconMapPin size="1.1rem" stroke={1.5} />,
-      label: "地区管理",
-    },
-    {
-      type: "divider",
-    },
-    ...developerMenu,
-  ];
-};
+const getMenuItems = (role?: string): MenuItem[] =>
+  visibleNavigation(role).flatMap((group): MenuItem[] => {
+    const items = group.items.map((item) => ({
+      key: item.path,
+      label: item.label,
+      icon: <item.icon size="1.1rem" stroke={1.5} />,
+    }));
+    return group.label ? [{ type: "group" as const, key: group.label, label: group.label, children: items }] : items;
+  });
 
 const bottomMenuItems: MenuItem[] = [
   {
@@ -102,7 +50,7 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(isMobile);
 
   const { logout, user } = useAuthStore();
 
@@ -117,14 +65,9 @@ export default function DashboardLayout() {
     }
 
     // 查找最匹配的路径
-    const allKeys = [
-      "/dashboard",
-      "/dashboard/event",
-      "/dashboard/organization",
-      "/dashboard/feature",
-      "/dashboard/region",
-      "/developer/application",
-    ];
+    const allKeys = visibleNavigation(user?.role)
+      .flatMap((group) => group.items.map((item) => item.path))
+      .sort((a, b) => b.length - a.length);
 
     for (const key of allKeys) {
       if (key !== "/dashboard" && currentPath.startsWith(key)) {
@@ -140,15 +83,15 @@ export default function DashboardLayout() {
       logout();
     } else if (e.key !== "user-settings") {
       navigate(e.key);
+      if (isMobile()) setCollapsed(true);
     }
   };
-  console.log(collapsed);
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
         trigger={null}
-        collapsedWidth="100"
-        width={300}
+        collapsedWidth={80}
+        width={232}
         className={clsx(
           "bg-slate-100 z-50 fixed md:sticky shadow-md md:shadow-none",
           collapsed ? "-translate-x-full md:translate-x-0" : "block",

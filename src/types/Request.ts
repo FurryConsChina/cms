@@ -7,6 +7,8 @@ export type List<T> = {
   records: T[];
 };
 
+export type PageQuery = { current: number; pageSize: number };
+
 export type PaginationConfig = {
   page?: number;
   page_size?: number;

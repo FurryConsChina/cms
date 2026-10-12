@@ -1,11 +1,10 @@
+import { apiErrorMessage } from "@/utils/apiError";
 import { Button, Flex, Typography, Space, App, Table, MenuProps, Dropdown } from "antd";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import DefaultContainer from "@/components/Layout/Container";
-import { IconCirclePlus, IconEdit, IconMenu, IconRefresh, IconTrash } from "@tabler/icons-react";
+import { IconCirclePlus, IconEdit, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { RegionAPI } from "@/api/dashboard/region";
-import { RegionType, RegionTypeLabel, type Region } from "@/types/region";
+import { RegionTypeLabel, type Region } from "@/types/region";
 import { ColumnsType } from "antd/es/table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import useSWR from "swr";
@@ -14,12 +13,12 @@ const { Title, Text } = Typography;
 
 export default function RegionPage() {
   const navigate = useNavigate();
-  const { message } = App.useApp();
+  const { message, modal } = App.useApp();
 
   const [current, setCurrent] = useQueryState("current", parseAsInteger.withDefault(1));
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
 
-  const { isLoading, data } = useSWR(["region-list", current, pageSize], () =>
+  const { isLoading, data, mutate } = useSWR(["region-list", current, pageSize], () =>
     RegionAPI.getRegionList({ current, pageSize }),
   );
 
@@ -30,20 +29,20 @@ export default function RegionPage() {
       key: "name",
     },
     {
-      title: "地区代码",
-      dataIndex: "code",
-      key: "code",
+      title: "地区 Slug",
+      dataIndex: "slug",
+      key: "slug",
     },
     {
       title: "地区类型",
-      dataIndex: "type",
-      key: "type",
-      render: (_, record) => RegionTypeLabel[record.type],
+      dataIndex: "kind",
+      key: "kind",
+      render: (_, record) => RegionTypeLabel[record.kind],
     },
     {
       title: "排序顺序",
-      dataIndex: "sortOrder",
-      key: "sortOrder",
+      dataIndex: "displayOrder",
+      key: "displayOrder",
     },
     {
       title: "父级地区",
@@ -63,7 +62,21 @@ export default function RegionPage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: true,
+            onClick: () =>
+              modal.confirm({
+                title: `确认删除“${record.name}”？`,
+                content: "相关引用可能阻止删除。",
+                onOk: async () => {
+                  try {
+                    await RegionAPI.deleteRegion(record.id);
+                    message.success("删除成功");
+                    await mutate();
+                  } catch (error) {
+                    message.error(apiErrorMessage(error));
+                    throw error;
+                  }
+                },
+              }),
           },
         ];
 
@@ -89,15 +102,6 @@ export default function RegionPage() {
     },
   ];
 
-  const handleRefreshRegionSort = async () => {
-    try {
-      await RegionAPI.recreateRegionOrder(RegionType.CITY);
-      message.success("刷新地区排序成功");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
     <>
       <DefaultContainer className="sticky top-0 z-20">
@@ -107,9 +111,6 @@ export default function RegionPage() {
           </Title>
 
           <Space>
-            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={handleRefreshRegionSort}>
-              刷新地区排序
-            </Button>
             <Button
               type="primary"
               icon={<IconCirclePlus size={16} stroke={1.5} />}

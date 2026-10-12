@@ -1,3 +1,4 @@
+import "./capAssets";
 import "@cap.js/widget";
 import type { CapWidget as CapWidgetType } from "@cap.js/widget";
 import { forwardRef, useImperativeHandle, useRef } from "react";
