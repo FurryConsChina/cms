@@ -14,11 +14,13 @@ const { Title, Text } = Typography;
 export default function ApplicationPage() {
   const editingApplication = useRef<Application>(null);
   const [opened, setOpened] = useState(false);
+  const [current, setCurrent] = useState(1);
+  const pageSize = 20;
   const { message, modal } = App.useApp();
 
   const { isPending, data, refetch } = useQuery({
-    queryKey: ["application-list"],
-    queryFn: () => ApplicationApi.getApplicationList(),
+    queryKey: ["application-list", current, pageSize],
+    queryFn: () => ApplicationApi.getApplicationList(current, pageSize),
   });
 
   const onDelete = (id: string) => {
@@ -31,7 +33,11 @@ export default function ApplicationPage() {
       onOk: async () => {
         await ApplicationApi.deleteApplication(id);
         message.success("删除应用成功");
-        refetch();
+        if (current > 1 && data?.records.length === 1) {
+          setCurrent(current - 1);
+        } else {
+          refetch();
+        }
       },
     });
   };
@@ -162,8 +168,14 @@ export default function ApplicationPage() {
           columns={columns}
           loading={isPending}
           dataSource={data?.records || []}
-          footer={() => `共 ${data?.total ?? 0} 个应用，当前后端仅返回前 20 条`}
-          pagination={false}
+          pagination={{
+            current,
+            pageSize,
+            total: data?.total,
+            showSizeChanger: false,
+            showTotal: (total) => `共 ${total} 个应用`,
+            onChange: setCurrent,
+          }}
           scroll={{ x: "max-content" }}
         />
       </div>
