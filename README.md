@@ -14,8 +14,8 @@
 
 ## 开发环境要求
 
-- Node.js 22+
-- Yarn 4.6.1+
+- Node.js 24 LTS
+- Yarn 4
 
 ## 快速开始
 
@@ -48,7 +48,9 @@ cp .env.example .env.local
 yarn dev
 ```
 
-应用将在 http://localhost:3001 启动
+应用将在 http://localhost:3001 启动。
+
+Rsbuild 2 默认仅监听本机。如需从局域网设备访问，运行 `yarn dev --host 0.0.0.0`。
 
 ### 5. 构建生产版本
 
