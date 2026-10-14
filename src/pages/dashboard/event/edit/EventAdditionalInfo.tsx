@@ -87,10 +87,10 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
         <Select mode="tags" placeholder="请输入展会专属的标签" />
       </Form.Item>
 
-      <Form.Item label="展会公共标签" name="featureIds">
+      <Form.Item label="活动标签" name="featureIds">
         <EventFeatureSelector
           antdSelectProps={{
-            placeholder: "请选择展会共有的标签",
+            placeholder: "请选择活动标签",
           }}
         />
       </Form.Item>

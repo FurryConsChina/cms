@@ -12,8 +12,12 @@ export function LinkFields({ name = "links", label = "联系方式与链接" }: 
           <div className="space-y-2">
             {fields.map((field) => (
               <Flex key={field.key} gap={8} align="start">
-                <Form.Item name={[field.name, "type"]} rules={[{ required: true, message: "请选择类型" }]} noStyle>
-                  <Select style={{ width: 130, flexShrink: 0 }} options={toOptions(linkTypeLabels)} />
+                <Form.Item
+                  name={[field.name, "type"]}
+                  rules={[{ required: true, message: "请选择类型" }]}
+                  style={{ marginBottom: 0, flex: 1, minWidth: 0 }}
+                >
+                  <Select options={toOptions(linkTypeLabels)} />
                 </Form.Item>
                 <Form.Item name={[field.name, "label"]} noStyle>
                   <Input placeholder="显示名称（可选）" style={{ width: 160, flexShrink: 0 }} />

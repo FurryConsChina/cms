@@ -1811,6 +1811,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"antd-img-crop@npm:^4.30.0":
+  version: 4.30.0
+  resolution: "antd-img-crop@npm:4.30.0"
+  dependencies:
+    react-easy-crop: "npm:^5.5.6"
+    tslib: "npm:^2.8.1"
+  peerDependencies:
+    antd: ">=4.0.0"
+    react: ">=16.8.0"
+    react-dom: ">=16.8.0"
+  checksum: 10c0/2a7e138c3b0782745d13b5266ad62f3aad240679fd5aaeda67ce3a111a7ad9640fc17591bf82ff46a62aa8846e3b61b3ca67e1015e7db02f952bbfe1438a6e07
+  languageName: node
+  linkType: hard
+
 "antd@npm:^6.6.5":
   version: 6.6.5
   resolution: "antd@npm:6.6.5"
@@ -2360,6 +2374,7 @@ __metadata:
     "@types/react": "npm:^19.3.0"
     "@types/react-dom": "npm:^19.3.0"
     antd: "npm:^6.6.5"
+    antd-img-crop: "npm:^4.30.0"
     axios: "npm:^1.20.0"
     clsx: "npm:^2.1.1"
     cos-js-sdk-v5: "npm:^1.10.1"
@@ -2844,6 +2859,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"normalize-wheel@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "normalize-wheel@npm:1.0.1"
+  checksum: 10c0/5daf4c97e39f36658a5263a6499bbc148676ae2bd85f12c8d03c46ffe7bc3c68d44564c00413d88d0457ac0d94450559bb1c24c2ce7ae0c107031f82d093ac06
+  languageName: node
+  linkType: hard
+
 "nth-check@npm:^2.0.1":
   version: 2.1.1
   resolution: "nth-check@npm:2.1.1"
@@ -2950,6 +2972,19 @@ __metadata:
   peerDependencies:
     react: ^19.3.0
   checksum: 10c0/c513044b724dd6bfe9500a9682d60973e7f8a48cffba00b6b16d3e910e27dcc459bf71bf0a5c33d7d62a3843ca30de1bd1e2098058aa4ed71f618a24b6061da5
+  languageName: node
+  linkType: hard
+
+"react-easy-crop@npm:^5.5.6":
+  version: 5.5.7
+  resolution: "react-easy-crop@npm:5.5.7"
+  dependencies:
+    normalize-wheel: "npm:^1.0.1"
+    tslib: "npm:^2.0.1"
+  peerDependencies:
+    react: ">=16.4.0"
+    react-dom: ">=16.4.0"
+  checksum: 10c0/446cc58157031af9638c88dc91bc4136d09e21c6562f030291e1e0d3a7808ce9fe29e2d44116c2ac70470c1a1fe2cd3947df3abc60c82faa550e8500c4bf443c
   languageName: node
   linkType: hard
 
@@ -3179,7 +3214,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.3, tslib@npm:^2.4.0, tslib@npm:^2.8.0, tslib@npm:^2.8.1":
+"tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.4.0, tslib@npm:^2.8.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10c0/9c4759110a19c53f992d9aae23aac5ced636e99887b51b9e61def52611732872ff7668757d4e4c61f19691e36f4da981cd9485e869b4a7408d689f6bf1f14e62

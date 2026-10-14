@@ -5,7 +5,7 @@ import { Alert, App, Button, Form, Input, Modal, Radio, Segmented, Space, Table,
 import { AccessAPI } from "@/api/dashboard/access";
 import type { Claim, EntityKind } from "@/types/access";
 import useAuthStore from "@/stores/auth";
-import { isAdmin, isPlatform } from "@/utils/permissions";
+import { isPlatform } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
 
 export default function AccessPage() {
@@ -20,7 +20,7 @@ export default function AccessPage() {
   const [form] = Form.useForm();
   const [reviewForm] = Form.useForm();
   const [acceptForm] = Form.useForm();
-  const canReview = kind === "organization" ? isAdmin(role) : isPlatform(role);
+  const canReview = isPlatform(role);
   const pending = tab === "pending" && canReview;
   const { data, error, isLoading, mutate } = useSWR(["claims", kind, pending], () => AccessAPI.claims(kind, pending));
   return (

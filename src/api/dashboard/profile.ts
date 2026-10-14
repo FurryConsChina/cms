@@ -1,12 +1,13 @@
 import Axios from "@/api";
 import { z } from "zod";
+import { contactLinkTypeSchema } from "@/types/contactLink";
 import type { List, PageQuery } from "@/types/Request";
 import type { Profile } from "@/types/profile";
 import { getMediaUsages } from "./upload";
 import { mediaBindingSchema, singleMediaBindingSchema } from "./mediaSchema";
 
 export const linkSchema = z.object({
-  type: z.string().min(1).max(64),
+  type: contactLinkTypeSchema,
   label: z.string().max(256).nullish(),
   value: z.string().min(1),
 });
