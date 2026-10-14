@@ -43,7 +43,6 @@ export default function MediaPicker({
         </Button>
         <UploadImage
           owner={owner}
-          pathPrefix=""
           disabled={disabled}
           onUploadSuccess={(asset) => {
             select(asset);
@@ -133,7 +132,7 @@ export function MediaListFields({
         <div className="space-y-3 my-4">
           <Flex justify="space-between" align="center">
             <Space orientation="vertical" size={0}>
-              <Typography.Text strong>{label}</Typography.Text>
+              <Typography.Text>{label}</Typography.Text>
               {!owner && <Typography.Text type="secondary">创建后可以添加{label}。</Typography.Text>}
             </Space>
             <Button disabled={disabled || !owner} onClick={() => add({})}>

@@ -79,9 +79,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const defaultEndAt = new Date(new Date().setHours(18, 0, 0, 0)).toISOString();
 
   const [form] = Form.useForm();
-  const slugValue = Form.useWatch("slug", form);
-  const organizationId = Form.useWatch("organization", form);
-  const organization = selectedOrganizations.find((o) => o.id === organizationId);
 
   const initialValues = {
     name: cleanedEvent.name,
@@ -94,9 +91,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     featureIds: cleanedEvent.features?.common || [],
     cover: cleanedEvent.cover || null,
     poster: cleanedEvent.poster || [],
-    gallery: cleanedEvent.gallery || [],
-    videos: cleanedEvent.videos || [],
-    lives: cleanedEvent.lives || [],
     organization: cleanedEvent.organization?.id,
     organizations: cleanedEvent.organizations?.map((o) => o.id) || [],
     slug: cleanedEvent.slug,
@@ -111,6 +105,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   };
 
   const [saving, setSaving] = useState(false);
+  const [mediaUploading, setMediaUploading] = useState(false);
   const [contentVersion, setContentVersion] = useState(event?.contentVersion);
   const onSubmit = async (value: EditableEvent) => {
     if (saving) return;
@@ -122,7 +117,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
-        message.success("活动已创建，现在可以上传封面和海报");
+        message.success("活动已创建，现在可以上传封面和详情海报");
         navigate(`/dashboard/event/${res.id}/edit`);
       }
     } catch (error) {
@@ -133,6 +128,10 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   };
 
   const handleFinish = (value: typeof initialValues) => {
+    if (mediaUploading) {
+      message.warning("请等待图片上传完成后再保存");
+      return;
+    }
     const processedValues = useZodValidateData(
       {
         ...value,
@@ -197,14 +196,13 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       <Divider dashed size="small" />
 
       <EventMedia
-        form={form}
         owner={event?.id ? { entityType: "event", entityId: event.id } : undefined}
-        pathPrefix={`organizations/${organization?.slug}/${slugValue}/`}
-        disabled={!organization?.slug || !slugValue}
+        disabled={saving}
+        onBusyChange={setMediaUploading}
       />
 
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
-        <Button type="primary" htmlType="submit" loading={saving}>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={mediaUploading}>
           {event?.id ? "保存" : "创建活动"}
         </Button>
       </Flex>

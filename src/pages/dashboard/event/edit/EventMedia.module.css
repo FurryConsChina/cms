@@ -1,0 +1,43 @@
+.posterRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.imageColumn {
+  display: flex;
+  min-height: 240px;
+}
+
+.imageField {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-bottom: 0;
+}
+
+.imageField :global(.ant-form-item-row),
+.imageField :global(.ant-form-item-control),
+.imageField :global(.ant-form-item-control-input) {
+  flex: 1;
+}
+
+.imageField :global(.ant-form-item-control) {
+  display: flex;
+  flex-direction: column;
+}
+
+.imageField :global(.ant-form-item-control-input-content) {
+  display: flex;
+  align-self: stretch;
+}
+
+@media (min-width: 768px) {
+  .posterRow {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .imageColumn {
+    min-height: 0;
+  }
+}

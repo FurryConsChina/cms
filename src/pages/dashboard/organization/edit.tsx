@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
-import AvatarUpload from "@/components/AvatarUpload";
+import UploadImage from "@/components/UploadImage";
 import { LinkFields } from "@/components/Cms/Fields";
 import { apiErrorMessage } from "@/utils/apiError";
 import { CreateOrganizationApiBody, EditOrganizationApiBody, OrganizationAPI } from "@/api/dashboard/organization";
@@ -164,12 +164,14 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
           基础信息
         </Title>
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-[144px_minmax(0,1fr)]">
-          <Form.Item label="组织头像" name="logo" tooltip="支持 JPEG、PNG 和 WebP，最大 50 MB。">
-            <AvatarUpload
+          <Form.Item label="组织头像" name="logo" tooltip="支持 JPEG、PNG、WebP、GIF、AVIF 和 BMP，最大 50 MB。">
+            <UploadImage
+              crop
+              aspect={1}
+              label="组织头像"
               owner={organization?.id ? { entityType: "organization", entityId: organization.id } : undefined}
               disabled={saving}
               onBusyChange={setAvatarBusy}
-              showHint={false}
             />
           </Form.Item>
           <div className="min-w-0">
