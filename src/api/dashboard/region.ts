@@ -13,13 +13,16 @@ export const EditRegionApiBody = z.object({
   kind: z.enum(RegionType),
   parentId: z.uuid().nullish(),
   localName: z.string().max(256).nullish(),
-  timezone: z.string().max(64).nullish(),
-  isoCode: z.string().max(10).nullish(),
-  displayOrder: z.number().min(0).optional(),
 });
 
 export class RegionAPI {
-  static async getRegionList(params: { pageSize: number; current: number; code?: string; name?: string }) {
+  static async getRegionList(params: {
+    pageSize: number;
+    current: number;
+    search?: string;
+    code?: string;
+    name?: string;
+  }) {
     const res = await Axios.get<List<Region>>("/cms/region", {
       params,
     });

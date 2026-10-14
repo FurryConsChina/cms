@@ -12,4 +12,5 @@ export type TencentLocation = {
   province: string;
   city: string;
   district: string;
+  matchedRegion?: { id: string; name: string; timezone: string | null } | null;
 };

@@ -20,6 +20,7 @@ function useDebounced<T>(value: T, delay = 300) {
 }
 
 export default function EntitySelect({
+  id,
   kind,
   value,
   onChange,
@@ -27,6 +28,7 @@ export default function EntitySelect({
   placeholder,
   style,
 }: {
+  id?: string;
   kind: EntityKind;
   value?: string | null;
   onChange?: (value: string | null) => void;
@@ -41,7 +43,11 @@ export default function EntitySelect({
     async () =>
       (
         await Axios.get<List<OptionRecord>>(listEndpoint(kind), {
-          params: { current: 1, pageSize: 50, [kind === "event" ? "search" : "name"]: keyword || undefined },
+          params: {
+            current: 1,
+            pageSize: 50,
+            [kind === "event" || kind === "region" ? "search" : "name"]: keyword || undefined,
+          },
         })
       ).data,
     { keepPreviousData: true },
@@ -54,6 +60,7 @@ export default function EntitySelect({
   const options = selected && !records.some((v) => v.id === selected.id) ? [selected, ...records] : records;
   return (
     <Select
+      id={id}
       value={value}
       disabled={disabled}
       onChange={(v) => onChange?.(v ?? null)}
@@ -62,7 +69,7 @@ export default function EntitySelect({
       status={error ? "error" : undefined}
       showSearch={{ onSearch: setSearch, filterOption: false }}
       options={options.map((v) => ({ value: v.id, label: `${v.name}${v.slug ? `（${v.slug}）` : ""}` }))}
-      placeholder={placeholder ?? "输入名称搜索"}
+      placeholder={placeholder ?? (kind === "region" ? "输入名称或代码搜索" : "输入名称搜索")}
       notFoundContent={error ? "加载失败，请重试" : isLoading ? "加载中…" : "没有匹配的结果"}
       style={{ minWidth: 220, ...style }}
     />
