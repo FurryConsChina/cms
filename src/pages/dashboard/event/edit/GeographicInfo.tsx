@@ -38,7 +38,7 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
         />
       </Form.Item>
       {error && <Alert type="error" title="场地加载失败，请稍后重试" />}
-      <Form.Item label="活动场地" name="placeId" extra="地址与经纬度由所选场地提供。">
+      <Form.Item label="活动场地" name="placeId">
         <Select
           disabled={!selectedRegion}
           allowClear
@@ -52,7 +52,7 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
         />
       </Form.Item>
       <Form.Item label="场地补充说明" name="locationNotes">
-        <Input.TextArea />
+        <Input.TextArea placeholder="选填，仅需补充入口或路线指引时填写。例如：从全家便利店旁的侧门进入，乘扶梯到二楼后直行。" />
       </Form.Item>
     </div>
   );
