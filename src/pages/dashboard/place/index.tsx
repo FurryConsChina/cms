@@ -1,131 +1,148 @@
-import { useState } from "react";
-import { App, Button, Collapse, Form, Input, InputNumber, Select, Space } from "antd";
-import ResourcePage from "@/components/Cms/ResourcePage";
+import { useState, useEffect } from "react";
+import { Button, Flex, Input, Select, Space, Typography, Alert, App, Table } from "antd";
+import PlaceEditor, { placeKinds } from "@/components/Place/PlaceEditor";
+import { IconCirclePlus, IconRefresh } from "@tabler/icons-react";
+import DefaultContainer from "@/components/Layout/Container";
+
+import useSWR from "swr";
+import { type ColumnsType } from "antd/es/table";
+import { apiErrorMessage } from "@/utils/apiError";
 import EntitySelect from "@/components/Cms/EntitySelect";
-import { PlaceAPI, placeSchema, type PlaceInput } from "@/api/dashboard/place";
+import { PlaceAPI } from "@/api/dashboard/place";
 import { toOptions } from "@/consts/labels";
 import type { Place } from "@/types/place";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
-import { apiErrorMessage } from "@/utils/apiError";
-
-const kinds = { venue: "场馆", food: "餐饮", attraction: "景点", hotel: "酒店", transport_hub: "交通枢纽" };
 
 export default function PlacePage() {
   const platform = isPlatform(useAuthStore((state) => state.user?.role));
-  const { message, modal } = App.useApp();
   const [search, setSearch] = useState("");
   const [regionId, setRegionId] = useState<string | null>(null);
   const [kind, setKind] = useState<Place["kind"]>();
-  return (
-    <ResourcePage<Place, PlaceInput>
-      title="地点"
-      queryKey={["places", search, regionId, kind]}
-      list={(page) => PlaceAPI.list({ ...page, name: search || undefined, regionId: regionId || undefined, kind })}
-      schema={placeSchema}
-      initialValues={(record) => ({ kind: "venue", regionId, latitude: null, longitude: null, ...record })}
-      save={PlaceAPI.save}
-      remove={PlaceAPI.delete}
-      canCreate={platform}
-      canEdit={platform}
-      canDelete={platform}
-      columns={[
-        { title: "名称", dataIndex: "name" },
-        { title: "类型", render: (_, v) => kinds[v.kind] },
-        { title: "地区", render: (_, v) => v.region?.name },
-        { title: "地址", dataIndex: "address" },
-        { title: "坐标", render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`) },
-      ]}
-      filters={
+  const { message, modal } = App.useApp();
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  useEffect(() => {
+    setCurrent(1);
+  }, [search, regionId, kind]);
+  const { data, error, isLoading, mutate } = useSWR(["places", search, regionId, kind, current, pageSize], () =>
+    PlaceAPI.list({ current, pageSize, name: search || undefined, regionId: regionId || undefined, kind }),
+  );
+  const [opened, setOpened] = useState(false);
+  const [editing, setEditing] = useState<Place>();
+  const open = (record?: Place) => {
+    setEditing(record);
+    setOpened(true);
+  };
+  const records = data?.records ?? [];
+  const columns: ColumnsType<Place> = [
+    { title: "名称", dataIndex: "name" },
+    { title: "类型", render: (_, v) => placeKinds[v.kind] },
+    { title: "地区", render: (_, v) => v.region?.name },
+    { title: "地址", dataIndex: "address" },
+    { title: "坐标", render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`) },
+    {
+      title: "操作",
+      key: "actions",
+      render: (_, record) => (
         <Space wrap>
-          <Input.Search allowClear placeholder="搜索地点名称" onSearch={setSearch} style={{ width: 240 }} />
-          <EntitySelect kind="region" value={regionId} onChange={setRegionId} placeholder="全部地区" />
-          <Select
-            allowClear
-            placeholder="全部类型"
-            style={{ width: 140 }}
-            value={kind}
-            onChange={setKind}
-            options={toOptions(kinds)}
-          />
+          {platform && <Button onClick={() => open(record)}>编辑</Button>}
+
           {platform && (
             <Button
+              danger
               onClick={() =>
                 modal.confirm({
-                  title: "重建地点地理索引？",
-                  content: "网站的附近地点搜索使用这个索引。批量导入或修改坐标后再执行。",
+                  title: "确认删除这条记录？",
+                  content: "删除后将不再展示。如果其他内容引用了这条记录，删除会失败。",
+                  okButtonProps: { danger: true },
                   onOk: async () => {
                     try {
-                      const res = await PlaceAPI.rebuildGeoIndex();
-                      message.success(`已索引 ${res.indexed} 个地点`);
-                    } catch (e) {
-                      message.error(apiErrorMessage(e));
-                      throw e;
+                      await PlaceAPI.delete(record.id);
+                      message.success("已删除");
+                      await mutate();
+                    } catch (error) {
+                      message.error(apiErrorMessage(error));
+                      throw error;
                     }
                   },
                 })
               }
             >
-              重建地理索引
+              删除
             </Button>
           )}
         </Space>
-      }
-      editor={() => (
-        <>
-          <Form.Item label="地点名称" name="name" rules={[{ required: true, message: "请填写地点名称" }]}>
-            <Input />
-          </Form.Item>
-          <Space wrap>
-            <Form.Item label="所属地区" name="regionId" rules={[{ required: true, message: "请选择所属地区" }]}>
-              <EntitySelect kind="region" style={{ width: 240 }} />
-            </Form.Item>
-            <Form.Item label="地点类型" name="kind">
-              <Select style={{ width: 160 }} options={toOptions(kinds)} />
-            </Form.Item>
-            <Form.Item label="子类型" name="subtype">
-              <Input placeholder="例如 会展中心" />
-            </Form.Item>
+      ),
+    },
+  ];
+  return (
+    <div className="space-y-4">
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex className="md:flex-row flex-col gap-2" justify="space-between" align="center">
+          <Typography.Title level={3} className="m-0">
+            地点列表
+          </Typography.Title>
+          <Space>
+            <Button icon=<IconRefresh size={16} stroke={1.5} /> onClick={() => void mutate()}>
+              刷新
+            </Button>
+            {platform && (
+              <Button type="primary" icon=<IconCirclePlus size={16} stroke={1.5} /> onClick={() => void open()}>
+                添加地点
+              </Button>
+            )}
           </Space>
-          <Form.Item label="地址" name="address">
-            <Input.TextArea autoSize={{ minRows: 2 }} />
-          </Form.Item>
-          <Space wrap>
-            <Form.Item label="纬度" name="latitude" extra="与经度一起填写">
-              <InputNumber min={-90} max={90} style={{ width: 180 }} />
-            </Form.Item>
-            <Form.Item label="经度" name="longitude">
-              <InputNumber min={-180} max={180} style={{ width: 180 }} />
-            </Form.Item>
-          </Space>
-          <Collapse
-            ghost
-            items={[
-              {
-                key: "source",
-                label: "更多信息（时区与坐标来源）",
-                forceRender: true,
-                children: (
-                  <>
-                    <Form.Item label="时区" name="timezone">
-                      <Input placeholder="Asia/Shanghai" />
-                    </Form.Item>
-                    <Form.Item label="坐标来源" name="coordinateSource">
-                      <Input placeholder="例如 tencent" />
-                    </Form.Item>
-                    <Form.Item label="原始坐标系" name="sourceCoordinateSystem">
-                      <Select allowClear options={["WGS84", "GCJ02", "BD09"].map((value) => ({ value, label: value }))} />
-                    </Form.Item>
-                    <Form.Item label="来源地点标识" name="sourcePlaceId">
-                      <Input />
-                    </Form.Item>
-                  </>
-                ),
-              },
-            ]}
-          />
-        </>
+        </Flex>
+      </DefaultContainer>
+      <Space wrap>
+        <Input.Search allowClear placeholder="搜索地点名称" onSearch={setSearch} style={{ width: 240 }} />
+        <EntitySelect kind="region" value={regionId} onChange={setRegionId} placeholder="全部地区" />
+        <Select
+          allowClear
+          placeholder="全部类型"
+          style={{ width: 140 }}
+          value={kind}
+          onChange={setKind}
+          options={toOptions(placeKinds)}
+        />
+      </Space>
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          title={apiErrorMessage(error)}
+          action=<Button onClick={() => void mutate()}>重试</Button>
+        />
       )}
-    />
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={records}
+        loading={isLoading}
+        scroll={{ x: "max-content" }}
+        pagination={{
+          current,
+          pageSize,
+          total: data?.total,
+          showSizeChanger: true,
+          onChange: (page, size) => {
+            setCurrent(page);
+            setPageSize(size);
+          },
+        }}
+      />
+      {platform && opened && (
+        <PlaceEditor
+          place={editing}
+          regionId={regionId}
+          onCancel={() => setOpened(false)}
+          onSaved={() => {
+            setOpened(false);
+            void mutate();
+          }}
+        />
+      )}
+    </div>
   );
 }

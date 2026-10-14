@@ -13,8 +13,10 @@ export const placeSchema = z
     latitude: z.number().min(-90).max(90).nullish(),
     longitude: z.number().min(-180).max(180).nullish(),
     timezone: z.string().max(64).nullish(),
-    coordinateSource: z.string().max(64).nullish(),
-    sourceCoordinateSystem: z.string().max(32).nullish(),
+    coordinateSource: z.enum(["tencent", "manual"], { error: "请选择腾讯地图或手动" }).nullish(),
+    sourceCoordinateSystem: z
+      .enum(["WGS84", "GCJ02", "BD09"], { error: "请选择有效的原始坐标系，未知时可留空" })
+      .nullish(),
     sourcePlaceId: z.string().max(256).nullish(),
   })
   .refine((v) => (v.latitude == null) === (v.longitude == null), {
