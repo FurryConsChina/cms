@@ -1,11 +1,16 @@
 import { RegionAPI } from "@/api/dashboard/region";
 import type { Region } from "@/types/region";
-import { Select, Spin, Form, SelectProps } from "antd";
+import { Select, Spin, SelectProps } from "antd";
 import { debounce, uniqBy } from "es-toolkit";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useImperativeHandle, type Ref } from "react";
 import useSWR from "swr";
 
+export interface RegionSelectorHandle {
+  refresh: () => Promise<unknown>;
+}
+
 interface RegionSelectorProps {
+  ref?: Ref<RegionSelectorHandle>;
   id?: string;
   value?: string;
   onChange?: (value?: string) => void;
@@ -15,6 +20,7 @@ interface RegionSelectorProps {
 }
 
 export default function RegionSelector({
+  ref,
   id,
   value,
   onChange,
@@ -24,9 +30,11 @@ export default function RegionSelector({
 }: RegionSelectorProps) {
   const [searchValue, setSearchValue] = useState("");
 
-  const { data, isLoading } = useSWR(["region/list", searchValue], () =>
-    RegionAPI.getRegionList({ pageSize: 50, current: 1, name: searchValue || undefined }),
+  const { data, isLoading, isValidating, mutate } = useSWR(["region/list", searchValue], () =>
+    RegionAPI.getRegionList({ pageSize: 50, current: 1, search: searchValue || undefined }),
   );
+
+  useImperativeHandle(ref, () => ({ refresh: () => mutate() }), [mutate]);
 
   const regions = uniqBy(
     [...(selectedOption ? [selectedOption] : []), ...(data?.records || [])],
@@ -40,7 +48,7 @@ export default function RegionSelector({
 
   const handleSearch = useCallback(
     debounce((value: string) => {
-      setSearchValue(value);
+      setSearchValue(value.trim());
     }, 300),
     [],
   );
@@ -58,12 +66,12 @@ export default function RegionSelector({
       onChange={handleChange}
       options={selectOptions}
       showSearch={{
-        optionFilterProp: "label",
+        filterOption: false,
         onSearch: handleSearch,
       }}
-      loading={isLoading}
+      loading={isLoading || isValidating}
       notFoundContent={isLoading ? <Spin size="small" /> : "没找到什么内容"}
-      placeholder="请选择地区"
+      placeholder="输入地区名称或代码搜索"
     />
   );
 }

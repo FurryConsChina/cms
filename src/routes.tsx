@@ -53,8 +53,6 @@ const router = createBrowserRouter([
         children: [
           { path: "feature", lazy: page(() => import("@/pages/dashboard/feature/list")) },
           { path: "region", lazy: page(() => import("@/pages/dashboard/region")) },
-          { path: "region/create", lazy: page(() => import("@/pages/dashboard/region/edit")) },
-          { path: "region/:regionId/edit", lazy: page(() => import("@/pages/dashboard/region/edit")) },
           { path: "feedback", lazy: page(() => import("@/pages/dashboard/feedback")) },
           { path: "cache-manager", lazy: page(() => import("@/pages/dashboard/cacheManager")) },
         ],
