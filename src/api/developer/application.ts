@@ -10,9 +10,10 @@ export const EditApplicationApiBody = z.object({
 });
 
 export class ApplicationApi {
-  static async getApplicationList() {
-    // 后端当前固定返回第 1 页、每页 20 条，不接受分页或搜索参数。
-    const res = await Axios.get<List<Application>>("/cms/application");
+  static async getApplicationList(current = 1, pageSize = 20) {
+    const res = await Axios.get<List<Application>>("/cms/application", {
+      params: { current, pageSize },
+    });
     return res.data;
   }
 
