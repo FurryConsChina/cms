@@ -64,7 +64,6 @@ export default function UploadImage({
         return;
       }
 
-      if (!owner) throw new Error("请先保存后再上传图片");
       const imagePath = `${pathPrefix}${imageName}.${imageMIME}`;
 
       const uploadRes = await uploadToCOS({
@@ -101,7 +100,7 @@ export default function UploadImage({
 
   return (
     <>
-      <Button disabled={disabled || !owner} onClick={() => setOpened(true)}>
+      <Button disabled={disabled} onClick={() => setOpened(true)}>
         上传
       </Button>
       <Modal open={opened} onCancel={onClose} title="上传图片" centered width={800} footer={null}>

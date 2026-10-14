@@ -11,7 +11,7 @@ export async function uploadStatic(form: FormData) {
   ).data;
 }
 
-export async function getUploadSignature({ pathKey, owner }: { pathKey: string; owner: MediaOwner }) {
+export async function getUploadSignature({ pathKey, owner }: { pathKey: string; owner?: MediaOwner }) {
   return (
     await Axios.post<{
       mediaAssetId: string;

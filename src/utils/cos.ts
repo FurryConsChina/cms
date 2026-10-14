@@ -3,7 +3,7 @@ import COS from "cos-js-sdk-v5";
 import type { MediaOwner } from "@/types/media";
 import { confirmUpload, getUploadSignature } from "@/api/dashboard/upload";
 
-export async function uploadToCOS({ pathKey, file, owner }: { pathKey: string; file: File; owner: MediaOwner }) {
+export async function uploadToCOS({ pathKey, file, owner }: { pathKey: string; file: File; owner?: MediaOwner }) {
   const signedKey = await getUploadSignature({ pathKey, owner });
 
   const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } = signedKey;

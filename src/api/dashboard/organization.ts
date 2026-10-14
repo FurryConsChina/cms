@@ -1,6 +1,4 @@
 import Axios from "@/api";
-import useAuthStore from "@/stores/auth";
-import { UserRole } from "@/types/User";
 import { singleMediaBindingSchema } from "./mediaSchema";
 import { getMediaUsages } from "./upload";
 import { InferZodType } from "@/types/common";
@@ -48,20 +46,7 @@ export class OrganizationAPI {
   }
 
   static async createOrganization(organization: InferZodType<typeof EditOrganizationApiBody>) {
-    const isAdmin = useAuthStore.getState().user?.role === UserRole.Admin;
-    const { logo, ...attributes } = organization;
-    if (logo) throw new Error("请先保存组织，再编辑标志");
-    const body = isAdmin
-      ? attributes
-      : {
-          slug: organization.slug,
-          name: organization.name,
-          description: organization.description,
-          type: organization.type,
-          contactMail: organization.contactMail,
-          links: organization.links,
-        };
-    const res = await Axios.post<Organization>(isAdmin ? "/cms/organization" : "/cms/organization/owned", body);
+    const res = await Axios.post<Organization>("/cms/organization", organization);
 
     return res.data;
   }

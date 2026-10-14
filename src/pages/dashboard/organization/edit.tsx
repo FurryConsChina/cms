@@ -92,7 +92,7 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         message.success("更新展商数据成功");
       } else {
         const res = await OrganizationAPI.createOrganization(value);
-        message.success("组织已创建，现在可以上传标志");
+        message.success("组织创建成功");
         navigate(`/dashboard/organization/${res.id}/edit`);
       }
     } catch (error) {
