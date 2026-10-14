@@ -14,7 +14,6 @@ import { useZodValidateData } from "@/utils/form";
 
 import BasicInfo from "./BasicInfo";
 import GeographicInfo from "./GeographicInfo";
-import UriBuilder from "./UriBuilder";
 import EventAdditionalInfo from "./EventAdditionalInfo";
 import EventSources from "./EventSources";
 import TicketChannels from "./TicketChannels";
@@ -93,7 +92,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     poster: cleanedEvent.poster || [],
     organization: cleanedEvent.organization?.id,
     organizations: cleanedEvent.organizations?.map((o) => o.id) || [],
-    slug: cleanedEvent.slug,
     detail: cleanedEvent.detail,
     status: cleanedEvent.status || EventStatus.EventScheduled,
     type: cleanedEvent.type || EventType.AllInCon,
@@ -176,10 +174,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       <Divider dashed size="small" />
 
       <GeographicInfo form={form} event={event} selectedRegion={selectedRegion} setSelectedRegion={setSelectedRegion} />
-
-      <Divider dashed size="small" />
-
-      <UriBuilder form={form} selectedRegion={selectedRegion} />
 
       <Divider dashed size="small" />
 
