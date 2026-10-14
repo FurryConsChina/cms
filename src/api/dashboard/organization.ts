@@ -1,12 +1,11 @@
 import Axios from "@/api";
-import useAuthStore from "@/stores/auth";
-import { UserRole } from "@/types/User";
 import { singleMediaBindingSchema } from "./mediaSchema";
 import { getMediaUsages } from "./upload";
 import { InferZodType } from "@/types/common";
 import { Organization, OrganizationStatus, OrganizationType } from "@/types/organization";
 import { List } from "@/types/Request";
 import { z } from "zod";
+import { contactLinkTypeSchema } from "@/types/contactLink";
 
 export const EditOrganizationApiBody = z.object({
   slug: z
@@ -22,13 +21,21 @@ export const EditOrganizationApiBody = z.object({
   contactMail: z.email().nullish(),
   links: z
     .array(
-      z.object({ type: z.string().min(1).max(64), label: z.string().max(256).nullish(), value: z.string().min(1) }),
+      z.object({
+        type: contactLinkTypeSchema,
+        label: z.string().max(256).nullish(),
+        value: z.string().min(1),
+      }),
     )
     .optional(),
   foundedOn: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .nullish(),
+});
+
+export const CreateOrganizationApiBody = EditOrganizationApiBody.extend({
+  slug: EditOrganizationApiBody.shape.slug.regex(/^[a-z0-9-]+$/, "只能使用小写英文字母、数字和连字符 -"),
 });
 
 export class OrganizationAPI {
@@ -47,21 +54,8 @@ export class OrganizationAPI {
     return { ...res.data, logo: usages.find((item) => item.role === "logo") ?? null };
   }
 
-  static async createOrganization(organization: InferZodType<typeof EditOrganizationApiBody>) {
-    const isAdmin = useAuthStore.getState().user?.role === UserRole.Admin;
-    const { logo, ...attributes } = organization;
-    if (logo) throw new Error("请先保存组织，再编辑标志");
-    const body = isAdmin
-      ? attributes
-      : {
-          slug: organization.slug,
-          name: organization.name,
-          description: organization.description,
-          type: organization.type,
-          contactMail: organization.contactMail,
-          links: organization.links,
-        };
-    const res = await Axios.post<Organization>(isAdmin ? "/cms/organization" : "/cms/organization/owned", body);
+  static async createOrganization(organization: InferZodType<typeof CreateOrganizationApiBody>) {
+    const res = await Axios.post<Organization>("/cms/organization", organization);
 
     return res.data;
   }

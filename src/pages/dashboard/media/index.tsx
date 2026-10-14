@@ -109,7 +109,7 @@ export default function MediaPage() {
           <div>
             <Typography.Text strong>2. 上传图片</Typography.Text>
             <Flex gap={8} wrap align="center" className="mt-2">
-              <UploadImage owner={owner} pathPrefix="" onUploadSuccess={() => void mutate()} />
+              <UploadImage owner={owner} onUploadSuccess={() => mutate()} />
               {!owner && <Typography.Text type="secondary">先完成第 1 步。</Typography.Text>}
             </Flex>
           </div>

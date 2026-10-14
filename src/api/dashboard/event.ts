@@ -17,11 +17,6 @@ import { mediaBindingSchema, singleMediaBindingSchema } from "./mediaSchema";
 
 export const EditEventApiBody = z.object({
   name: z.string().min(1).max(256),
-  slug: z
-    .string()
-    .min(1)
-    .max(256)
-    .regex(/^[a-zA-Z0-9-]+$/),
   startAt: z.iso.datetime().nullish(),
   endAt: z.iso.datetime().nullish(),
   status: z.enum(EventStatus),

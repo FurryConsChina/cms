@@ -23,14 +23,14 @@ export const navigation: NavGroup[] = [
   {
     label: "内容管理",
     items: [
-      { path: "/dashboard/event", label: "活动", icon: IconCalendarEvent },
       { path: "/dashboard/organization", label: "组织", icon: IconBuildingCommunity },
+      { path: "/dashboard/event", label: "活动", icon: IconCalendarEvent },
+      { path: "/dashboard/region", label: "地区", icon: IconWorld, platform: true },
       // 暂不开放的新功能入口，后续恢复。
       // { path: "/dashboard/profile", label: "主体资料", icon: IconUserCircle },
       { path: "/dashboard/place", label: "地点", icon: IconMapPin },
       // { path: "/dashboard/media", label: "媒体资源库", icon: IconPhoto },
-      { path: "/dashboard/feature", label: "公共标签", icon: IconTags, platform: true },
-      { path: "/dashboard/region", label: "地区", icon: IconWorld, platform: true },
+      { path: "/dashboard/feature", label: "活动标签", icon: IconTags, platform: true },
       // { path: "/dashboard/feedback", label: "页面反馈", icon: IconMessageReport, platform: true },
       // { path: "/dashboard/cache-manager", label: "网站运维", icon: IconServerCog, platform: true },
     ],

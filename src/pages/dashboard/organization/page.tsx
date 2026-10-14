@@ -1,5 +1,5 @@
 import useAuthStore from "@/stores/auth";
-import { isAdmin, isPlatform } from "@/utils/permissions";
+import { isPlatform } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
 import { cleanPageCache } from "@/api/dashboard/cache";
 import { OrganizationAPI } from "@/api/dashboard/organization";
@@ -20,7 +20,7 @@ export default function OrganizationPage() {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const role = useAuthStore((state) => state.user?.role);
-  const admin = isAdmin(role);
+  const platform = isPlatform(role);
 
   const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
   const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
@@ -126,7 +126,7 @@ export default function OrganizationPage() {
         const menuItems: MenuProps["items"] = [
           {
             key: "refresh",
-            disabled: !isPlatform(role),
+            disabled: !platform,
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
@@ -147,7 +147,7 @@ export default function OrganizationPage() {
             icon: <IconTrash style={{ width: 14, height: 14 }} />,
             label: "删除",
             danger: true,
-            disabled: !admin,
+            disabled: !platform,
             onClick: () =>
               modal.confirm({
                 title: `确认删除“${record.name}”？`,
@@ -228,15 +228,17 @@ export default function OrganizationPage() {
             展商列表
           </Title>
 
-          <Button
-            type="primary"
-            icon={<IconCirclePlus size={16} stroke={1.5} />}
-            onClick={() => {
-              navigate("/dashboard/organization/create");
-            }}
-          >
-            添加展商
-          </Button>
+          {platform && (
+            <Button
+              type="primary"
+              icon={<IconCirclePlus size={16} stroke={1.5} />}
+              onClick={() => {
+                navigate("/dashboard/organization/create");
+              }}
+            >
+              添加展商
+            </Button>
+          )}
         </Flex>
       </DefaultContainer>
 

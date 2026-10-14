@@ -1,10 +1,10 @@
 import { useState } from "react";
 import useAuthStore from "@/stores/auth";
-import { isAdmin } from "@/utils/permissions";
-import MediaPicker from "@/components/Cms/MediaPicker";
+import { isPlatform } from "@/utils/permissions";
+import UploadImage from "@/components/UploadImage";
 import { LinkFields } from "@/components/Cms/Fields";
 import { apiErrorMessage } from "@/utils/apiError";
-import { EditOrganizationApiBody, OrganizationAPI } from "@/api/dashboard/organization";
+import { CreateOrganizationApiBody, EditOrganizationApiBody, OrganizationAPI } from "@/api/dashboard/organization";
 import DefaultContainer from "@/components/Layout/Container";
 import LoadError from "@/components/Layout/LoadError";
 import type { MediaBinding } from "@/types/media";
@@ -17,10 +17,25 @@ import {
   OrganizationTypeLabel,
 } from "@/types/organization";
 import { useZodValidateData } from "@/utils/form";
-import { Alert, App, Button, Col, DatePicker, Divider, Flex, Form, Input, Row, Select, Spin, Typography } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Col,
+  DatePicker,
+  Divider,
+  Flex,
+  Form,
+  Input,
+  Result,
+  Row,
+  Select,
+  Spin,
+  Typography,
+} from "antd";
 import dayjs from "dayjs";
 import { pickBy } from "es-toolkit";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 
 const { Title } = Typography;
@@ -28,6 +43,7 @@ const { TextArea } = Input;
 
 export default function OrganizationEditPage() {
   const { organizationId } = useParams();
+  const canCreate = isPlatform(useAuthStore((state) => state.user?.role));
 
   const { data, isLoading, error } = useSWR(
     ["organization-detail", organizationId],
@@ -37,6 +53,21 @@ export default function OrganizationEditPage() {
       revalidateOnReconnect: false,
     },
   );
+
+  if (!organizationId && !canCreate) {
+    return (
+      <Result
+        status="403"
+        title="没有组织创建权限"
+        subTitle="仅管理员和编辑可以创建组织。"
+        extra={
+          <Link to="/dashboard/organization">
+            <Button>返回组织列表</Button>
+          </Link>
+        }
+      />
+    );
+  }
 
   if (error) {
     return <LoadError />;
@@ -65,7 +96,6 @@ export default function OrganizationEditPage() {
 function OrganizationEditorContent({ organization }: { organization?: Organization & { logo?: MediaBinding | null } }) {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
-  const admin = isAdmin(useAuthStore((state) => state.user?.role));
   const cleanedOrganization = organization ? pickBy(organization, (v) => v !== "" && v != null) : {};
 
   const [form] = Form.useForm();
@@ -83,6 +113,7 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
   };
 
   const [saving, setSaving] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const onSubmit = async (value: InferZodType<typeof EditOrganizationApiBody>) => {
     if (saving) return;
     setSaving(true);
@@ -92,7 +123,7 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         message.success("更新展商数据成功");
       } else {
         const res = await OrganizationAPI.createOrganization(value);
-        message.success("组织已创建，现在可以上传标志");
+        message.success("组织创建成功");
         navigate(`/dashboard/organization/${res.id}/edit`);
       }
     } catch (error) {
@@ -103,12 +134,16 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
   };
 
   const handleFinish = (value: typeof initialValues) => {
+    if (avatarBusy) {
+      message.warning("请完成头像裁剪和上传后再提交");
+      return;
+    }
     const processedValues = useZodValidateData(
       {
         ...value,
         foundedOn: value.foundedOn ? value.foundedOn.format("YYYY-MM-DD") : null,
       },
-      EditOrganizationApiBody,
+      organization ? EditOrganizationApiBody : CreateOrganizationApiBody,
     );
     if (processedValues.errors.length > 0) {
       return modal.warning({
@@ -128,62 +163,76 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         <Title level={5} style={{ margin: "12px 0" }}>
           基础信息
         </Title>
-        <Row gutter={8}>
-          <Col flex={1}>
-            <Form.Item label="展商名称" required name="name" rules={[{ required: true, message: "请输入展商名称" }]}>
-              <Input placeholder="请输入展商名称" />
-            </Form.Item>
-          </Col>
-          <Col flex={1}>
-            <Form.Item label="创立日期" extra={!organization && !admin ? "创建后可编辑" : undefined} name="foundedOn">
-              <DatePicker
-                disabled={!organization && !admin}
-                format="YYYY年MM月DD日"
-                placeholder="请选择日期"
-                allowClear
-                style={{ width: "100%" }}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-[144px_minmax(0,1fr)]">
+          <Form.Item label="组织头像" name="logo" tooltip="支持 JPEG、PNG、WebP、GIF、AVIF 和 BMP，最大 50 MB。">
+            <UploadImage
+              crop
+              aspect={1}
+              label="组织头像"
+              owner={organization?.id ? { entityType: "organization", entityId: organization.id } : undefined}
+              disabled={saving}
+              onBusyChange={setAvatarBusy}
+            />
+          </Form.Item>
+          <div className="min-w-0">
+            <Row gutter={8}>
+              <Col span={12}>
+                <Form.Item
+                  label="展商名称"
+                  required
+                  name="name"
+                  rules={[{ required: true, message: "请输入展商名称" }]}
+                >
+                  <Input placeholder="请输入展商名称" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="创立日期" name="foundedOn">
+                  <DatePicker format="YYYY年MM月DD日" placeholder="请选择日期" allowClear style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+            </Row>
 
-        <Row gutter={8}>
-          <Col flex={1}>
-            <Form.Item label="展商状态" required name="status">
-              <Select
-                disabled={!organization && !admin}
-                placeholder="请选择展商状态"
-                options={Object.values(OrganizationStatus).map((status) => ({
-                  label: OrganizationStatusLabel[status],
-                  value: status,
-                }))}
-              />
-            </Form.Item>
-          </Col>
-          <Col flex={1}>
-            <Form.Item label="展商类型" required name="type">
-              <Select
-                placeholder="请选择展商类型"
-                options={Object.values(OrganizationType).map((type) => ({
-                  label: OrganizationTypeLabel[type],
-                  value: type,
-                }))}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Form.Item label="展商状态" required name="status">
+                  <Select
+                    placeholder="请选择展商状态"
+                    options={Object.values(OrganizationStatus).map((status) => ({
+                      label: OrganizationStatusLabel[status],
+                      value: status,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="展商类型" required name="type">
+                  <Select
+                    placeholder="请选择展商类型"
+                    options={Object.values(OrganizationType).map((type) => ({
+                      label: OrganizationTypeLabel[type],
+                      value: type,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </div>
+        </div>
 
         <Form.Item
           label="展商Slug"
           required
-          extra="请不要使用大写"
           name="slug"
           rules={[
             { required: true },
-            ...(!organization && !admin ? [{ min: 2, message: "标识至少需要两个字符" }] : []),
+            ...(!organization ? [{ pattern: /^[a-z0-9-]+$/, message: "只能使用小写英文字母、数字和连字符 -" }] : []),
           ]}
         >
-          <Input disabled={!!organization?.id} placeholder="请输入展商Slug" />
+          <Input
+            disabled={!!organization?.id}
+            placeholder="可以是展商的英文名字或者拼音。只能使用小写英文字母、数字和连字符 -"
+          />
         </Form.Item>
 
         <Flex gap={8}>
@@ -197,8 +246,8 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
       <div>
         <Title level={5}>展商附加信息</Title>
         <Flex vertical gap={8}>
-          <Form.Item label="展商描述" extra="可以是展商的自我简介之类的东西，不填也没关系。" name="description">
-            <TextArea placeholder="请输入展商简介" autoSize={{ minRows: 10 }} />
+          <Form.Item label="展商描述" name="description">
+            <TextArea placeholder="可以是展商的自我简介之类的东西，不填也没关系。" autoSize={{ minRows: 10 }} />
           </Form.Item>
         </Flex>
       </div>
@@ -208,22 +257,8 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
       </Form.Item>
       <LinkFields label="社交链接与联系方式" />
 
-      <Divider dashed />
-
-      <div>
-        <Title level={5}>展会媒体资源</Title>
-
-        <Flex vertical>
-          <Form.Item label="组织标志图片" name="logo">
-            <MediaPicker
-              owner={organization?.id ? { entityType: "organization", entityId: organization.id } : undefined}
-            />
-          </Form.Item>
-        </Flex>
-      </div>
-
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
-        <Button type="primary" htmlType="submit" loading={saving}>
+        <Button type="primary" htmlType="submit" loading={saving} disabled={avatarBusy}>
           提交
         </Button>
       </Flex>

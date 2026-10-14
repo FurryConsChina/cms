@@ -38,25 +38,23 @@ export default function MediaPicker({
         <Typography.Text>已选择媒体资源</Typography.Text>
       ) : null}
       <Space wrap>
-        <Button disabled={disabled || !owner} onClick={() => setOpened(true)}>
+        <Button disabled={disabled} onClick={() => setOpened(true)}>
           选择媒体
         </Button>
         <UploadImage
           owner={owner}
-          pathPrefix=""
-          disabled={disabled || !owner}
+          disabled={disabled}
           onUploadSuccess={(asset) => {
             select(asset);
             void mutate();
           }}
         />
         {value && (
-          <Button disabled={disabled || !owner} onClick={() => onChange?.(null)}>
+          <Button disabled={disabled} onClick={() => onChange?.(null)}>
             移除
           </Button>
         )}
       </Space>
-      {!owner && <Typography.Text type="secondary">创建后可以上传或选择图片。</Typography.Text>}
       <Modal title="选择媒体资源" open={opened} onCancel={() => setOpened(false)} footer={null} width={850}>
         <Flex gap={8} className="mb-4">
           <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="外部图片、视频或直播链接" />
@@ -134,7 +132,7 @@ export function MediaListFields({
         <div className="space-y-3 my-4">
           <Flex justify="space-between" align="center">
             <Space orientation="vertical" size={0}>
-              <Typography.Text strong>{label}</Typography.Text>
+              <Typography.Text>{label}</Typography.Text>
               {!owner && <Typography.Text type="secondary">创建后可以添加{label}。</Typography.Text>}
             </Space>
             <Button disabled={disabled || !owner} onClick={() => add({})}>

@@ -1,7 +1,9 @@
+import type { ContactLinkType } from "@/types/contactLink";
+
 export const toOptions = (labels: Record<string, string>) =>
   Object.entries(labels).map(([value, label]) => ({ value, label }));
 
-export const linkTypeLabels: Record<string, string> = {
+export const linkTypeLabels: Record<ContactLinkType, string> = {
   website: "官网",
   twitter: "Twitter / X",
   weibo: "微博",
@@ -11,8 +13,6 @@ export const linkTypeLabels: Record<string, string> = {
   wikifur: "WikiFur",
   facebook: "Facebook",
   plurk: "Plurk",
-  email: "邮箱",
-  other: "其他",
 };
 
 export const mediaRoleLabels: Record<string, string> = {
