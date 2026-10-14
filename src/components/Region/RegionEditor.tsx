@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { App, Form, Input, Modal, Select } from "antd";
+import { App, Col, Form, Input, Modal, Row, Select } from "antd";
 import { EditRegionApiBody, RegionAPI } from "@/api/dashboard/region";
 import RegionSelector from "@/components/Region/RegionSelector";
 import { RegionType, RegionTypeLabel, type Region } from "@/types/region";
@@ -89,22 +89,34 @@ export default function RegionEditor({
         onFinish={submit}
         scrollToFirstError
       >
-        <Form.Item label="地区名称" name="name" rules={[{ required: true }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item label="本地名称" name="localName">
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="地区 Slug"
-          name="slug"
-          rules={[{ required: true }, { pattern: /^[a-zA-Z0-9-]+$/, message: "仅支持字母、数字和连字符" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item label="地区类型" name="kind" rules={[{ required: true }]}>
-          <Select options={Object.values(RegionType).map((value) => ({ value, label: RegionTypeLabel[value] }))} />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item label="地区名称" name="name" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item label="本地名称" name="localName">
+              <Input />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Form.Item
+              label="地区 Slug"
+              name="slug"
+              rules={[{ required: true }, { pattern: /^[a-zA-Z0-9-]+$/, message: "仅支持字母、数字和连字符" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Form.Item label="地区类型" name="kind" rules={[{ required: true }]}>
+              <Select options={Object.values(RegionType).map((value) => ({ value, label: RegionTypeLabel[value] }))} />
+            </Form.Item>
+          </Col>
+        </Row>
         <Form.Item label="父级地区" name="parentId" extra="国家无父级，其他地区必须选择父级。">
           <RegionSelector selectedOption={region?.parent ?? undefined} antdSelectProps={{ allowClear: true }} />
         </Form.Item>
