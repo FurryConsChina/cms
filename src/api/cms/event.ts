@@ -7,7 +7,7 @@ import {
   EventType,
   type EditableEvent,
 } from "@/types/event";
-import type { List } from "@/types/Request";
+import type { List, PageQuery } from "@/types/Request";
 import z from "zod";
 import { getMediaUsages } from "./upload";
 import type { EventResponse } from "@/types/event";
@@ -70,8 +70,17 @@ export const EditEventApiBody = z.object({
     .optional(),
 });
 
+export interface EventListQuery extends PageQuery {
+  search?: string;
+  orgSearch?: string;
+  regionSlug?: string[];
+  regionName?: string;
+  placeName?: string;
+  placeAddress?: string;
+}
+
 export class EventAPI {
-  static async getEventList(params: { pageSize: number; current: number; search?: string; orgSearch?: string }) {
+  static async getEventList(params: EventListQuery) {
     const res = await Axios.get<List<EventResponse>>("/cms/event/list", {
       params,
     });
@@ -99,11 +108,8 @@ export class EventAPI {
     return res.data;
   }
 
-  static async updateEvent(eventId: string, event: EditableEvent, expectedContentVersion?: number) {
-    const res = await Axios.patch<EventResponse>(`/cms/event/${eventId}`, {
-      event,
-      expectedContentVersion,
-    });
+  static async updateEvent(eventId: string, event: EditableEvent) {
+    const res = await Axios.patch<EventResponse>(`/cms/event/${eventId}`, { event });
 
     return res.data;
   }

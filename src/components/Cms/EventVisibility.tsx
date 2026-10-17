@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { App, Button, Space, Tag } from "antd";
-import { EventAPI } from "@/api/dashboard/event";
+import { EventAPI } from "@/api/cms/event";
 import type { EventItem } from "@/types/event";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";

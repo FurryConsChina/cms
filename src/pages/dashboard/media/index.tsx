@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Alert, App, Button, Card, Flex, Image, Input, Modal, Select, Space, Table, Tag, Typography } from "antd";
-import { ParticipantAPI } from "@/api/dashboard/participant";
+import { ParticipantAPI } from "@/api/cms/participant";
 import {
   confirmUpload,
   createExternalMedia,
@@ -9,7 +9,7 @@ import {
   getMediaUsages,
   isImageAsset,
   listMediaAssets,
-} from "@/api/dashboard/upload";
+} from "@/api/cms/upload";
 import EntitySelect from "@/components/Cms/EntitySelect";
 import UploadImage from "@/components/UploadImage";
 import { mediaOwnerLabels, mediaRoleLabels, toOptions } from "@/consts/labels";

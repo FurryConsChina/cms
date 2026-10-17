@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
 import { Alert, App, Button, Form, Input, Modal, Radio, Segmented, Space, Table, Tabs, Tag, Typography } from "antd";
-import { AccessAPI } from "@/api/dashboard/access";
+import { AccessAPI } from "@/api/cms/access";
 import type { Claim, EntityKind } from "@/types/access";
 import useAuthStore from "@/stores/auth";
-import { isPlatform } from "@/utils/permissions";
+import { isAdmin } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
 
 export default function AccessPage() {
@@ -20,9 +20,11 @@ export default function AccessPage() {
   const [form] = Form.useForm();
   const [reviewForm] = Form.useForm();
   const [acceptForm] = Form.useForm();
-  const canReview = isPlatform(role);
+  const canReview = isAdmin(role);
   const pending = tab === "pending" && canReview;
-  const { data, error, isLoading, mutate } = useSWR(["claims", kind, pending], () => AccessAPI.claims(kind, pending));
+  const { data, error, isLoading, mutate } = useSWR(tab === "accept" ? null : ["claims", kind, pending, role], () =>
+    AccessAPI.claims(kind, pending),
+  );
   return (
     <div className="space-y-4">
       <Typography.Title level={3}>认领与邀请</Typography.Title>

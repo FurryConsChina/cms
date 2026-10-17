@@ -1,5 +1,5 @@
 import { apiErrorMessage } from "@/utils/apiError";
-import { FeatureAPI } from "@/api/dashboard/feature";
+import { FeatureAPI } from "@/api/cms/feature";
 import DefaultContainer from "@/components/Layout/Container";
 import FeatureEditor from "@/components/EventFeature/FeatureEditor";
 import { FeatureCategory, FeatureCategoryLabel, type Feature } from "@/types/feature";

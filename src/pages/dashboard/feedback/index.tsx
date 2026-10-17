@@ -15,7 +15,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { FeedbackAPI, feedbackUpdateSchema } from "@/api/dashboard/feedback";
+import { FeedbackAPI, feedbackUpdateSchema } from "@/api/cms/feedback";
 import type { Feedback, FeedbackCategory, FeedbackDetail, FeedbackStatus } from "@/types/feedback";
 import { apiErrorMessage } from "@/utils/apiError";
 import { targetTypeLabels } from "@/consts/labels";

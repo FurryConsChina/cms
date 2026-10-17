@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { App, Col, Form, Input, Modal, Row, Select } from "antd";
-import { EditRegionApiBody, RegionAPI } from "@/api/dashboard/region";
+import { EditRegionApiBody, RegionAPI } from "@/api/cms/region";
 import RegionSelector from "@/components/Region/RegionSelector";
 import { RegionType, RegionTypeLabel, type Region } from "@/types/region";
 import { apiErrorMessage } from "@/utils/apiError";

@@ -40,6 +40,6 @@ export class PlaceAPI {
   }
 
   static async rebuildGeoIndex() {
-    return (await Axios.post<{ indexed: number }>("/cms/place/rebuild-geo-index")).data;
+    return (await Axios.post<{ indexed: number }>("/cms/admin/place/rebuild-geo-index")).data;
   }
 }

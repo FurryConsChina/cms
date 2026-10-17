@@ -1,4 +1,4 @@
-import { EditEventApiBody } from "@/api/dashboard/event";
+import { EditEventApiBody } from "@/api/cms/event";
 import { BaseModel, InferZodType } from "@/types/common";
 import { Organization } from "@/types/organization";
 import type { Place } from "@/types/place";
@@ -108,7 +108,6 @@ export interface IEvent extends BaseModel {
   placeId: string | null;
   locationNotes: string | null;
   eventKey: string;
-  contentVersion: number;
   isPublished: boolean;
   isSuspended: boolean;
   cover: MediaBinding | null;

@@ -1,4 +1,4 @@
-import { EditFeatureApiBody, FeatureAPI } from "@/api/dashboard/feature";
+import { EditFeatureApiBody, FeatureAPI } from "@/api/cms/feature";
 import { Feature, FeatureCategory, FeatureCategoryLabel } from "@/types/feature";
 import { InferZodType } from "@/types/common";
 import { useZodValidateData } from "@/utils/form";
@@ -23,13 +23,7 @@ export default function FeatureEditor({
   );
 }
 
-function EditorContent({
-  editingFeature,
-  onClose,
-}: {
-  editingFeature: Feature | null;
-  onClose: () => void;
-}) {
+function EditorContent({ editingFeature, onClose }: { editingFeature: Feature | null; onClose: () => void }) {
   const { message, modal } = App.useApp();
   const cleanedFeature = editingFeature ? pickBy(editingFeature, (v) => v !== "" && v != null) : {};
   const [form] = Form.useForm();

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Alert, App, Button, Col, Form, Input, InputNumber, Row, Select, Typography, Modal } from "antd";
-import { PlaceAPI, placeSchema } from "@/api/dashboard/place";
-import { RegionAPI } from "@/api/dashboard/region";
+import { PlaceAPI, placeSchema } from "@/api/cms/place";
+import { RegionAPI } from "@/api/cms/region";
 import type { Place } from "@/types/place";
 import type { Region } from "@/types/region";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -142,7 +142,12 @@ export default function PlaceEditor({
         </Form.Item>
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Form.Item label="所属地区" name="regionId" rules={[{ required: true, message: "请选择所属地区" }]}>
+            <Form.Item
+              label="所属地区"
+              name="regionId"
+              rules={[{ required: true, message: "请选择所属地区" }]}
+              extra={place ? "修改地区后，使用此地点的活动会同步更新地区和页面地址。" : undefined}
+            >
               <EntitySelect kind="region" style={{ width: "100%", minWidth: 0 }} />
             </Form.Item>
           </Col>

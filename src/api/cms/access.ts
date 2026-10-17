@@ -39,7 +39,7 @@ export class AccessAPI {
   }
 
   static async claims(kind: EntityKind, pending: boolean) {
-    return (await Axios.get<Claim[]>(`${base(kind)}/claims${pending ? "/pending" : ""}`)).data;
+    return (await Axios.get<Claim[]>(pending ? `/cms/admin/${kind}/claims/pending` : `${base(kind)}/claims`)).data;
   }
 
   static async claim(kind: EntityKind, id: string, reason: string) {
@@ -47,7 +47,7 @@ export class AccessAPI {
   }
 
   static async reviewClaim(kind: EntityKind, id: string, approved: boolean, note?: string) {
-    return (await Axios.post<Claim>(`${base(kind)}/claims/${id}/review`, { approved, note })).data;
+    return (await Axios.post<Claim>(`/cms/admin/${kind}/claims/${id}/review`, { approved, note })).data;
   }
 
   static async auditLogs(id: string, params: PageQuery & { action?: string }) {

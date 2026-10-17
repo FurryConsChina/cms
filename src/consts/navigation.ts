@@ -6,7 +6,7 @@ import {
   IconMapPin,
   // IconMessageReport,
   // IconPhoto,
-  // IconServerCog,
+  IconServerCog,
   IconTags,
   // IconUserCheck,
   // IconUserCircle,
@@ -14,8 +14,9 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import { isPlatform } from "@/utils/permissions";
+import { UserRole } from "@/types/User";
 
-type NavItem = { path: string; label: string; icon: Icon; platform?: boolean };
+type NavItem = { path: string; label: string; icon: Icon; platform?: boolean; roles?: UserRole[] };
 type NavGroup = { label?: string; items: NavItem[] };
 
 export const navigation: NavGroup[] = [
@@ -23,7 +24,7 @@ export const navigation: NavGroup[] = [
   {
     label: "内容管理",
     items: [
-      { path: "/dashboard/organization", label: "组织", icon: IconBuildingCommunity },
+      { path: "/dashboard/organization", label: "展商", icon: IconBuildingCommunity },
       { path: "/dashboard/event", label: "活动", icon: IconCalendarEvent },
       { path: "/dashboard/region", label: "地区", icon: IconWorld, platform: true },
       // 暂不开放的新功能入口，后续恢复。
@@ -32,7 +33,7 @@ export const navigation: NavGroup[] = [
       // { path: "/dashboard/media", label: "媒体资源库", icon: IconPhoto },
       { path: "/dashboard/feature", label: "活动标签", icon: IconTags, platform: true },
       // { path: "/dashboard/feedback", label: "页面反馈", icon: IconMessageReport, platform: true },
-      // { path: "/dashboard/cache-manager", label: "网站运维", icon: IconServerCog, platform: true },
+      // { path: "/dashboard/cache-manager", label: "页面缓存与浏览量", icon: IconServerCog, platform: true },
     ],
   },
   // {
@@ -41,7 +42,21 @@ export const navigation: NavGroup[] = [
   // },
   {
     label: "开发者",
-    items: [{ path: "/developer/application", label: "应用管理", icon: IconCode }],
+    items: [
+      {
+        path: "/developer/application",
+        label: "我的应用",
+        icon: IconCode,
+        roles: [UserRole.Admin, UserRole.Editor, UserRole.User],
+      },
+    ],
+  },
+  {
+    label: "管理员",
+    items: [
+      { path: "/admin/application", label: "应用管理", icon: IconCode, roles: [UserRole.Admin] },
+      { path: "/admin/infrastructure", label: "运维工具", icon: IconServerCog, roles: [UserRole.Admin] },
+    ],
   },
 ];
 
@@ -49,6 +64,9 @@ export const visibleNavigation = (role?: string) =>
   navigation
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !item.platform || isPlatform(role)),
+      items: group.items.filter(
+        (item) =>
+          (!item.platform || isPlatform(role)) && (!item.roles || item.roles.some((allowed) => allowed === role)),
+      ),
     }))
     .filter((group) => group.items.length > 0);

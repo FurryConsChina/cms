@@ -1,7 +1,7 @@
 import COS from "cos-js-sdk-v5";
 
 import type { MediaOwner } from "@/types/media";
-import { confirmUpload, getUploadSignature } from "@/api/dashboard/upload";
+import { confirmUpload, getUploadSignature } from "@/api/cms/upload";
 
 export async function uploadToCOS({
   file,

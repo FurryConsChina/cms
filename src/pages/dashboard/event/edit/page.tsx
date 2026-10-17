@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { Button, Divider, Typography, Flex, App, Form, Spin } from "antd";
 import { Organization } from "@/types/organization";
 import { Region } from "@/types/region";
-import { EditEventApiBody, EventAPI } from "@/api/dashboard/event";
+import { EditEventApiBody, EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/Layout/Container";
 import LoadError from "@/components/Layout/LoadError";
 import { useZodValidateData } from "@/utils/form";
@@ -104,14 +104,12 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
   const [saving, setSaving] = useState(false);
   const [mediaUploading, setMediaUploading] = useState(false);
-  const [contentVersion, setContentVersion] = useState(event?.contentVersion);
   const onSubmit = async (value: EditableEvent) => {
     if (saving) return;
     setSaving(true);
     try {
       if (event?.id) {
-        const res = await EventAPI.updateEvent(event.id, value, contentVersion);
-        setContentVersion(res.contentVersion);
+        await EventAPI.updateEvent(event.id, value);
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);

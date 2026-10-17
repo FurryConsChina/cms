@@ -1,4 +1,4 @@
-import { getTencentLocation } from "@/api/dashboard/map";
+import { getTencentLocation } from "@/api/cms/map";
 import type { TencentLocation } from "@/types/map";
 import { apiErrorMessage } from "@/utils/apiError";
 import { Alert, Empty, Input, Modal, Radio, Spin, Typography } from "antd";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
 import { Alert, App, Button, Descriptions, Form, Input, Modal, Space, Table, Tabs, Tag, Typography } from "antd";
-import { AccessAPI } from "@/api/dashboard/access";
+import { AccessAPI } from "@/api/cms/access";
 import type { EntityKind, Invitation, Member } from "@/types/access";
 import { auditActionLabel, targetTypeLabels } from "@/consts/labels";
 import useAuthStore from "@/stores/auth";

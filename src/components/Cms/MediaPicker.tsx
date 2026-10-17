@@ -2,7 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Alert, App, Button, Card, Flex, Form, Image, Input, Modal, Pagination, Space, Typography } from "antd";
 import type { MediaBinding, MediaOwner } from "@/types/media";
-import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/dashboard/upload";
+import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/cms/upload";
 import UploadImage from "@/components/UploadImage";
 import { apiErrorMessage } from "@/utils/apiError";
 import { imageUrl } from "@/utils/imageLoader";

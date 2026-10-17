@@ -1,4 +1,4 @@
-import { FeatureAPI } from "@/api/dashboard/feature";
+import { FeatureAPI } from "@/api/cms/feature";
 import type { Feature } from "@/types/feature";
 import { FeatureCategoryLabel } from "@/types/feature";
 import { Select, Spin, SelectProps } from "antd";

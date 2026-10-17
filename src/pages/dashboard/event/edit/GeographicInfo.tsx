@@ -4,7 +4,7 @@ import type { Place } from "@/types/place";
 import PlaceEditor from "@/components/Place/PlaceEditor";
 import RegionEditor from "@/components/Region/RegionEditor";
 import RegionSelector, { type RegionSelectorHandle } from "@/components/Region/RegionSelector";
-import { PlaceAPI } from "@/api/dashboard/place";
+import { PlaceAPI } from "@/api/cms/place";
 import { Typography, Form, Input, Select, Alert, Row, Col, App, Button, Flex, Space } from "antd";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import useAuthStore from "@/stores/auth";

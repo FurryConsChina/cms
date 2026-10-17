@@ -4,7 +4,7 @@ import { isPlatform } from "@/utils/permissions";
 import UploadImage from "@/components/UploadImage";
 import { LinkFields } from "@/components/Cms/Fields";
 import { apiErrorMessage } from "@/utils/apiError";
-import { CreateOrganizationApiBody, EditOrganizationApiBody, OrganizationAPI } from "@/api/dashboard/organization";
+import { CreateOrganizationApiBody, EditOrganizationApiBody, OrganizationAPI } from "@/api/cms/organization";
 import DefaultContainer from "@/components/Layout/Container";
 import LoadError from "@/components/Layout/LoadError";
 import type { MediaBinding } from "@/types/media";

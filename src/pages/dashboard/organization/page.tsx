@@ -1,8 +1,8 @@
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
-import { cleanPageCache } from "@/api/dashboard/cache";
-import { OrganizationAPI } from "@/api/dashboard/organization";
+import { cleanPageCache } from "@/api/cms/cache";
+import { OrganizationAPI } from "@/api/cms/organization";
 import DefaultContainer from "@/components/Layout/Container";
 import { Organization, OrganizationStatusLabel, OrganizationTypeLabel } from "@/types/organization";
 import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";

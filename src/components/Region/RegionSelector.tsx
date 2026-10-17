@@ -1,4 +1,4 @@
-import { RegionAPI } from "@/api/dashboard/region";
+import { RegionAPI } from "@/api/cms/region";
 import type { Region } from "@/types/region";
 import { Select, Spin, SelectProps } from "antd";
 import { debounce, uniqBy } from "es-toolkit";

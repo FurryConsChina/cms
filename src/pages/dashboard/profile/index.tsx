@@ -25,7 +25,7 @@ import { toNullable } from "@/utils/form";
 import { apiErrorMessage } from "@/utils/apiError";
 import MediaPicker, { MediaListFields } from "@/components/Cms/MediaPicker";
 import { LinkFields } from "@/components/Cms/Fields";
-import { ProfileAPI, profileSchema } from "@/api/dashboard/profile";
+import { ProfileAPI, profileSchema } from "@/api/cms/profile";
 import { toOptions } from "@/consts/labels";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
