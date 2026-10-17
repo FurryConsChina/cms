@@ -15,14 +15,20 @@ export const EditRegionApiBody = z.object({
   localName: z.string().max(256).nullish(),
 });
 
+export interface RegionListQuery {
+  pageSize: number;
+  current: number;
+  search?: string;
+  code?: string;
+  name?: string;
+  kind?: RegionType;
+  parentId?: string;
+  sortBy?: "createdAt" | "updatedAt" | "name" | "displayOrder";
+  sortOrder?: "asc" | "desc";
+}
+
 export class RegionAPI {
-  static async getRegionList(params: {
-    pageSize: number;
-    current: number;
-    search?: string;
-    code?: string;
-    name?: string;
-  }) {
+  static async getRegionList(params: RegionListQuery) {
     const res = await Axios.get<List<Region>>("/cms/region", {
       params,
     });

@@ -63,7 +63,7 @@ export const CapWidget = forwardRef<CapWidgetRef, CapWidgetProps>(
         data-cap-i18n-error-aria-label="验证失败，请重试"
       />
     );
-  }
+  },
 );
 
 CapWidget.displayName = "CapWidget";

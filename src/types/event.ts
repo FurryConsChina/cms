@@ -1,4 +1,4 @@
-import { EditEventApiBody } from "@/api/dashboard/event";
+import { EditEventApiBody } from "@/api/cms/event";
 import { BaseModel, InferZodType } from "@/types/common";
 import { Organization } from "@/types/organization";
 import type { Place } from "@/types/place";
@@ -88,7 +88,13 @@ export interface IEvent extends BaseModel {
   locationType: (typeof EventLocationType)[keyof typeof EventLocationType] | null;
   sources: { url: string; name?: string | null; description?: string | null }[] | null;
   ticketChannels:
-    { type: "wxMiniProgram" | "url" | "qrcode" | "app"; name: string; url: string; available: boolean }[] | null;
+    | {
+        type: "wxMiniProgram" | "url" | "qrcode" | "app";
+        name: string;
+        url: string;
+        available: boolean;
+      }[]
+    | null;
   address: string | null;
   addressLat: string | null;
   addressLon: string | null;
@@ -108,7 +114,6 @@ export interface IEvent extends BaseModel {
   placeId: string | null;
   locationNotes: string | null;
   eventKey: string;
-  contentVersion: number;
   isPublished: boolean;
   isSuspended: boolean;
   cover: MediaBinding | null;

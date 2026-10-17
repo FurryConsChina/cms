@@ -54,7 +54,11 @@ export default function TicketChannels({ form }: TicketChannelsProps) {
                       }}
                       disabled={index === fields.length - 1}
                     />
-                    <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
+                    <Button
+                      danger
+                      icon={<IconTrash size={14} />}
+                      onClick={() => remove(field.name)}
+                    />
                   </Flex>
                 </Flex>
                 <Row gutter={8} align="bottom">

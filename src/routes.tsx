@@ -4,7 +4,7 @@ import Auth from "@/pages/auth";
 import ErrorPage from "@/pages/error";
 import useAuthStore from "@/stores/auth";
 import type { ComponentType } from "react";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter, Navigate, redirect } from "react-router-dom";
 
 const page =
   <M extends Record<string, unknown>>(load: () => Promise<M>, name: keyof M = "default") =>
@@ -23,7 +23,10 @@ const router = createBrowserRouter([
         children: [
           { index: true, lazy: page(() => import("@/pages/dashboard/event/list")) },
           { path: "create", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
-          { path: ":eventId/manage", lazy: page(() => import("@/pages/dashboard/event/manage/page")) },
+          {
+            path: ":eventId/manage",
+            lazy: page(() => import("@/pages/dashboard/event/manage/page")),
+          },
           { path: ":eventId/edit", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
         ],
       },
@@ -36,7 +39,10 @@ const router = createBrowserRouter([
             path: ":entityId/access",
             lazy: page(() => import("@/pages/dashboard/access/entity"), "OrganizationAccessPage"),
           },
-          { path: ":organizationId/edit", lazy: page(() => import("@/pages/dashboard/organization/edit")) },
+          {
+            path: ":organizationId/edit",
+            lazy: page(() => import("@/pages/dashboard/organization/edit")),
+          },
         ],
       },
       { path: "profile", lazy: page(() => import("@/pages/dashboard/profile")) },
@@ -67,9 +73,24 @@ const router = createBrowserRouter([
     hydrateFallbackElement: <FullScreenLoading />,
     children: [
       {
-        index: true,
         path: "application",
         lazy: page(() => import("@/pages/dashboard/developer/application/list")),
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    Component: App,
+    errorElement: <ErrorPage />,
+    hydrateFallbackElement: <FullScreenLoading />,
+    children: [
+      {
+        lazy: page(() => import("@/components/Cms/AdminGuard")),
+        children: [
+          { index: true, element: <Navigate to="/admin/application" replace /> },
+          { path: "application", lazy: page(() => import("@/pages/admin/application/list")) },
+          { path: "infrastructure", lazy: page(() => import("@/pages/admin/infrastructure")) },
+        ],
       },
     ],
   },

@@ -46,7 +46,11 @@ export default function UpdatePassword({ user }: UpdatePasswordProps) {
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical">
-      <Form.Item label="当前密码" name="currentPassword" rules={[{ required: true, message: "请输入当前密码" }]}>
+      <Form.Item
+        label="当前密码"
+        name="currentPassword"
+        rules={[{ required: true, message: "请输入当前密码" }]}
+      >
         <Input.Password autoComplete="current-password" />
       </Form.Item>
       <Form.Item

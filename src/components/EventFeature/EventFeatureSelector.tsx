@@ -1,4 +1,4 @@
-import { FeatureAPI } from "@/api/dashboard/feature";
+import { FeatureAPI } from "@/api/cms/feature";
 import type { Feature } from "@/types/feature";
 import { FeatureCategoryLabel } from "@/types/feature";
 import { Select, Spin, SelectProps } from "antd";
@@ -29,7 +29,10 @@ export default function EventFeatureSelector({
     FeatureAPI.getFeatureList({ pageSize: 50, current: 1, name: searchValue }),
   );
 
-  const features = uniqBy([...(selectedOptions || []), ...(data?.records || [])], (feature) => feature.id);
+  const features = uniqBy(
+    [...(selectedOptions || []), ...(data?.records || [])],
+    (feature) => feature.id,
+  );
 
   const selectOptions = features.reduce(
     (acc, feature) => {
@@ -57,7 +60,10 @@ export default function EventFeatureSelector({
       }
       return acc;
     },
-    [] as Array<{ label: string; options: Array<{ label: string; value: string; feature: Feature }> }>,
+    [] as Array<{
+      label: string;
+      options: Array<{ label: string; value: string; feature: Feature }>;
+    }>,
   );
 
   const handleSearch = useCallback(

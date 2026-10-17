@@ -1,5 +1,10 @@
 export type FeedbackStatus = "new" | "processing" | "resolved" | "closed" | "spam";
-export type FeedbackCategory = "incorrect_info" | "missing_info" | "broken_page" | "suggestion" | "other";
+export type FeedbackCategory =
+  | "incorrect_info"
+  | "missing_info"
+  | "broken_page"
+  | "suggestion"
+  | "other";
 
 export type Feedback = {
   id: string;

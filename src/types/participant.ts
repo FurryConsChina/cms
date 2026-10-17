@@ -29,7 +29,12 @@ export type Benefit = {
   sortOrder: number;
 };
 
-export type OfferBenefit = { benefitId: string; quantity?: number | null; note?: string | null; benefit?: Benefit };
+export type OfferBenefit = {
+  benefitId: string;
+  quantity?: number | null;
+  note?: string | null;
+  benefit?: Benefit;
+};
 
 export type Offer = {
   id: string;

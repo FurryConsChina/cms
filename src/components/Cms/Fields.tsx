@@ -4,7 +4,13 @@ import dayjs from "dayjs";
 import { linkTypeLabels, toOptions } from "@/consts/labels";
 import type { Dayjs } from "dayjs";
 
-export function LinkFields({ name = "links", label = "联系方式与链接" }: { name?: string; label?: string }) {
+export function LinkFields({
+  name = "links",
+  label = "联系方式与链接",
+}: {
+  name?: string;
+  label?: string;
+}) {
   return (
     <Form.Item label={label}>
       <Form.List name={name}>
@@ -29,10 +35,20 @@ export function LinkFields({ name = "links", label = "联系方式与链接" }: 
                 >
                   <Input placeholder="链接、群号或账号" />
                 </Form.Item>
-                <Button danger type="text" icon={<IconTrash size={16} />} onClick={() => remove(field.name)} />
+                <Button
+                  danger
+                  type="text"
+                  icon={<IconTrash size={16} />}
+                  onClick={() => remove(field.name)}
+                />
               </Flex>
             ))}
-            <Button type="dashed" block icon={<IconPlus size={16} />} onClick={() => add({ type: "website" })}>
+            <Button
+              type="dashed"
+              block
+              icon={<IconPlus size={16} />}
+              onClick={() => add({ type: "website" })}
+            >
               添加一条
             </Button>
           </div>
@@ -59,14 +75,22 @@ export function IsoDateTimeInput({
   );
 }
 
-export function DateListInput({ value, onChange }: { value?: string[] | null; onChange?: (value: string[]) => void }) {
+export function DateListInput({
+  value,
+  onChange,
+}: {
+  value?: string[] | null;
+  onChange?: (value: string[]) => void;
+}) {
   return (
     <DatePicker
       multiple
       value={(value ?? []).map((v) => dayjs(v))}
       style={{ width: "100%" }}
       format="YYYY-MM-DD"
-      onChange={(dates: Dayjs[] | null) => onChange?.((dates ?? []).map((v) => v.format("YYYY-MM-DD")))}
+      onChange={(dates: Dayjs[] | null) =>
+        onChange?.((dates ?? []).map((v) => v.format("YYYY-MM-DD")))
+      }
     />
   );
 }

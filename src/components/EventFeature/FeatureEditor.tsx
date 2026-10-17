@@ -1,4 +1,4 @@
-import { EditFeatureApiBody, FeatureAPI } from "@/api/dashboard/feature";
+import { EditFeatureApiBody, FeatureAPI } from "@/api/cms/feature";
 import { Feature, FeatureCategory, FeatureCategoryLabel } from "@/types/feature";
 import { InferZodType } from "@/types/common";
 import { useZodValidateData } from "@/utils/form";
@@ -71,11 +71,21 @@ function EditorContent({
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-      <Form.Item label="标签名称" required name="name" rules={[{ required: true, message: "请输入标签名称" }]}>
+      <Form.Item
+        label="标签名称"
+        required
+        name="name"
+        rules={[{ required: true, message: "请输入标签名称" }]}
+      >
         <Input placeholder="请输入标签名称" />
       </Form.Item>
 
-      <Form.Item label="标签分类" required name="category" rules={[{ required: true, message: "请选择标签分类" }]}>
+      <Form.Item
+        label="标签分类"
+        required
+        name="category"
+        rules={[{ required: true, message: "请选择标签分类" }]}
+      >
         <Select
           placeholder="请选择标签分类"
           options={Object.values(FeatureCategory).map((item) => ({

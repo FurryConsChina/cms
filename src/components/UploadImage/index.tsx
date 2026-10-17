@@ -7,7 +7,14 @@ import { uploadToCOS } from "@/utils/cos";
 import { imageUrl } from "@/utils/imageLoader";
 import { apiErrorMessage } from "@/utils/apiError";
 
-const imageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif", "image/bmp"];
+const imageTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "image/bmp",
+];
 
 export default function UploadImage({
   value,
@@ -181,7 +188,9 @@ export default function UploadImage({
               src={value.url ? imageUrl(value.url) : undefined}
               alt={label}
               width={previewWidth}
-              height={fillHeight ? "100%" : (previewHeight ?? (crop ? previewWidth / aspect : undefined))}
+              height={
+                fillHeight ? "100%" : (previewHeight ?? (crop ? previewWidth / aspect : undefined))
+              }
               preview
               style={{ objectFit: "contain" }}
             />
@@ -192,7 +201,12 @@ export default function UploadImage({
           justify={value ? "center" : undefined}
           style={
             value
-              ? { position: "absolute", inset: "auto 0 0", padding: 8, background: "rgba(0, 0, 0, 0.45)" }
+              ? {
+                  position: "absolute",
+                  inset: "auto 0 0",
+                  padding: 8,
+                  background: "rgba(0, 0, 0, 0.45)",
+                }
               : fillHeight
                 ? { position: "absolute", inset: 0 }
                 : undefined

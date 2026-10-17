@@ -4,14 +4,22 @@ import type { List, PageQuery } from "@/types/Request";
 
 export async function uploadStatic(form: FormData) {
   return (
-    await Axios.post<{ S3UploadRes: { ETag: string }; mediaAssetId: string; key: string; url: string }>(
-      "/cms/infra/upload/static",
-      form,
-    )
+    await Axios.post<{
+      S3UploadRes: { ETag: string };
+      mediaAssetId: string;
+      key: string;
+      url: string;
+    }>("/cms/infra/upload/static", form)
   ).data;
 }
 
-export async function getUploadSignature({ fileName, owner }: { fileName: string; owner?: MediaOwner }) {
+export async function getUploadSignature({
+  fileName,
+  owner,
+}: {
+  fileName: string;
+  owner?: MediaOwner;
+}) {
   return (
     await Axios.post<{
       mediaAssetId: string;
@@ -40,7 +48,8 @@ export async function getMediaUsages(owner: MediaOwner) {
 }
 
 export async function createExternalMedia(url: string) {
-  return (await Axios.post<{ id: string; url: string }>("/cms/media/assets/external", { url })).data;
+  return (await Axios.post<{ id: string; url: string }>("/cms/media/assets/external", { url }))
+    .data;
 }
 
 export async function listMediaAssets(params: PageQuery & { owner?: MediaOwner }) {
@@ -52,4 +61,5 @@ export async function deleteMediaAsset(id: string) {
 }
 
 export const isImageAsset = (asset: { url?: string; mimeType?: string | null }) =>
-  !!asset.mimeType?.startsWith("image/") || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(asset.url ?? "");
+  !!asset.mimeType?.startsWith("image/") ||
+  /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(asset.url ?? "");

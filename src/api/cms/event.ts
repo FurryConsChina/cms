@@ -7,7 +7,7 @@ import {
   EventType,
   type EditableEvent,
 } from "@/types/event";
-import type { List } from "@/types/Request";
+import type { List, PageQuery } from "@/types/Request";
 import z from "zod";
 import { getMediaUsages } from "./upload";
 import type { EventResponse } from "@/types/event";
@@ -58,20 +58,33 @@ export const EditEventApiBody = z.object({
   videos: z.array(mediaBindingSchema).nullish(),
   lives: z.array(mediaBindingSchema).nullish(),
   detail: z.string().nullish(),
-  features: z.array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })])).nullish(),
+  features: z
+    .array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })]))
+    .nullish(),
   extra: z
     .object({
       overrideOrganizationContact: z
         .object({
-          qqGroups: z.array(z.object({ label: z.string().nullish(), value: z.string() })).optional(),
+          qqGroups: z
+            .array(z.object({ label: z.string().nullish(), value: z.string() }))
+            .optional(),
         })
         .optional(),
     })
     .optional(),
 });
 
+export interface EventListQuery extends PageQuery {
+  search?: string;
+  orgSearch?: string;
+  regionSlug?: string[];
+  regionName?: string;
+  placeName?: string;
+  placeAddress?: string;
+}
+
 export class EventAPI {
-  static async getEventList(params: { pageSize: number; current: number; search?: string; orgSearch?: string }) {
+  static async getEventList(params: EventListQuery) {
     const res = await Axios.get<List<EventResponse>>("/cms/event/list", {
       params,
     });
@@ -99,11 +112,8 @@ export class EventAPI {
     return res.data;
   }
 
-  static async updateEvent(eventId: string, event: EditableEvent, expectedContentVersion?: number) {
-    const res = await Axios.patch<EventResponse>(`/cms/event/${eventId}`, {
-      event,
-      expectedContentVersion,
-    });
+  static async updateEvent(eventId: string, event: EditableEvent) {
+    const res = await Axios.patch<EventResponse>(`/cms/event/${eventId}`, { event });
 
     return res.data;
   }

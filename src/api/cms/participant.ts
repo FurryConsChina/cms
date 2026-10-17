@@ -56,11 +56,17 @@ export class ParticipantAPI {
   }
 
   static async save(id: string | undefined, participant: ParticipantInput) {
-    return (await Axios.post<Participant>(id ? `/cms/participant/${id}` : "/cms/participant", { participant })).data;
+    return (
+      await Axios.post<Participant>(id ? `/cms/participant/${id}` : "/cms/participant", {
+        participant,
+      })
+    ).data;
   }
 
   static async updateOwn(id: string, description: string | null) {
-    return (await Axios.patch<Participant>(`/cms/participant/${id}`, { participant: { description } })).data;
+    return (
+      await Axios.patch<Participant>(`/cms/participant/${id}`, { participant: { description } })
+    ).data;
   }
 
   static async delete(id: string) {

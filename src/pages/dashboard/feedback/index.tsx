@@ -15,12 +15,18 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { FeedbackAPI, feedbackUpdateSchema } from "@/api/dashboard/feedback";
+import { FeedbackAPI, feedbackUpdateSchema } from "@/api/cms/feedback";
 import type { Feedback, FeedbackCategory, FeedbackDetail, FeedbackStatus } from "@/types/feedback";
 import { apiErrorMessage } from "@/utils/apiError";
 import { targetTypeLabels } from "@/consts/labels";
 
-const statuses = { new: "新反馈", processing: "处理中", resolved: "已解决", closed: "已关闭", spam: "垃圾反馈" };
+const statuses = {
+  new: "新反馈",
+  processing: "处理中",
+  resolved: "已解决",
+  closed: "已关闭",
+  spam: "垃圾反馈",
+};
 const categories = {
   incorrect_info: "信息错误",
   missing_info: "信息缺失",
@@ -38,8 +44,17 @@ export default function FeedbackPage() {
   const [detail, setDetail] = useState<FeedbackDetail>();
   const [busy, setBusy] = useState(false);
   const [form] = Form.useForm();
-  const { data, error, isLoading, mutate } = useSWR(["feedback", current, status, category, path, range], () =>
-    FeedbackAPI.list({ current, pageSize: 20, status, category, pagePath: path || undefined, ...range }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["feedback", current, status, category, path, range],
+    () =>
+      FeedbackAPI.list({
+        current,
+        pageSize: 20,
+        status,
+        category,
+        pagePath: path || undefined,
+        ...range,
+      }),
   );
   const open = async (record: Feedback) => {
     try {
@@ -99,14 +114,23 @@ export default function FeedbackPage() {
         rowKey="id"
         dataSource={data?.records ?? []}
         loading={isLoading}
-        pagination={{ current, pageSize: 20, total: data?.total, onChange: setCurrent, showSizeChanger: false }}
+        pagination={{
+          current,
+          pageSize: 20,
+          total: data?.total,
+          onChange: setCurrent,
+          showSizeChanger: false,
+        }}
         columns={[
           { title: "分类", render: (_, v) => categories[v.category] },
           { title: "内容", dataIndex: "contentSummary" },
           { title: "页面", render: (_, v) => v.page.title || v.page.path },
           { title: "状态", render: (_, v) => <Tag>{statuses[v.status]}</Tag> },
           { title: "提交时间", render: (_, v) => new Date(v.createdAt).toLocaleString("zh-CN") },
-          { title: "操作", render: (_, v) => <Button onClick={() => void open(v)}>查看与处理</Button> },
+          {
+            title: "操作",
+            render: (_, v) => <Button onClick={() => void open(v)}>查看与处理</Button>,
+          },
         ]}
       />
       <Modal
@@ -125,7 +149,9 @@ export default function FeedbackPage() {
                 key: "content",
                 label: "反馈内容",
                 children: (
-                  <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>{detail.content}</Typography.Paragraph>
+                  <Typography.Paragraph style={{ whiteSpace: "pre-wrap" }}>
+                    {detail.content}
+                  </Typography.Paragraph>
                 ),
               },
               { key: "page", label: "页面", children: detail.page.path },
@@ -145,7 +171,8 @@ export default function FeedbackPage() {
           layout="vertical"
           onFinish={async (values) => {
             const parsed = feedbackUpdateSchema.safeParse(values);
-            if (!parsed.success) return message.error(parsed.error.issues.map((v) => v.message).join("；"));
+            if (!parsed.success)
+              return message.error(parsed.error.issues.map((v) => v.message).join("；"));
             setBusy(true);
             try {
               await FeedbackAPI.update(detail!.id, parsed.data);
@@ -160,7 +187,9 @@ export default function FeedbackPage() {
           }}
         >
           <Form.Item label="处理状态" name="status">
-            <Select options={Object.entries(statuses).map(([value, label]) => ({ value, label }))} />
+            <Select
+              options={Object.entries(statuses).map(([value, label]) => ({ value, label }))}
+            />
           </Form.Item>
           <Form.Item label="内部备注（关闭或标记垃圾时必填）" name="internalNote">
             <Input.TextArea rows={4} maxLength={2000} showCount />

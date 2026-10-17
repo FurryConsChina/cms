@@ -1,7 +1,7 @@
 import COS from "cos-js-sdk-v5";
 
 import type { MediaOwner } from "@/types/media";
-import { confirmUpload, getUploadSignature } from "@/api/dashboard/upload";
+import { confirmUpload, getUploadSignature } from "@/api/cms/upload";
 
 export async function uploadToCOS({
   file,
@@ -16,7 +16,8 @@ export async function uploadToCOS({
   const fileName = `image.${file.type.split("/")[1]}`;
   const signedKey = await getUploadSignature({ fileName, owner });
 
-  const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } = signedKey;
+  const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } =
+    signedKey;
   const cos = new COS({
     SecretId: tempSecretId,
     SecretKey: tempSecretKey,

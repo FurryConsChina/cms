@@ -65,7 +65,12 @@ export default function Auth() {
     },
   });
 
-  const handleFinish = (values: { name: string; email: string; password: string; captchaToken: string }) => {
+  const handleFinish = (values: {
+    name: string;
+    email: string;
+    password: string;
+    captchaToken: string;
+  }) => {
     if (currentSegment === "login") {
       loginMutation.mutate(values);
     } else if (currentSegment === "register") {
@@ -86,7 +91,12 @@ export default function Auth() {
         backdropFilter: "blur(5px)",
       }}
     >
-      <Flex justify="center" className="items-center md:items-end" style={{ height: "100%" }} vertical>
+      <Flex
+        justify="center"
+        className="items-center md:items-end"
+        style={{ height: "100%" }}
+        vertical
+      >
         <Card
           className="w-full md:w-96 h-full"
           style={{ margin: 20, borderRadius: 8 }}
@@ -147,7 +157,9 @@ export default function Auth() {
                 >
                   <Input.Password
                     placeholder="请输入您的密码"
-                    autoComplete={currentSegment === "register" ? "new-password" : "current-password"}
+                    autoComplete={
+                      currentSegment === "register" ? "new-password" : "current-password"
+                    }
                   />
                 </Form.Item>
                 {currentSegment === "login" && (

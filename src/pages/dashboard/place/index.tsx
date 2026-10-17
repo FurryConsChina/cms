@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
-import { Button, Flex, Input, Select, Space, Typography, Alert, App, Table } from "antd";
+import { useState } from "react";
+import { Button, Flex, Space, Typography, Alert, App, Table } from "antd";
 import PlaceEditor, { placeKinds } from "@/components/Place/PlaceEditor";
-import { IconCirclePlus, IconRefresh } from "@tabler/icons-react";
+import { IconCirclePlus, IconRefresh, IconSearch } from "@tabler/icons-react";
 import DefaultContainer from "@/components/Layout/Container";
 
 import useSWR from "swr";
 import { type ColumnsType } from "antd/es/table";
 import { apiErrorMessage } from "@/utils/apiError";
-import EntitySelect from "@/components/Cms/EntitySelect";
-import { PlaceAPI } from "@/api/dashboard/place";
-import { toOptions } from "@/consts/labels";
+import TableFilterDropdown from "@/components/Cms/TableFilterDropdown";
+import { PlaceAPI } from "@/api/cms/place";
 import type { Place } from "@/types/place";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
@@ -22,11 +21,16 @@ export default function PlacePage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  useEffect(() => {
-    setCurrent(1);
-  }, [search, regionId, kind]);
-  const { data, error, isLoading, mutate } = useSWR(["places", search, regionId, kind, current, pageSize], () =>
-    PlaceAPI.list({ current, pageSize, name: search || undefined, regionId: regionId || undefined, kind }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["places", search, regionId, kind, current, pageSize],
+    () =>
+      PlaceAPI.list({
+        current,
+        pageSize,
+        name: search || undefined,
+        regionId: regionId || undefined,
+        kind,
+      }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Place>();
@@ -36,11 +40,34 @@ export default function PlacePage() {
   };
   const records = data?.records ?? [];
   const columns: ColumnsType<Place> = [
-    { title: "名称", dataIndex: "name" },
-    { title: "类型", render: (_, v) => placeKinds[v.kind] },
-    { title: "地区", render: (_, v) => v.region?.name },
+    {
+      title: "名称",
+      dataIndex: "name",
+      key: "name",
+      filteredValue: search ? [search] : null,
+      filterDropdown: (props) => <TableFilterDropdown {...props} placeholder="搜索地点名称" />,
+      filterIcon: () => <IconSearch size={14} />,
+    },
+    {
+      title: "类型",
+      key: "kind",
+      render: (_, v) => placeKinds[v.kind],
+      filters: Object.entries(placeKinds).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: kind ? [kind] : null,
+    },
+    {
+      title: "地区",
+      key: "regionId",
+      render: (_, v) => v.region?.name,
+      filteredValue: regionId ? [regionId] : null,
+      filterDropdown: (props) => <TableFilterDropdown {...props} region placeholder="选择地区" />,
+    },
     { title: "地址", dataIndex: "address" },
-    { title: "坐标", render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`) },
+    {
+      title: "坐标",
+      render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`),
+    },
     {
       title: "操作",
       key: "actions",
@@ -88,25 +115,17 @@ export default function PlacePage() {
               刷新
             </Button>
             {platform && (
-              <Button type="primary" icon=<IconCirclePlus size={16} stroke={1.5} /> onClick={() => void open()}>
+              <Button
+                type="primary"
+                icon=<IconCirclePlus size={16} stroke={1.5} />
+                onClick={() => void open()}
+              >
                 添加地点
               </Button>
             )}
           </Space>
         </Flex>
       </DefaultContainer>
-      <Space wrap>
-        <Input.Search allowClear placeholder="搜索地点名称" onSearch={setSearch} style={{ width: 240 }} />
-        <EntitySelect kind="region" value={regionId} onChange={setRegionId} placeholder="全部地区" />
-        <Select
-          allowClear
-          placeholder="全部类型"
-          style={{ width: 140 }}
-          value={kind}
-          onChange={setKind}
-          options={toOptions(placeKinds)}
-        />
-      </Space>
       {error && (
         <Alert
           type="error"
@@ -121,15 +140,22 @@ export default function PlacePage() {
         dataSource={records}
         loading={isLoading}
         scroll={{ x: "max-content" }}
+        onChange={(pagination, values, _sorter, extra) => {
+          setSearch((values.name?.[0] as string | undefined)?.trim() ?? "");
+          setKind(values.kind?.[0] as Place["kind"] | undefined);
+          setRegionId((values.regionId?.[0] as string | undefined) ?? null);
+          setCurrent(
+            extra.action === "paginate" && pagination.pageSize === pageSize
+              ? (pagination.current ?? 1)
+              : 1,
+          );
+          setPageSize(pagination.pageSize ?? pageSize);
+        }}
         pagination={{
           current,
           pageSize,
           total: data?.total,
           showSizeChanger: true,
-          onChange: (page, size) => {
-            setCurrent(page);
-            setPageSize(size);
-          },
         }}
       />
       {platform && opened && (

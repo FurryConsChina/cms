@@ -20,7 +20,9 @@ const getMenuItems = (role?: string): MenuItem[] =>
       label: item.label,
       icon: <item.icon size="1.1rem" stroke={1.5} />,
     }));
-    return group.label ? [{ type: "group" as const, key: group.label, label: group.label, children: items }] : items;
+    return group.label
+      ? [{ type: "group" as const, key: group.label, label: group.label, children: items }]
+      : items;
   });
 
 const bottomMenuItems: MenuItem[] = [

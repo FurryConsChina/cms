@@ -1,21 +1,24 @@
-import { RegionAPI } from "@/api/dashboard/region";
+import { RegionAPI, type RegionListQuery } from "@/api/cms/region";
 import { useState } from "react";
 import { Alert, App, Space, Table, Button, Flex, Typography } from "antd";
 import useSWR from "swr";
 import { type ColumnsType } from "antd/es/table";
 import { apiErrorMessage } from "@/utils/apiError";
-import { type Region, RegionTypeLabel } from "@/types/region";
+import { type Region, RegionType, RegionTypeLabel } from "@/types/region";
 import DefaultContainer from "@/components/Layout/Container";
 import RegionEditor from "@/components/Region/RegionEditor";
+import TableFilterDropdown from "@/components/Cms/TableFilterDropdown";
 
-import { IconCirclePlus } from "@tabler/icons-react";
+import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
 
 export default function RegionPage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, error, isLoading, mutate } = useSWR(["region-list", current, pageSize], () =>
-    RegionAPI.getRegionList({ current, pageSize }),
+  const [filters, setFilters] = useState<Omit<RegionListQuery, "current" | "pageSize">>({});
+  const { data, error, isLoading, mutate } = useSWR(
+    ["region-list", current, pageSize, filters],
+    () => RegionAPI.getRegionList({ current, pageSize, ...filters }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Region>();
@@ -33,11 +36,39 @@ export default function RegionPage() {
   };
   const records = data?.records ?? [];
   const columns: ColumnsType<Region> = [
-    { title: "地区名称", dataIndex: "name", key: "name" },
-    { title: "地区 Slug", dataIndex: "slug", key: "slug" },
-    { title: "地区类型", key: "kind", render: (_, record) => RegionTypeLabel[record.kind] },
-    { title: "排序顺序", dataIndex: "displayOrder", key: "displayOrder" },
-    { title: "父级地区", key: "parent", render: (_, record) => record.parent?.name },
+    {
+      title: "地区名称",
+      dataIndex: "name",
+      key: "name",
+      filteredValue: filters.name ? [filters.name] : null,
+      filterDropdown: (props) => <TableFilterDropdown {...props} placeholder="搜索地区名称" />,
+      filterIcon: () => <IconSearch size={14} />,
+    },
+    {
+      title: "地区 Slug",
+      dataIndex: "slug",
+      key: "code",
+      filteredValue: filters.code ? [filters.code] : null,
+      filterDropdown: (props) => <TableFilterDropdown {...props} placeholder="搜索地区 Slug" />,
+      filterIcon: () => <IconSearch size={14} />,
+    },
+    {
+      title: "地区类型",
+      key: "kind",
+      render: (_, record) => RegionTypeLabel[record.kind],
+      filters: Object.entries(RegionTypeLabel).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: filters.kind ? [filters.kind] : null,
+    },
+    {
+      title: "父级地区",
+      key: "parentId",
+      render: (_, record) => record.parent?.name,
+      filteredValue: filters.parentId ? [filters.parentId] : null,
+      filterDropdown: (props) => (
+        <TableFilterDropdown {...props} region placeholder="选择父级地区（仅直接子级）" />
+      ),
+    },
     {
       title: "操作",
       key: "actions",
@@ -80,7 +111,11 @@ export default function RegionPage() {
           <Typography.Title level={3} className="m-0">
             地区列表
           </Typography.Title>
-          <Button type="primary" icon=<IconCirclePlus size={16} stroke={1.5} /> onClick={() => void open()}>
+          <Button
+            type="primary"
+            icon=<IconCirclePlus size={16} stroke={1.5} />
+            onClick={() => void open()}
+          >
             添加地区
           </Button>
         </Flex>
@@ -100,15 +135,25 @@ export default function RegionPage() {
         dataSource={records}
         loading={isLoading}
         scroll={{ x: "max-content" }}
+        onChange={(pagination, values, _sorter, extra) => {
+          setFilters({
+            name: (values.name?.[0] as string | undefined)?.trim() || undefined,
+            code: (values.code?.[0] as string | undefined)?.trim() || undefined,
+            kind: values.kind?.[0] as RegionType | undefined,
+            parentId: values.parentId?.[0] as string | undefined,
+          });
+          setCurrent(
+            extra.action === "paginate" && pagination.pageSize === pageSize
+              ? (pagination.current ?? 1)
+              : 1,
+          );
+          setPageSize(pagination.pageSize ?? pageSize);
+        }}
         pagination={{
           current,
           pageSize,
           total: data?.total,
           showSizeChanger: true,
-          onChange: (page, size) => {
-            setCurrent(page);
-            setPageSize(size);
-          },
         }}
       />
       {opened && (

@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { Button, Divider, Typography, Flex, App, Form, Spin } from "antd";
 import { Organization } from "@/types/organization";
 import { Region } from "@/types/region";
-import { EditEventApiBody, EventAPI } from "@/api/dashboard/event";
+import { EditEventApiBody, EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/Layout/Container";
 import LoadError from "@/components/Layout/LoadError";
 import { useZodValidateData } from "@/utils/form";
@@ -21,7 +21,14 @@ import EventMedia from "./EventMedia";
 
 import "dayjs/locale/zh-cn";
 
-import { type EditableEvent, EventItem, EventStatus, EventType, EventScale, EventLocationType } from "@/types/event";
+import {
+  type EditableEvent,
+  EventItem,
+  EventStatus,
+  EventType,
+  EventScale,
+  EventLocationType,
+} from "@/types/event";
 
 dayjs.locale("zh-cn");
 
@@ -69,9 +76,14 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const { message, modal } = App.useApp();
   const cleanedEvent = event ? pickBy(event, (v) => v !== "" && v != null) : {};
 
-  const [selectedRegion, setSelectedRegion] = useState<Region | undefined>(event?.region ?? undefined);
+  const [selectedRegion, setSelectedRegion] = useState<Region | undefined>(
+    event?.region ?? undefined,
+  );
   const [selectedOrganizations, setSelectedOrganizations] = useState<Organization[]>(() => {
-    return uniqBy([...(event?.organization ? [event.organization] : []), ...(event?.organizations || [])], (o) => o.id);
+    return uniqBy(
+      [...(event?.organization ? [event.organization] : []), ...(event?.organizations || [])],
+      (o) => o.id,
+    );
   });
 
   const defaultStartAt = new Date(new Date().setHours(10, 0, 0, 0)).toISOString();
@@ -81,7 +93,11 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
   const initialValues = {
     name: cleanedEvent.name,
-    startAt: cleanedEvent.startAt ? dayjs(cleanedEvent.startAt) : event ? null : dayjs(defaultStartAt),
+    startAt: cleanedEvent.startAt
+      ? dayjs(cleanedEvent.startAt)
+      : event
+        ? null
+        : dayjs(defaultStartAt),
     endAt: cleanedEvent.endAt ? dayjs(cleanedEvent.endAt) : event ? null : dayjs(defaultEndAt),
     placeId: cleanedEvent.placeId,
     locationNotes: cleanedEvent.locationNotes,
@@ -104,14 +120,12 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
   const [saving, setSaving] = useState(false);
   const [mediaUploading, setMediaUploading] = useState(false);
-  const [contentVersion, setContentVersion] = useState(event?.contentVersion);
   const onSubmit = async (value: EditableEvent) => {
     if (saving) return;
     setSaving(true);
     try {
       if (event?.id) {
-        const res = await EventAPI.updateEvent(event.id, value, contentVersion);
-        setContentVersion(res.contentVersion);
+        await EventAPI.updateEvent(event.id, value);
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
@@ -173,7 +187,12 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
       <Divider dashed size="small" />
 
-      <GeographicInfo form={form} event={event} selectedRegion={selectedRegion} setSelectedRegion={setSelectedRegion} />
+      <GeographicInfo
+        form={form}
+        event={event}
+        selectedRegion={selectedRegion}
+        setSelectedRegion={setSelectedRegion}
+      />
 
       <Divider dashed size="small" />
 

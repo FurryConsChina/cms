@@ -1,12 +1,21 @@
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
-import { cleanPageCache } from "@/api/dashboard/cache";
-import { EventAPI } from "@/api/dashboard/event";
+import { cleanPageCache } from "@/api/cms/cache";
+import { EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/Layout/Container";
 import { EventScaleLabel, EventStatusColor, EventStatusLabel } from "@/consts/event";
 import { EventItem } from "@/types/event";
-import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
 import {
+  IconCirclePlus,
+  IconEdit,
+  IconLink,
+  IconMenu,
+  IconRefresh,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
+import {
+  Alert,
   App,
   Button,
   Dropdown,
@@ -22,30 +31,40 @@ import {
 } from "antd";
 import { ColumnsType, FilterDropdownProps } from "antd/es/table/interface";
 import dayjs from "dayjs";
-import { parseAsInteger, useQueryState } from "nuqs";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { useNavigate } from "react-router-dom";
-import useSWR from "swr";
+import { useEventsList } from "@/hooks/api/event/useEventsList";
+import { apiErrorMessage } from "@/utils/apiError";
 
 const { Title } = Typography;
+
+type SearchField = "search" | "orgSearch" | "regionName" | "placeName" | "placeAddress";
 
 export default function EventPage() {
   const navigate = useNavigate();
   const platform = isPlatform(useAuthStore((state) => state.user?.role));
   const { message, modal } = App.useApp();
 
-  const [search, setSearch] = useQueryState("search");
-  const [orgSearch, setOrgSearch] = useQueryState("orgSearch");
-  const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
-  const [pageSize, setPageSize] = useQueryState("pageSize", parseAsInteger.withDefault(20));
+  const [filters, setFilters] = useQueryStates({
+    search: parseAsString,
+    orgSearch: parseAsString,
+    regionName: parseAsString,
+    placeName: parseAsString,
+    placeAddress: parseAsString,
+    currentPage: parseAsInteger.withDefault(1),
+    pageSize: parseAsInteger.withDefault(20),
+  });
+  const { currentPage, pageSize } = filters;
 
-  const { data, isLoading, mutate } = useSWR(["event-list", currentPage, pageSize, search, orgSearch], () =>
-    EventAPI.getEventList({
-      pageSize: pageSize,
-      current: currentPage,
-      search: search || undefined,
-      orgSearch: orgSearch || undefined,
-    }),
-  );
+  const { data, error, isLoading, mutate } = useEventsList({
+    pageSize,
+    current: currentPage,
+    search: filters.search?.trim() || undefined,
+    orgSearch: filters.orgSearch?.trim() || undefined,
+    regionName: filters.regionName?.trim() || undefined,
+    placeName: filters.placeName?.trim() || undefined,
+    placeAddress: filters.placeAddress?.trim() || undefined,
+  });
 
   const handleDeleteEvent = async (id: string) => {
     try {
@@ -65,38 +84,27 @@ export default function EventPage() {
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem,
+    field: SearchField,
   ) => {
+    void setFilters({ [field]: selectedKeys[0]?.trim() || null, currentPage: 1 });
     confirm();
-
-    if (dataIndex === "name") {
-      setSearch(selectedKeys[0]);
-    } else if (dataIndex === "organization") {
-      setOrgSearch(selectedKeys[0]);
-    }
-    setCurrentPage(1);
   };
 
   const handleReset = (
     clearFilters: () => void,
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: keyof EventItem,
+    field: SearchField,
   ) => {
+    void setFilters({ [field]: null, currentPage: 1 });
     clearFilters();
     confirm();
-
-    if (dataIndex === "name") {
-      setSearch(null);
-    } else if (dataIndex === "organization") {
-      setOrgSearch(null);
-    }
-    setCurrentPage(1);
   };
 
   const getColumnSearchProps = (
-    dataIndex: keyof EventItem,
+    field: SearchField,
     searchPlaceholder?: string,
   ): TableColumnType<EventItem> => ({
+    filteredValue: filters[field] ? [filters[field]] : null,
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Space orientation="vertical">
@@ -105,11 +113,11 @@ export default function EventPage() {
             value={selectedKeys[0]}
             allowClear
             onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            onPressEnter={() => handleSearch(selectedKeys as string[], confirm, field)}
           />
           <Space>
             <Button
-              onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+              onClick={() => handleSearch(selectedKeys as string[], confirm, field)}
               icon={<IconSearch size={14} />}
               size="small"
               type="primary"
@@ -117,7 +125,10 @@ export default function EventPage() {
             >
               搜索
             </Button>
-            <Button onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)} size="small">
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters, confirm, field)}
+              size="small"
+            >
               重置
             </Button>
             <Button
@@ -133,7 +144,9 @@ export default function EventPage() {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
+    filterIcon: (filtered: boolean) => (
+      <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
   });
 
   const columns: ColumnsType<EventItem> = [
@@ -141,13 +154,13 @@ export default function EventPage() {
       title: "展商",
       dataIndex: ["organization", "name"],
       key: "organizationName",
-      ...getColumnSearchProps("organization", "请输入展商名称"),
+      ...getColumnSearchProps("orgSearch", "请输入展商名称"),
     },
     {
       title: "展会名称",
       dataIndex: "name",
       key: "name",
-      ...getColumnSearchProps("name", "请输入展会名称"),
+      ...getColumnSearchProps("search", "请输入展会名称"),
     },
     {
       title: "日期",
@@ -177,15 +190,22 @@ export default function EventPage() {
       render: (scale) => EventScaleLabel[scale],
     },
     {
-      title: "城市",
+      title: "地区",
       dataIndex: ["region", "name"],
       key: "city",
+      ...getColumnSearchProps("regionName", "请输入地区名称（含下级地区）"),
     },
-
+    {
+      title: "地点",
+      dataIndex: ["place", "name"],
+      key: "place",
+      ...getColumnSearchProps("placeName", "请输入地点名称"),
+    },
     {
       title: "地址",
       dataIndex: "address",
       key: "address",
+      ...getColumnSearchProps("placeAddress", "请输入地点地址"),
     },
     {
       title: "操作",
@@ -217,7 +237,10 @@ export default function EventPage() {
             label: "删除",
             danger: true,
             onClick: () => {
-              modal.confirm({ title: `确认删除活动“${record.name}”？`, onOk: () => handleDeleteEvent(record.id) });
+              modal.confirm({
+                title: `确认删除活动“${record.name}”？`,
+                onOk: () => handleDeleteEvent(record.id),
+              });
             },
           },
         ];
@@ -268,6 +291,15 @@ export default function EventPage() {
       </DefaultContainer>
 
       <div className="shadow-sm mt-4 p-4 rounded-xl bg-white">
+        {error && (
+          <Alert
+            className="mb-4"
+            type="error"
+            showIcon
+            title={apiErrorMessage(error)}
+            action={<Button onClick={() => void mutate()}>重试</Button>}
+          />
+        )}
         <Table
           rowKey={(row) => row.id}
           columns={columns}
@@ -279,13 +311,12 @@ export default function EventPage() {
             total: data?.total,
             current: currentPage,
           }}
-          onChange={(tablePagination) => {
-            if (tablePagination.current) {
-              setCurrentPage(tablePagination.current);
-            }
-            if (tablePagination.pageSize) {
-              setPageSize(tablePagination.pageSize);
-            }
+          onChange={(pagination, _filters, _sorter, extra) => {
+            if (extra.action !== "paginate") return;
+            void setFilters({
+              currentPage: pagination.pageSize !== pageSize ? 1 : (pagination.current ?? 1),
+              pageSize: pagination.pageSize ?? pageSize,
+            });
           }}
         />
       </div>

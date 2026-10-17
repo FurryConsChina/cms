@@ -1,4 +1,4 @@
-import { ApplicationApi, EditApplicationApiBody } from "@/api/developer/application";
+import { EditApplicationApiBody } from "@/api/cms/application";
 import { InferZodType } from "@/types/common";
 import { Application } from "@/types/application";
 import { useZodValidateData } from "@/utils/form";
@@ -7,15 +7,18 @@ import { App, Button, Flex, Form, Input, Modal } from "antd";
 
 const { TextArea } = Input;
 
+type EditorProps = {
+  onClose: () => void;
+  editingApplication: Application | null;
+  onSave: (value: InferZodType<typeof EditApplicationApiBody>, id?: string) => Promise<unknown>;
+};
+
 export default function ApplicationEditor({
   opened,
   onClose,
   editingApplication,
-}: {
-  opened: boolean;
-  onClose: () => void;
-  editingApplication: Application | null;
-}) {
+  onSave,
+}: EditorProps & { opened: boolean }) {
   return (
     <Modal
       open={opened}
@@ -25,20 +28,16 @@ export default function ApplicationEditor({
       destroyOnHidden
       footer={null}
     >
-      <EditorContent editingApplication={editingApplication} onClose={onClose} />
+      <EditorContent editingApplication={editingApplication} onClose={onClose} onSave={onSave} />
     </Modal>
   );
 }
 
-function EditorContent({
-  editingApplication,
-  onClose,
-}: {
-  editingApplication: Application | null;
-  onClose: () => void;
-}) {
+function EditorContent({ editingApplication, onClose, onSave }: EditorProps) {
   const { message, modal } = App.useApp();
-  const cleanedApplication = editingApplication ? pickBy(editingApplication, (v) => v !== "" && v != null) : {};
+  const cleanedApplication = editingApplication
+    ? pickBy(editingApplication, (v) => v !== "" && v != null)
+    : {};
   const [form] = Form.useForm();
 
   const initialValues = {
@@ -48,13 +47,8 @@ function EditorContent({
 
   const onSubmit = async (value: InferZodType<typeof EditApplicationApiBody>) => {
     try {
-      if (editingApplication?.id) {
-        await ApplicationApi.updateApplication(editingApplication.id, value);
-        message.success("更新应用成功");
-        return onClose();
-      }
-      await ApplicationApi.createApplication(value);
-      message.success("创建应用成功");
+      await onSave(value, editingApplication?.id);
+      message.success(editingApplication?.id ? "更新应用成功" : "创建应用成功");
       return onClose();
     } catch (error) {
       message.error(`有错误发生: ${JSON.stringify(error)}`);
@@ -77,7 +71,12 @@ function EditorContent({
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-      <Form.Item label="应用名称" required name="name" rules={[{ required: true, message: "请输入应用名称" }]}>
+      <Form.Item
+        label="应用名称"
+        required
+        name="name"
+        rules={[{ required: true, message: "请输入应用名称" }]}
+      >
         <Input placeholder="请输入应用名称" />
       </Form.Item>
 

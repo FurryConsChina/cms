@@ -1,5 +1,5 @@
 import { apiErrorMessage } from "@/utils/apiError";
-import { FeatureAPI } from "@/api/dashboard/feature";
+import { FeatureAPI } from "@/api/cms/feature";
 import DefaultContainer from "@/components/Layout/Container";
 import FeatureEditor from "@/components/EventFeature/FeatureEditor";
 import { FeatureCategory, FeatureCategoryLabel, type Feature } from "@/types/feature";
@@ -46,7 +46,9 @@ export default function FeaturePage() {
       title: "类别",
       dataIndex: "category",
       key: "category",
-      render: (_, record) => <Tag color="blue">{FeatureCategoryLabel[record.category as FeatureCategory]}</Tag>,
+      render: (_, record) => (
+        <Tag color="blue">{FeatureCategoryLabel[record.category as FeatureCategory]}</Tag>
+      ),
     },
     {
       title: "描述",

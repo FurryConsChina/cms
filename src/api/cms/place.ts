@@ -27,7 +27,9 @@ export const placeSchema = z
 export type PlaceInput = z.infer<typeof placeSchema>;
 
 export class PlaceAPI {
-  static async list(params: PageQuery & { name?: string; kind?: Place["kind"]; regionId?: string }) {
+  static async list(
+    params: PageQuery & { name?: string; kind?: Place["kind"]; regionId?: string },
+  ) {
     return (await Axios.get<List<Place>>("/cms/place", { params })).data;
   }
 
@@ -40,6 +42,6 @@ export class PlaceAPI {
   }
 
   static async rebuildGeoIndex() {
-    return (await Axios.post<{ indexed: number }>("/cms/place/rebuild-geo-index")).data;
+    return (await Axios.post<{ indexed: number }>("/cms/admin/place/rebuild-geo-index")).data;
   }
 }

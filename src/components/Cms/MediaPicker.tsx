@@ -1,8 +1,21 @@
 import { useState } from "react";
 import useSWR from "swr";
-import { Alert, App, Button, Card, Flex, Form, Image, Input, Modal, Pagination, Space, Typography } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Card,
+  Flex,
+  Form,
+  Image,
+  Input,
+  Modal,
+  Pagination,
+  Space,
+  Typography,
+} from "antd";
 import type { MediaBinding, MediaOwner } from "@/types/media";
-import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/dashboard/upload";
+import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/cms/upload";
 import UploadImage from "@/components/UploadImage";
 import { apiErrorMessage } from "@/utils/apiError";
 import { imageUrl } from "@/utils/imageLoader";
@@ -33,7 +46,12 @@ export default function MediaPicker({
   return (
     <div className="space-y-2">
       {value?.url ? (
-        <Image src={imageUrl(value.url)} width={120} height={100} style={{ objectFit: "contain" }} />
+        <Image
+          src={imageUrl(value.url)}
+          width={120}
+          height={100}
+          style={{ objectFit: "contain" }}
+        />
       ) : value?.mediaAssetId ? (
         <Typography.Text>已选择媒体资源</Typography.Text>
       ) : null}
@@ -55,15 +73,26 @@ export default function MediaPicker({
           </Button>
         )}
       </Space>
-      <Modal title="选择媒体资源" open={opened} onCancel={() => setOpened(false)} footer={null} width={850}>
+      <Modal
+        title="选择媒体资源"
+        open={opened}
+        onCancel={() => setOpened(false)}
+        footer={null}
+        width={850}
+      >
         <Flex gap={8} className="mb-4">
-          <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="外部图片、视频或直播链接" />
+          <Input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="外部图片、视频或直播链接"
+          />
           <Button
             loading={busy}
             onClick={async () => {
               try {
                 const parsed = new URL(url);
-                if (!["https:", "http:"].includes(parsed.protocol)) throw new Error("请使用 HTTP 或 HTTPS 链接");
+                if (!["https:", "http:"].includes(parsed.protocol))
+                  throw new Error("请使用 HTTP 或 HTTPS 链接");
                 setBusy(true);
                 const asset = await createExternalMedia(parsed.toString());
                 select({ mediaAssetId: asset.id, url: asset.url });
@@ -88,7 +117,12 @@ export default function MediaPicker({
           {(data?.records ?? []).map((asset) => (
             <Card key={asset.id} size="small" style={{ width: 180 }}>
               {isImageAsset(asset) ? (
-                <Image src={imageUrl(asset.url)} width={150} height={100} style={{ objectFit: "contain" }} />
+                <Image
+                  src={imageUrl(asset.url)}
+                  width={150}
+                  height={100}
+                  style={{ objectFit: "contain" }}
+                />
               ) : (
                 <Typography.Paragraph ellipsis={{ rows: 3 }}>{asset.url}</Typography.Paragraph>
               )}
@@ -133,7 +167,9 @@ export function MediaListFields({
           <Flex justify="space-between" align="center">
             <Space orientation="vertical" size={0}>
               <Typography.Text>{label}</Typography.Text>
-              {!owner && <Typography.Text type="secondary">创建后可以添加{label}。</Typography.Text>}
+              {!owner && (
+                <Typography.Text type="secondary">创建后可以添加{label}。</Typography.Text>
+              )}
             </Space>
             <Button disabled={disabled || !owner} onClick={() => add({})}>
               添加{label}
@@ -165,7 +201,10 @@ export function MediaListFields({
                 <Button disabled={!index} onClick={() => move(index, index - 1)}>
                   上移
                 </Button>
-                <Button disabled={index === fields.length - 1} onClick={() => move(index, index + 1)}>
+                <Button
+                  disabled={index === fields.length - 1}
+                  onClick={() => move(index, index + 1)}
+                >
                   下移
                 </Button>
                 <Button danger onClick={() => remove(field.name)}>

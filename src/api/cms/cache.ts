@@ -6,9 +6,15 @@ export async function cleanPageCache(path: string) {
 }
 
 export async function refreshSitemap() {
-  return (await Axios.get<{ success: boolean; message?: string }>("/cms/infra/refresh-sitemap")).data;
+  return (
+    await Axios.get<{ success: boolean; message?: string }>("/cms/admin/infra/refresh-sitemap")
+  ).data;
 }
 
 export async function getPageview(path: string) {
-  return (await Axios.get<{ success: boolean; pageCount: number }>("/cms/infra/pageview", { params: { path } })).data;
+  return (
+    await Axios.get<{ success: boolean; pageCount: number }>("/cms/infra/pageview", {
+      params: { path },
+    })
+  ).data;
 }

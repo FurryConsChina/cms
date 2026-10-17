@@ -1,12 +1,32 @@
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
-import { cleanPageCache } from "@/api/dashboard/cache";
-import { OrganizationAPI } from "@/api/dashboard/organization";
+import { cleanPageCache } from "@/api/cms/cache";
+import { OrganizationAPI } from "@/api/cms/organization";
 import DefaultContainer from "@/components/Layout/Container";
 import { Organization, OrganizationStatusLabel, OrganizationTypeLabel } from "@/types/organization";
-import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
-import { App, Button, Dropdown, Flex, Input, MenuProps, Space, Table, TableColumnType, Tag, Typography } from "antd";
+import {
+  IconCirclePlus,
+  IconEdit,
+  IconLink,
+  IconMenu,
+  IconRefresh,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
+import {
+  App,
+  Button,
+  Dropdown,
+  Flex,
+  Input,
+  MenuProps,
+  Space,
+  Table,
+  TableColumnType,
+  Tag,
+  Typography,
+} from "antd";
 import { ColumnsType, FilterDropdownProps } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -30,13 +50,15 @@ export default function OrganizationPage() {
     slug?: string;
   }>({});
 
-  const { data, isLoading, mutate } = useSWR(["organization/list", filter, currentPage, pageSize], () =>
-    OrganizationAPI.getOrganizationList({
-      pageSize: pageSize,
-      current: currentPage,
-      name: filter.name,
-      slug: filter.slug,
-    }),
+  const { data, isLoading, mutate } = useSWR(
+    ["organization/list", filter, currentPage, pageSize],
+    () =>
+      OrganizationAPI.getOrganizationList({
+        pageSize: pageSize,
+        current: currentPage,
+        name: filter.name,
+        slug: filter.slug,
+      }),
   );
 
   const handleRefreshPage = async (slug: string) => {
@@ -68,7 +90,10 @@ export default function OrganizationPage() {
             >
               搜索
             </Button>
-            <Button onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)} size="small">
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters, confirm, dataIndex)}
+              size="small"
+            >
               重置
             </Button>
             <Button
@@ -84,7 +109,9 @@ export default function OrganizationPage() {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
+    filterIcon: (filtered: boolean) => (
+      <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
   });
 
   const columns: ColumnsType<Organization> = [
@@ -116,7 +143,9 @@ export default function OrganizationPage() {
       title: "创立日期",
       key: "date",
       render: (_, record) => (
-        <Space>{record.foundedOn ? dayjs(record.foundedOn).format("YYYY年MM月DD日") : "未配置"}</Space>
+        <Space>
+          {record.foundedOn ? dayjs(record.foundedOn).format("YYYY年MM月DD日") : "未配置"}
+        </Space>
       ),
     },
     {

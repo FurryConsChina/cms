@@ -1,4 +1,7 @@
-export type MediaOwner = { entityType: "event" | "organization" | "profile" | "event_participation"; entityId: string };
+export type MediaOwner = {
+  entityType: "event" | "organization" | "profile" | "event_participation";
+  entityId: string;
+};
 export type MediaBinding = {
   mediaAssetId: string;
   url?: string;
