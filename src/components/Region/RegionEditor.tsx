@@ -106,19 +106,30 @@ export default function RegionEditor({
             <Form.Item
               label="地区 Slug"
               name="slug"
-              rules={[{ required: true }, { pattern: /^[a-zA-Z0-9-]+$/, message: "仅支持字母、数字和连字符" }]}
+              rules={[
+                { required: true },
+                { pattern: /^[a-zA-Z0-9-]+$/, message: "仅支持字母、数字和连字符" },
+              ]}
             >
               <Input />
             </Form.Item>
           </Col>
           <Col xs={24} sm={12}>
             <Form.Item label="地区类型" name="kind" rules={[{ required: true }]}>
-              <Select options={Object.values(RegionType).map((value) => ({ value, label: RegionTypeLabel[value] }))} />
+              <Select
+                options={Object.values(RegionType).map((value) => ({
+                  value,
+                  label: RegionTypeLabel[value],
+                }))}
+              />
             </Form.Item>
           </Col>
         </Row>
         <Form.Item label="父级地区" name="parentId" extra="国家无父级，其他地区必须选择父级。">
-          <RegionSelector selectedOption={region?.parent ?? undefined} antdSelectProps={{ allowClear: true }} />
+          <RegionSelector
+            selectedOption={region?.parent ?? undefined}
+            antdSelectProps={{ allowClear: true }}
+          />
         </Form.Item>
       </Form>
     </Modal>

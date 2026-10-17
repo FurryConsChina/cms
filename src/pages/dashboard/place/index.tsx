@@ -21,8 +21,16 @@ export default function PlacePage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, error, isLoading, mutate } = useSWR(["places", search, regionId, kind, current, pageSize], () =>
-    PlaceAPI.list({ current, pageSize, name: search || undefined, regionId: regionId || undefined, kind }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["places", search, regionId, kind, current, pageSize],
+    () =>
+      PlaceAPI.list({
+        current,
+        pageSize,
+        name: search || undefined,
+        regionId: regionId || undefined,
+        kind,
+      }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Place>();
@@ -56,7 +64,10 @@ export default function PlacePage() {
       filterDropdown: (props) => <TableFilterDropdown {...props} region placeholder="选择地区" />,
     },
     { title: "地址", dataIndex: "address" },
-    { title: "坐标", render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`) },
+    {
+      title: "坐标",
+      render: (_, v) => (v.latitude == null ? "未设置" : `${v.latitude}, ${v.longitude}`),
+    },
     {
       title: "操作",
       key: "actions",
@@ -104,7 +115,11 @@ export default function PlacePage() {
               刷新
             </Button>
             {platform && (
-              <Button type="primary" icon=<IconCirclePlus size={16} stroke={1.5} /> onClick={() => void open()}>
+              <Button
+                type="primary"
+                icon=<IconCirclePlus size={16} stroke={1.5} />
+                onClick={() => void open()}
+              >
                 添加地点
               </Button>
             )}
@@ -129,7 +144,11 @@ export default function PlacePage() {
           setSearch((values.name?.[0] as string | undefined)?.trim() ?? "");
           setKind(values.kind?.[0] as Place["kind"] | undefined);
           setRegionId((values.regionId?.[0] as string | undefined) ?? null);
-          setCurrent(extra.action === "paginate" && pagination.pageSize === pageSize ? (pagination.current ?? 1) : 1);
+          setCurrent(
+            extra.action === "paginate" && pagination.pageSize === pageSize
+              ? (pagination.current ?? 1)
+              : 1,
+          );
           setPageSize(pagination.pageSize ?? pageSize);
         }}
         pagination={{

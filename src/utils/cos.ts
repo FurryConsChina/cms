@@ -16,7 +16,8 @@ export async function uploadToCOS({
   const fileName = `image.${file.type.split("/")[1]}`;
   const signedKey = await getUploadSignature({ fileName, owner });
 
-  const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } = signedKey;
+  const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } =
+    signedKey;
   const cos = new COS({
     SecretId: tempSecretId,
     SecretKey: tempSecretKey,

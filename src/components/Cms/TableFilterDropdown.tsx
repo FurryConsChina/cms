@@ -42,7 +42,10 @@ export default function TableFilterDropdown({
           <Button type="primary" size="small" onClick={apply}>
             筛选
           </Button>
-          <Button size="small" onClick={() => clearFilters?.({ confirm: true, closeDropdown: true })}>
+          <Button
+            size="small"
+            onClick={() => clearFilters?.({ confirm: true, closeDropdown: true })}
+          >
             重置
           </Button>
         </Space>

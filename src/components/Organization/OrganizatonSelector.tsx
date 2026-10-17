@@ -51,7 +51,10 @@ export default function OrganizationSelector({
     const ids = Array.isArray(selectedValue) ? selectedValue : selectedValue ? [selectedValue] : [];
     onSelect?.(
       uniqBy(
-        [...(selectedOptions ?? []), ...organizations.filter((organization) => ids.includes(organization.id))],
+        [
+          ...(selectedOptions ?? []),
+          ...organizations.filter((organization) => ids.includes(organization.id)),
+        ],
         (organization) => organization.id,
       ),
     );

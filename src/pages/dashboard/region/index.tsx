@@ -16,8 +16,9 @@ export default function RegionPage() {
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [filters, setFilters] = useState<Omit<RegionListQuery, "current" | "pageSize">>({});
-  const { data, error, isLoading, mutate } = useSWR(["region-list", current, pageSize, filters], () =>
-    RegionAPI.getRegionList({ current, pageSize, ...filters }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["region-list", current, pageSize, filters],
+    () => RegionAPI.getRegionList({ current, pageSize, ...filters }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Region>();
@@ -64,7 +65,9 @@ export default function RegionPage() {
       key: "parentId",
       render: (_, record) => record.parent?.name,
       filteredValue: filters.parentId ? [filters.parentId] : null,
-      filterDropdown: (props) => <TableFilterDropdown {...props} region placeholder="选择父级地区（仅直接子级）" />,
+      filterDropdown: (props) => (
+        <TableFilterDropdown {...props} region placeholder="选择父级地区（仅直接子级）" />
+      ),
     },
     {
       title: "操作",
@@ -108,7 +111,11 @@ export default function RegionPage() {
           <Typography.Title level={3} className="m-0">
             地区列表
           </Typography.Title>
-          <Button type="primary" icon=<IconCirclePlus size={16} stroke={1.5} /> onClick={() => void open()}>
+          <Button
+            type="primary"
+            icon=<IconCirclePlus size={16} stroke={1.5} />
+            onClick={() => void open()}
+          >
             添加地区
           </Button>
         </Flex>
@@ -135,7 +142,11 @@ export default function RegionPage() {
             kind: values.kind?.[0] as RegionType | undefined,
             parentId: values.parentId?.[0] as string | undefined,
           });
-          setCurrent(extra.action === "paginate" && pagination.pageSize === pageSize ? (pagination.current ?? 1) : 1);
+          setCurrent(
+            extra.action === "paginate" && pagination.pageSize === pageSize
+              ? (pagination.current ?? 1)
+              : 1,
+          );
           setPageSize(pagination.pageSize ?? pageSize);
         }}
         pagination={{

@@ -58,12 +58,16 @@ export const EditEventApiBody = z.object({
   videos: z.array(mediaBindingSchema).nullish(),
   lives: z.array(mediaBindingSchema).nullish(),
   detail: z.string().nullish(),
-  features: z.array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })])).nullish(),
+  features: z
+    .array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })]))
+    .nullish(),
   extra: z
     .object({
       overrideOrganizationContact: z
         .object({
-          qqGroups: z.array(z.object({ label: z.string().nullish(), value: z.string() })).optional(),
+          qqGroups: z
+            .array(z.object({ label: z.string().nullish(), value: z.string() }))
+            .optional(),
         })
         .optional(),
     })

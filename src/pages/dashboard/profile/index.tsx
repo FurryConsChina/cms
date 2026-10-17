@@ -47,8 +47,9 @@ export default function ProfilePage() {
   useEffect(() => {
     setCurrent(1);
   }, [search, kind]);
-  const { data, error, isLoading, mutate } = useSWR(["profiles", search, kind, current, pageSize], () =>
-    ProfileAPI.list({ current, pageSize, name: search || undefined, kind }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["profiles", search, kind, current, pageSize],
+    () => ProfileAPI.list({ current, pageSize, name: search || undefined, kind }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Profile>();
@@ -134,7 +135,9 @@ export default function ProfilePage() {
       title: "名称",
       render: (_, v) => (
         <Space>
-          <Avatar src={v.avatarUrl ? imageUrl(v.avatarUrl) : undefined}>{v.name.slice(0, 1)}</Avatar>
+          <Avatar src={v.avatarUrl ? imageUrl(v.avatarUrl) : undefined}>
+            {v.name.slice(0, 1)}
+          </Avatar>
           {v.name}
         </Space>
       ),
@@ -143,7 +146,9 @@ export default function ProfilePage() {
     { title: "类型", render: (_, v) => kindLabels[v.kind] },
     {
       title: "状态",
-      render: (_, v) => <Tag color={v.status === "active" ? "green" : "default"}>{statusLabels[v.status]}</Tag>,
+      render: (_, v) => (
+        <Tag color={v.status === "active" ? "green" : "default"}>{statusLabels[v.status]}</Tag>
+      ),
     },
     {
       title: "操作",
@@ -197,7 +202,12 @@ export default function ProfilePage() {
         </Space>
       </Flex>
       <Space wrap>
-        <Input.Search allowClear placeholder="搜索名称" onSearch={setSearch} style={{ width: 260 }} />
+        <Input.Search
+          allowClear
+          placeholder="搜索名称"
+          onSearch={setSearch}
+          style={{ width: 260 }}
+        />
         <Select
           allowClear
           placeholder="全部类型"
@@ -249,7 +259,12 @@ export default function ProfilePage() {
       >
         <>
           {!editing && (
-            <Alert type="info" showIcon title={"先填写基本信息并创建。创建后可以上传头像和图片。"} className="mb-4" />
+            <Alert
+              type="info"
+              showIcon
+              title={"先填写基本信息并创建。创建后可以上传头像和图片。"}
+              className="mb-4"
+            />
           )}
           <Form
             form={form}
@@ -259,7 +274,11 @@ export default function ProfilePage() {
             scrollToFirstError
           >
             <>
-              <Form.Item label="名称" name="name" rules={[{ required: true, message: "请填写名称" }]}>
+              <Form.Item
+                label="名称"
+                name="name"
+                rules={[{ required: true, message: "请填写名称" }]}
+              >
                 <Input maxLength={256} />
               </Form.Item>
               <Form.Item
@@ -288,7 +307,11 @@ export default function ProfilePage() {
               <Form.Item label="简介" name="description">
                 <Input.TextArea autoSize={{ minRows: 4 }} />
               </Form.Item>
-              <Form.Item label="联系邮箱" name="contactMail" rules={[{ type: "email", message: "邮箱格式不正确" }]}>
+              <Form.Item
+                label="联系邮箱"
+                name="contactMail"
+                rules={[{ type: "email", message: "邮箱格式不正确" }]}
+              >
                 <Input />
               </Form.Item>
               <LinkFields />

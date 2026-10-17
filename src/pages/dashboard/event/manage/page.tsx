@@ -36,7 +36,14 @@ import { MediaListFields } from "@/components/Cms/MediaPicker";
 import EventVisibility from "@/components/Cms/EventVisibility";
 import { EventAPI } from "@/api/cms/event";
 import { ParticipantAPI, participantSchema, toParticipantInput } from "@/api/cms/participant";
-import { BenefitAPI, OfferAPI, benefitSchema, offerSchema, toBenefitInput, toOfferInput } from "@/api/cms/offer";
+import {
+  BenefitAPI,
+  OfferAPI,
+  benefitSchema,
+  offerSchema,
+  toBenefitInput,
+  toOfferInput,
+} from "@/api/cms/offer";
 import { toOptions } from "@/consts/labels";
 import type { Participant, Benefit, Offer } from "@/types/participant";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -44,8 +51,16 @@ import { toNullable } from "@/utils/form";
 
 const roles = { guest: "嘉宾", exhibitor: "展商", sponsor: "赞助商", media: "媒体" };
 const availability = { upcoming: "待售", onSale: "售卖中", soldOut: "售罄", ended: "已结束" };
-const availabilityColors = { upcoming: "blue", onSale: "green", soldOut: "orange", ended: "default" };
-const currencies = ["CNY", "HKD", "TWD", "USD", "JPY", "EUR"].map((value) => ({ value, label: value }));
+const availabilityColors = {
+  upcoming: "blue",
+  onSale: "green",
+  soldOut: "orange",
+  ended: "default",
+};
+const currencies = ["CNY", "HKD", "TWD", "USD", "JPY", "EUR"].map((value) => ({
+  value,
+  label: value,
+}));
 
 export default function EventManagePage() {
   const { eventId } = useParams();
@@ -174,8 +189,10 @@ function Benefits({ eventId }: { eventId: string }) {
     }
   };
   const records = data?.records ?? [];
-  const reorder: ((record: Benefit, sortOrder: number) => Promise<Benefit>) | undefined = (record, sortOrder) =>
-    BenefitAPI.save(record.id, { ...toBenefitInput(record), sortOrder });
+  const reorder: ((record: Benefit, sortOrder: number) => Promise<Benefit>) | undefined = (
+    record,
+    sortOrder,
+  ) => BenefitAPI.save(record.id, { ...toBenefitInput(record), sortOrder });
   const move = async (index: number, offset: -1 | 1) => {
     if (!reorder) return;
     const next = [...records];
@@ -322,7 +339,11 @@ function Benefits({ eventId }: { eventId: string }) {
               <Form.Item name="sortOrder" hidden>
                 <InputNumber />
               </Form.Item>
-              <Form.Item label="名称" name="name" rules={[{ required: true, message: "请填写权益名称" }]}>
+              <Form.Item
+                label="名称"
+                name="name"
+                rules={[{ required: true, message: "请填写权益名称" }]}
+              >
                 <Input placeholder="例如 入场手环、限定徽章" />
               </Form.Item>
               <Form.Item label="分类" name="category">
@@ -347,8 +368,9 @@ function Offers({ eventId }: { eventId: string }) {
   useEffect(() => {
     setCurrent(1);
   }, [eventId, status]);
-  const { data, error, isLoading, mutate } = useSWR(["offers", eventId, status, current, pageSize], () =>
-    OfferAPI.list({ current, pageSize, eventId, availability: status }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["offers", eventId, status, current, pageSize],
+    () => OfferAPI.list({ current, pageSize, eventId, availability: status }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Offer>();
@@ -489,7 +511,9 @@ function Offers({ eventId }: { eventId: string }) {
     { title: "价格", render: (_, v) => (v.price == null ? "待公布" : `${v.price} ${v.currency}`) },
     {
       title: "状态",
-      render: (_, v) => <Tag color={availabilityColors[v.availability]}>{availability[v.availability]}</Tag>,
+      render: (_, v) => (
+        <Tag color={availabilityColors[v.availability]}>{availability[v.availability]}</Tag>
+      ),
     },
     {
       title: "包含权益",
@@ -628,7 +652,11 @@ function OfferFields({ eventId }: { eventId: string }) {
       <Form.Item name="sortOrder" hidden>
         <InputNumber />
       </Form.Item>
-      <Form.Item label="票档名称" name="name" rules={[{ required: true, message: "请填写票档名称" }]}>
+      <Form.Item
+        label="票档名称"
+        name="name"
+        rules={[{ required: true, message: "请填写票档名称" }]}
+      >
         <Input placeholder="例如 普通票、赞助票" />
       </Form.Item>
       <Form.Item label="描述" name="description">
@@ -674,7 +702,12 @@ function OfferFields({ eventId }: { eventId: string }) {
       <Divider titlePlacement="start">包含的权益</Divider>
       {error && <Alert type="error" showIcon title="权益加载失败，请刷新后重试" className="mb-2" />}
       {data && !data.records.length && (
-        <Alert type="info" showIcon title="这个活动还没有权益。请先在「权益」标签页中添加。" className="mb-2" />
+        <Alert
+          type="info"
+          showIcon
+          title="这个活动还没有权益。请先在「权益」标签页中添加。"
+          className="mb-2"
+        />
       )}
       <Form.List name="benefits">
         {(fields, { add, remove }) => (
@@ -701,7 +734,12 @@ function OfferFields({ eventId }: { eventId: string }) {
                 </Form.Item>
               </Card>
             ))}
-            <Button type="dashed" block disabled={!benefitOptions.length} onClick={() => add({ quantity: 1 })}>
+            <Button
+              type="dashed"
+              block
+              disabled={!benefitOptions.length}
+              onClick={() => add({ quantity: 1 })}
+            >
               添加权益
             </Button>
           </div>
@@ -721,8 +759,9 @@ function Participants({ eventId }: { eventId: string }) {
   useEffect(() => {
     setCurrent(1);
   }, [eventId, role]);
-  const { data, error, isLoading, mutate } = useSWR(["participants", eventId, role, current, pageSize], () =>
-    ParticipantAPI.list({ current, pageSize, eventId, role }),
+  const { data, error, isLoading, mutate } = useSWR(
+    ["participants", eventId, role, current, pageSize],
+    () => ParticipantAPI.list({ current, pageSize, eventId, role }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Participant>();
@@ -812,9 +851,11 @@ function Participants({ eventId }: { eventId: string }) {
     }
   };
   const records = data?.records ?? [];
-  const reorder: ((record: Participant, sortOrder: number) => Promise<Participant>) | undefined = role
-    ? undefined
-    : (record, sortOrder) => ParticipantAPI.save(record.id, { ...toParticipantInput(record), sortOrder });
+  const reorder: ((record: Participant, sortOrder: number) => Promise<Participant>) | undefined =
+    role
+      ? undefined
+      : (record, sortOrder) =>
+          ParticipantAPI.save(record.id, { ...toParticipantInput(record), sortOrder });
   const move = async (index: number, offset: -1 | 1) => {
     if (!reorder) return;
     const next = [...records];
@@ -978,7 +1019,9 @@ function Participants({ eventId }: { eventId: string }) {
         </Flex>
       >
         <>
-          {!editing && <Alert type="info" showIcon title={"创建后可以上传形象图和相册。"} className="mb-4" />}
+          {!editing && (
+            <Alert type="info" showIcon title={"创建后可以上传形象图和相册。"} className="mb-4" />
+          )}
           <Form
             form={form}
             layout="vertical"
@@ -996,7 +1039,9 @@ function Participants({ eventId }: { eventId: string }) {
 
 function ParticipantFields({ form, record }: { form: FormInstance; record?: Participant }) {
   const subjectType = Form.useWatch("subjectType", form) as "profile" | "organization" | undefined;
-  const owner = record ? { entityType: "event_participation" as const, entityId: record.id } : undefined;
+  const owner = record
+    ? { entityType: "event_participation" as const, entityId: record.id }
+    : undefined;
   return (
     <>
       <Form.Item name="eventId" hidden>
@@ -1015,7 +1060,11 @@ function ParticipantFields({ form, record }: { form: FormInstance; record?: Part
         />
       </Form.Item>
       {subjectType === "organization" ? (
-        <Form.Item label="选择组织" name="organizationId" rules={[{ required: true, message: "请选择组织" }]}>
+        <Form.Item
+          label="选择组织"
+          name="organizationId"
+          rules={[{ required: true, message: "请选择组织" }]}
+        >
           <EntitySelect kind="organization" />
         </Form.Item>
       ) : (

@@ -1,7 +1,20 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useSWR from "swr";
-import { Alert, App, Button, Descriptions, Form, Input, Modal, Space, Table, Tabs, Tag, Typography } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Descriptions,
+  Form,
+  Input,
+  Modal,
+  Space,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
+} from "antd";
 import { AccessAPI } from "@/api/cms/access";
 import type { EntityKind, Invitation, Member } from "@/types/access";
 import { auditActionLabel, targetTypeLabels } from "@/consts/labels";
@@ -70,9 +83,16 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
         </Typography.Title>
         <Button onClick={() => navigate(`/dashboard/${kind}`)}>返回列表</Button>
       </Space>
-      <Alert type="info" title="所有者可邀请和移除成员；所有者转移暂不支持。普通成员可以主动退出。" />
+      <Alert
+        type="info"
+        title="所有者可邀请和移除成员；所有者转移暂不支持。普通成员可以主动退出。"
+      />
       {membersError && (
-        <Alert type="warning" title="当前账号无法管理该实体成员。" description={apiErrorMessage(membersError)} />
+        <Alert
+          type="warning"
+          title="当前账号无法管理该实体成员。"
+          description={apiErrorMessage(membersError)}
+        />
       )}
       <Space>
         {canManage && (
@@ -82,7 +102,9 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
         )}
         <Button
           danger
-          disabled={members?.records.some((member) => member.userId === user?.id && member.role === "owner")}
+          disabled={members?.records.some(
+            (member) => member.userId === user?.id && member.role === "owner",
+          )}
           onClick={() =>
             modal.confirm({
               title: "退出此实体？",
@@ -122,7 +144,10 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                 columns={[
                   { title: "名称", dataIndex: "name" },
                   { title: "邮箱", dataIndex: "email" },
-                  { title: "角色", render: (_, v) => <Tag>{v.role === "owner" ? "所有者" : "成员"}</Tag> },
+                  {
+                    title: "角色",
+                    render: (_, v) => <Tag>{v.role === "owner" ? "所有者" : "成员"}</Tag>,
+                  },
                   {
                     title: "操作",
                     render: (_, v) => (
@@ -132,7 +157,8 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                         onClick={() =>
                           modal.confirm({
                             title: `移除成员 ${v.name}？`,
-                            onOk: () => run(() => AccessAPI.removeMember(kind, id, v.id), refreshMembers),
+                            onOk: () =>
+                              run(() => AccessAPI.removeMember(kind, id, v.id), refreshMembers),
                           })
                         }
                       >
@@ -156,7 +182,10 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                   dataSource={invitations ?? []}
                   columns={[
                     { title: "邮箱", dataIndex: "email" },
-                    { title: "有效期", render: (_, v) => new Date(v.expiresAt).toLocaleString("zh-CN") },
+                    {
+                      title: "有效期",
+                      render: (_, v) => new Date(v.expiresAt).toLocaleString("zh-CN"),
+                    },
                     {
                       title: "状态",
                       render: (_, v) =>
@@ -173,11 +202,16 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                       render: (_, v) => (
                         <Button
                           danger
-                          disabled={!!v.revokedAt || !!v.acceptedAt || new Date(v.expiresAt).getTime() <= Date.now()}
+                          disabled={
+                            !!v.revokedAt ||
+                            !!v.acceptedAt ||
+                            new Date(v.expiresAt).getTime() <= Date.now()
+                          }
                           onClick={() =>
                             modal.confirm({
                               title: "撤销邀请？",
-                              onOk: () => run(() => AccessAPI.revokeInvitation(kind, v.id), refreshInvites),
+                              onOk: () =>
+                                run(() => AccessAPI.revokeInvitation(kind, v.id), refreshInvites),
                             })
                           }
                         >
@@ -210,10 +244,19 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                           showSizeChanger: false,
                         }}
                         columns={[
-                          { title: "时间", render: (_, v) => new Date(v.createdAt).toLocaleString("zh-CN") },
+                          {
+                            title: "时间",
+                            render: (_, v) => new Date(v.createdAt).toLocaleString("zh-CN"),
+                          },
                           { title: "操作", render: (_, v) => auditActionLabel(v.action) },
-                          { title: "操作者", render: (_, v) => v.actor?.name ?? v.actor?.email ?? "系统" },
-                          { title: "对象", render: (_, v) => targetTypeLabels[v.targetType] ?? v.targetType },
+                          {
+                            title: "操作者",
+                            render: (_, v) => v.actor?.name ?? v.actor?.email ?? "系统",
+                          },
+                          {
+                            title: "对象",
+                            render: (_, v) => targetTypeLabels[v.targetType] ?? v.targetType,
+                          },
                         ]}
                         expandable={{
                           expandedRowRender: (v) => (
@@ -222,7 +265,8 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                               items={Object.entries(v.metadata).map(([label, value]) => ({
                                 key: label,
                                 label,
-                                children: typeof value === "object" ? JSON.stringify(value) : String(value),
+                                children:
+                                  typeof value === "object" ? JSON.stringify(value) : String(value),
                               }))}
                             />
                           ),
@@ -260,7 +304,11 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
             }
           }}
         >
-          <Form.Item label="成员邮箱" name="email" rules={[{ required: true }, { type: "email" }, { max: 254 }]}>
+          <Form.Item
+            label="成员邮箱"
+            name="email"
+            rules={[{ required: true }, { type: "email" }, { max: 254 }]}
+          >
             <Input />
           </Form.Item>
         </Form>
@@ -271,8 +319,15 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
         onCancel={() => setCreatedToken(undefined)}
         footer={<Button onClick={() => setCreatedToken(undefined)}>完成</Button>}
       >
-        <Alert type="warning" showIcon title="这个链接只显示一次。关闭前请复制并发给对方。" className="mb-4" />
-        <Typography.Paragraph>对方使用被邀请的邮箱登录后，打开链接即可接受邀请。</Typography.Paragraph>
+        <Alert
+          type="warning"
+          showIcon
+          title="这个链接只显示一次。关闭前请复制并发给对方。"
+          className="mb-4"
+        />
+        <Typography.Paragraph>
+          对方使用被邀请的邮箱登录后，打开链接即可接受邀请。
+        </Typography.Paragraph>
         {createdToken && (
           <Typography.Paragraph copyable={{ tooltips: ["复制邀请链接", "已复制"] }} code>
             {inviteLink(kind, createdToken)}

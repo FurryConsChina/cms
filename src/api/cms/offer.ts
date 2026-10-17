@@ -35,17 +35,26 @@ export const offerSchema = z
     admissionDates: z.array(z.iso.date()).nullish(),
     sortOrder: z.number().int().min(0),
     benefits: z
-      .array(z.object({ benefitId: z.uuid(), quantity: z.number().int().min(1).nullish(), note: z.string().nullish() }))
+      .array(
+        z.object({
+          benefitId: z.uuid(),
+          quantity: z.number().int().min(1).nullish(),
+          note: z.string().nullish(),
+        }),
+      )
       .optional(),
   })
   .refine((v) => new Set(v.benefits?.map((b) => b.benefitId)).size === (v.benefits?.length ?? 0), {
     message: "不能重复添加同一权益",
     path: ["benefits"],
   })
-  .refine((v) => !v.saleStartAt || !v.saleEndAt || Date.parse(v.saleStartAt) <= Date.parse(v.saleEndAt), {
-    message: "售票结束时间不能早于开始时间",
-    path: ["saleEndAt"],
-  });
+  .refine(
+    (v) => !v.saleStartAt || !v.saleEndAt || Date.parse(v.saleStartAt) <= Date.parse(v.saleEndAt),
+    {
+      message: "售票结束时间不能早于开始时间",
+      path: ["saleEndAt"],
+    },
+  );
 
 export type OfferInput = z.infer<typeof offerSchema>;
 
@@ -70,7 +79,8 @@ export class BenefitAPI {
   }
 
   static async save(id: string | undefined, benefit: BenefitInput) {
-    return (await Axios.post<Benefit>(id ? `/cms/benefit/${id}` : "/cms/benefit", { benefit })).data;
+    return (await Axios.post<Benefit>(id ? `/cms/benefit/${id}` : "/cms/benefit", { benefit }))
+      .data;
   }
 
   static async delete(id: string) {
@@ -79,7 +89,9 @@ export class BenefitAPI {
 }
 
 export class OfferAPI {
-  static async list(params: PageQuery & { eventId?: string; name?: string; availability?: Offer["availability"] }) {
+  static async list(
+    params: PageQuery & { eventId?: string; name?: string; availability?: Offer["availability"] },
+  ) {
     return (await Axios.get<List<Offer>>("/cms/offer", { params })).data;
   }
 

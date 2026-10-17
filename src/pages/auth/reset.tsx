@@ -28,7 +28,10 @@ export default function ResetPasswordPage() {
         <Form
           form={form}
           layout="vertical"
-          initialValues={{ email: params.get("email") ?? undefined, resetToken: params.get("token") ?? undefined }}
+          initialValues={{
+            email: params.get("email") ?? undefined,
+            resetToken: params.get("token") ?? undefined,
+          }}
           onFinish={async (values: {
             email: string;
             captchaToken: string;
@@ -38,7 +41,10 @@ export default function ResetPasswordPage() {
             setBusy(true);
             try {
               if (mode === "request") {
-                await AuthAPI.requestPasswordReset({ email: values.email, captchaToken: values.captchaToken });
+                await AuthAPI.requestPasswordReset({
+                  email: values.email,
+                  captchaToken: values.captchaToken,
+                });
                 message.success("申请已受理，请查看邮箱中的重置凭证");
                 setMode("reset");
               } else {
@@ -65,7 +71,11 @@ export default function ResetPasswordPage() {
           </Form.Item>
           {mode === "request" ? (
             <>
-              <Form.Item name="captchaToken" hidden rules={[{ required: true, message: "请先完成人机验证" }]}>
+              <Form.Item
+                name="captchaToken"
+                hidden
+                rules={[{ required: true, message: "请先完成人机验证" }]}
+              >
                 <Input />
               </Form.Item>
               <CapWidget
@@ -86,7 +96,11 @@ export default function ResetPasswordPage() {
               >
                 <Input autoComplete="off" />
               </Form.Item>
-              <Form.Item label="新密码" name="newPassword" rules={[{ required: true }, { min: 8 }, { max: 64 }]}>
+              <Form.Item
+                label="新密码"
+                name="newPassword"
+                rules={[{ required: true }, { min: 8 }, { max: 64 }]}
+              >
                 <Input.Password autoComplete="new-password" />
               </Form.Item>
             </>

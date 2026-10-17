@@ -13,13 +13,21 @@ interface BasicInfoProps {
   setSelectedOrganizations: (orgs?: Organization[]) => void;
 }
 
-export default function BasicInfo({ selectedOrganizations, setSelectedOrganizations }: BasicInfoProps) {
+export default function BasicInfo({
+  selectedOrganizations,
+  setSelectedOrganizations,
+}: BasicInfoProps) {
   return (
     <div>
       <Title level={5} style={{ margin: "12px 0" }}>
         基础信息
       </Title>
-      <Form.Item label="展会名称" required name="name" rules={[{ required: true, message: "请输入展会名称" }]}>
+      <Form.Item
+        label="展会名称"
+        required
+        name="name"
+        rules={[{ required: true, message: "请输入展会名称" }]}
+      >
         <Input placeholder="请输入展会名称" />
       </Form.Item>
 
@@ -40,7 +48,11 @@ export default function BasicInfo({ selectedOrganizations, setSelectedOrganizati
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="展会协办方" help="可以选很多，但是请注意，主办方不能在协办方中" name="organizations">
+          <Form.Item
+            label="展会协办方"
+            help="可以选很多，但是请注意，主办方不能在协办方中"
+            name="organizations"
+          >
             <OrganizationSelector
               selectedOptions={selectedOrganizations}
               onSelect={(value) => {
@@ -56,7 +68,11 @@ export default function BasicInfo({ selectedOrganizations, setSelectedOrganizati
 
       <Row gutter={8}>
         <Col flex={1}>
-          <Form.Item label="开始日期" name="startAt" help="除非明确知晓展会开始时间，否则请保持默认上午10点">
+          <Form.Item
+            label="开始日期"
+            name="startAt"
+            help="除非明确知晓展会开始时间，否则请保持默认上午10点"
+          >
             <DatePicker
               showTime
               format="YYYY年MM月DD日 hh:mm A"
@@ -67,7 +83,11 @@ export default function BasicInfo({ selectedOrganizations, setSelectedOrganizati
           </Form.Item>
         </Col>
         <Col flex={1}>
-          <Form.Item label="结束日期" name="endAt" help="除非明确知晓展会结束时间，否则请保持默认下午6点">
+          <Form.Item
+            label="结束日期"
+            name="endAt"
+            help="除非明确知晓展会结束时间，否则请保持默认下午6点"
+          >
             <DatePicker
               showTime
               format="YYYY年MM月DD日 hh:mm A"

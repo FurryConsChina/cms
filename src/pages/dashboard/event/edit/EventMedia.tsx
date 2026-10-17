@@ -47,7 +47,9 @@ export default function EventMedia({
               {fields.length === 0 && (
                 <div className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center">
                   <Typography.Text type="secondary">
-                    {owner ? "暂无详情海报，添加后可上传图片并填写说明。" : "创建活动后可以添加详情海报。"}
+                    {owner
+                      ? "暂无详情海报，添加后可上传图片并填写说明。"
+                      : "创建活动后可以添加详情海报。"}
                   </Typography.Text>
                 </div>
               )}
@@ -91,7 +93,10 @@ export default function EventMedia({
                         rules={[{ required: true, message: "请上传详情海报图片，或删除此项" }]}
                         getValueProps={(mediaAssetId) => ({
                           value: mediaAssetId
-                            ? { mediaAssetId, url: form.getFieldValue(["poster", field.name, "url"]) }
+                            ? {
+                                mediaAssetId,
+                                url: form.getFieldValue(["poster", field.name, "url"]),
+                              }
                             : null,
                         })}
                         getValueFromEvent={(asset: MediaBinding | null) => {
@@ -117,8 +122,16 @@ export default function EventMedia({
                       <Form.Item label="标题" name={[field.name, "title"]}>
                         <Input disabled={disabled} placeholder="选填" />
                       </Form.Item>
-                      <Form.Item label="描述" name={[field.name, "description"]} style={{ marginBottom: 0 }}>
-                        <Input.TextArea disabled={disabled} autoSize={{ minRows: 3, maxRows: 6 }} placeholder="选填" />
+                      <Form.Item
+                        label="描述"
+                        name={[field.name, "description"]}
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Input.TextArea
+                          disabled={disabled}
+                          autoSize={{ minRows: 3, maxRows: 6 }}
+                          placeholder="选填"
+                        />
                       </Form.Item>
                     </div>
                   </div>

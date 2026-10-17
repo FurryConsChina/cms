@@ -41,7 +41,12 @@ export default function EventVisibility({
       </Tag>
       <Button
         loading={busy}
-        onClick={() => change({ isPublished: !event.isPublished }, event.isPublished ? "下架活动？" : "发布活动？")}
+        onClick={() =>
+          change(
+            { isPublished: !event.isPublished },
+            event.isPublished ? "下架活动？" : "发布活动？",
+          )
+        }
       >
         {event.isPublished ? "下架" : "发布"}
       </Button>
@@ -50,7 +55,10 @@ export default function EventVisibility({
           danger={!event.isSuspended}
           loading={busy}
           onClick={() =>
-            change({ isSuspended: !event.isSuspended }, event.isSuspended ? "解除平台暂停？" : "暂停展示此活动？")
+            change(
+              { isSuspended: !event.isSuspended },
+              event.isSuspended ? "解除平台暂停？" : "暂停展示此活动？",
+            )
           }
         >
           {event.isSuspended ? "解除暂停" : "暂停展示"}

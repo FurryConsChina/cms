@@ -17,7 +17,10 @@ export default function EventSources({ form }: EventSourcesProps) {
             <Title level={5} style={{ margin: "12px 0" }}>
               <Flex justify="space-between" align="center">
                 展会信息来源
-                <Button icon={<IconPlus size={14} />} onClick={() => add({ name: "", url: "", description: "" })}>
+                <Button
+                  icon={<IconPlus size={14} />}
+                  onClick={() => add({ name: "", url: "", description: "" })}
+                >
                   添加来源
                 </Button>
               </Flex>
@@ -44,7 +47,11 @@ export default function EventSources({ form }: EventSourcesProps) {
                       }}
                       disabled={index === fields.length - 1}
                     />
-                    <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
+                    <Button
+                      danger
+                      icon={<IconTrash size={14} />}
+                      onClick={() => remove(field.name)}
+                    />
                   </Flex>
                 </Flex>
                 <Row gutter={8} align="bottom">

@@ -7,7 +7,12 @@ import {
   type EventStatusKeyType,
   EventType,
 } from "@/types/event";
-import { EventLocationTypeLabel, EventScaleLabel, EventStatusLabel, EventTypeLabel } from "@/consts/event";
+import {
+  EventLocationTypeLabel,
+  EventScaleLabel,
+  EventStatusLabel,
+  EventTypeLabel,
+} from "@/consts/event";
 import EventFeatureSelector from "@/components/EventFeature/EventFeatureSelector";
 import { Typography, Flex, Form, Select, Input, Col, Row, Button, Space } from "antd";
 import type { FormInstance } from "antd";
@@ -29,7 +34,12 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
       </Title>
       <Row gutter={8}>
         <Col span={12}>
-          <Form.Item label="展会状态" required name="status" rules={[{ required: true, message: "请选择展会状态" }]}>
+          <Form.Item
+            label="展会状态"
+            required
+            name="status"
+            rules={[{ required: true, message: "请选择展会状态" }]}
+          >
             <Select
               placeholder="选择展会状态"
               options={Object.keys(EventStatus).map((key) => ({
@@ -40,7 +50,12 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="展会规模" required name="scale" rules={[{ required: true, message: "请选择展会规模" }]}>
+          <Form.Item
+            label="展会规模"
+            required
+            name="scale"
+            rules={[{ required: true, message: "请选择展会规模" }]}
+          >
             <Select
               placeholder="选一个"
               options={Object.keys(EventScale).map((key) => ({
@@ -55,7 +70,12 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
 
       <Row gutter={8}>
         <Col span={12}>
-          <Form.Item label="展会类型" required name="type" rules={[{ required: true, message: "请选择展会类型" }]}>
+          <Form.Item
+            label="展会类型"
+            required
+            name="type"
+            rules={[{ required: true, message: "请选择展会类型" }]}
+          >
             <Select
               placeholder="选一个"
               options={Object.keys(EventType).map((key) => ({
@@ -75,7 +95,8 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
             <Select
               placeholder="选一个"
               options={Object.keys(EventLocationType).map((key) => ({
-                label: EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
+                label:
+                  EventLocationTypeLabel[EventLocationType[key as keyof typeof EventLocationType]],
                 value: EventLocationType[key as keyof typeof EventLocationType],
               }))}
             />
@@ -110,9 +131,19 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
                 <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
                   <Text strong>第{index + 1}个QQ群</Text>
                   <Space>
-                    <Button icon={<IconArrowUp size={14} />} onClick={() => move(index, index - 1)} />
-                    <Button icon={<IconArrowDown size={14} />} onClick={() => move(index, index + 1)} />
-                    <Button danger icon={<IconTrash size={14} />} onClick={() => remove(field.name)} />
+                    <Button
+                      icon={<IconArrowUp size={14} />}
+                      onClick={() => move(index, index - 1)}
+                    />
+                    <Button
+                      icon={<IconArrowDown size={14} />}
+                      onClick={() => move(index, index + 1)}
+                    />
+                    <Button
+                      danger
+                      icon={<IconTrash size={14} />}
+                      onClick={() => remove(field.name)}
+                    />
                   </Space>
                 </Flex>
                 <Row gutter={8}>

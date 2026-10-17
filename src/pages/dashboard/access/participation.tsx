@@ -34,7 +34,10 @@ export default function OwnParticipationPage() {
         <Form.Item
           label="参加记录标识"
           name="id"
-          rules={[{ required: true }, { pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i }]}
+          rules={[
+            { required: true },
+            { pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i },
+          ]}
         >
           <Input />
         </Form.Item>

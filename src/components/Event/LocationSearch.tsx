@@ -65,7 +65,9 @@ export default function LocationSearch({
           <Radio.Group
             value={selectedLocation?.id}
             onChange={(event) =>
-              setSelectedLocation(data.data.find((location) => location.id === event.target.value) ?? null)
+              setSelectedLocation(
+                data.data.find((location) => location.id === event.target.value) ?? null,
+              )
             }
             className="w-full"
           >
@@ -75,7 +77,9 @@ export default function LocationSearch({
                   <Typography.Text strong>{location.title}</Typography.Text>
                   <div className="mt-1">
                     <Typography.Text type="secondary">
-                      {[location.province, location.city, location.district].filter(Boolean).join(" ")}
+                      {[location.province, location.city, location.district]
+                        .filter(Boolean)
+                        .join(" ")}
                     </Typography.Text>
                   </div>
                   <div className="mt-1 break-words">{location.address}</div>

@@ -35,7 +35,9 @@ export default function ApplicationEditor({
 
 function EditorContent({ editingApplication, onClose, onSave }: EditorProps) {
   const { message, modal } = App.useApp();
-  const cleanedApplication = editingApplication ? pickBy(editingApplication, (v) => v !== "" && v != null) : {};
+  const cleanedApplication = editingApplication
+    ? pickBy(editingApplication, (v) => v !== "" && v != null)
+    : {};
   const [form] = Form.useForm();
 
   const initialValues = {
@@ -69,7 +71,12 @@ function EditorContent({ editingApplication, onClose, onSave }: EditorProps) {
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-      <Form.Item label="应用名称" required name="name" rules={[{ required: true, message: "请输入应用名称" }]}>
+      <Form.Item
+        label="应用名称"
+        required
+        name="name"
+        rules={[{ required: true, message: "请输入应用名称" }]}
+      >
         <Input placeholder="请输入应用名称" />
       </Form.Item>
 

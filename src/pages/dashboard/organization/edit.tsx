@@ -4,7 +4,11 @@ import { isPlatform } from "@/utils/permissions";
 import UploadImage from "@/components/UploadImage";
 import { LinkFields } from "@/components/Cms/Fields";
 import { apiErrorMessage } from "@/utils/apiError";
-import { CreateOrganizationApiBody, EditOrganizationApiBody, OrganizationAPI } from "@/api/cms/organization";
+import {
+  CreateOrganizationApiBody,
+  EditOrganizationApiBody,
+  OrganizationAPI,
+} from "@/api/cms/organization";
 import DefaultContainer from "@/components/Layout/Container";
 import LoadError from "@/components/Layout/LoadError";
 import type { MediaBinding } from "@/types/media";
@@ -47,7 +51,9 @@ export default function OrganizationEditPage() {
 
   const { data, isLoading, error } = useSWR(
     ["organization-detail", organizationId],
-    organizationId ? () => OrganizationAPI.getOrganizationDetail({ id: organizationId as string }) : null,
+    organizationId
+      ? () => OrganizationAPI.getOrganizationDetail({ id: organizationId as string })
+      : null,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -93,10 +99,16 @@ export default function OrganizationEditPage() {
   );
 }
 
-function OrganizationEditorContent({ organization }: { organization?: Organization & { logo?: MediaBinding | null } }) {
+function OrganizationEditorContent({
+  organization,
+}: {
+  organization?: Organization & { logo?: MediaBinding | null };
+}) {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
-  const cleanedOrganization = organization ? pickBy(organization, (v) => v !== "" && v != null) : {};
+  const cleanedOrganization = organization
+    ? pickBy(organization, (v) => v !== "" && v != null)
+    : {};
 
   const [form] = Form.useForm();
 
@@ -164,12 +176,20 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
           基础信息
         </Title>
         <div className="grid grid-cols-1 gap-x-6 md:grid-cols-[144px_minmax(0,1fr)]">
-          <Form.Item label="组织头像" name="logo" tooltip="支持 JPEG、PNG、WebP、GIF、AVIF 和 BMP，最大 50 MB。">
+          <Form.Item
+            label="组织头像"
+            name="logo"
+            tooltip="支持 JPEG、PNG、WebP、GIF、AVIF 和 BMP，最大 50 MB。"
+          >
             <UploadImage
               crop
               aspect={1}
               label="组织头像"
-              owner={organization?.id ? { entityType: "organization", entityId: organization.id } : undefined}
+              owner={
+                organization?.id
+                  ? { entityType: "organization", entityId: organization.id }
+                  : undefined
+              }
               disabled={saving}
               onBusyChange={setAvatarBusy}
             />
@@ -188,7 +208,12 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
               </Col>
               <Col span={12}>
                 <Form.Item label="创立日期" name="foundedOn">
-                  <DatePicker format="YYYY年MM月DD日" placeholder="请选择日期" allowClear style={{ width: "100%" }} />
+                  <DatePicker
+                    format="YYYY年MM月DD日"
+                    placeholder="请选择日期"
+                    allowClear
+                    style={{ width: "100%" }}
+                  />
                 </Form.Item>
               </Col>
             </Row>
@@ -226,7 +251,9 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
           name="slug"
           rules={[
             { required: true },
-            ...(!organization ? [{ pattern: /^[a-z0-9-]+$/, message: "只能使用小写英文字母、数字和连字符 -" }] : []),
+            ...(!organization
+              ? [{ pattern: /^[a-z0-9-]+$/, message: "只能使用小写英文字母、数字和连字符 -" }]
+              : []),
           ]}
         >
           <Input
@@ -236,8 +263,14 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         </Form.Item>
 
         <Flex gap={8}>
-          <Alert type="info" title="Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。" />
-          <Alert type="error" title="不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。" />
+          <Alert
+            type="info"
+            title="Slug是展商的对外唯一标识，请谨慎选择，如果要修改请联系管理员。"
+          />
+          <Alert
+            type="error"
+            title="不到万不得已，请勿使用拼音。 如果英文名称太长，使用-连字符。"
+          />
         </Flex>
       </div>
 
@@ -247,12 +280,19 @@ function OrganizationEditorContent({ organization }: { organization?: Organizati
         <Title level={5}>展商附加信息</Title>
         <Flex vertical gap={8}>
           <Form.Item label="展商描述" name="description">
-            <TextArea placeholder="可以是展商的自我简介之类的东西，不填也没关系。" autoSize={{ minRows: 10 }} />
+            <TextArea
+              placeholder="可以是展商的自我简介之类的东西，不填也没关系。"
+              autoSize={{ minRows: 10 }}
+            />
           </Form.Item>
         </Flex>
       </div>
 
-      <Form.Item label="联系邮箱" name="contactMail" rules={[{ type: "email", message: "邮箱格式不正确" }]}>
+      <Form.Item
+        label="联系邮箱"
+        name="contactMail"
+        rules={[{ type: "email", message: "邮箱格式不正确" }]}
+      >
         <Input />
       </Form.Item>
       <LinkFields label="社交链接与联系方式" />

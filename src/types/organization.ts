@@ -29,7 +29,9 @@ export const OrganizationSchema = z.object({
   type: z.enum(["personal", "agency"]).nullish(),
   logoUrl: z.string().nullish(),
   contactMail: z.string().nullish(),
-  links: z.array(z.object({ type: z.string(), label: z.string().nullish(), value: z.string() })).optional(),
+  links: z
+    .array(z.object({ type: z.string(), label: z.string().nullish(), value: z.string() }))
+    .optional(),
   foundedOn: z.string().nullish(),
 });
 

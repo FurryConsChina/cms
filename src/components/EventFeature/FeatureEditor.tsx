@@ -23,7 +23,13 @@ export default function FeatureEditor({
   );
 }
 
-function EditorContent({ editingFeature, onClose }: { editingFeature: Feature | null; onClose: () => void }) {
+function EditorContent({
+  editingFeature,
+  onClose,
+}: {
+  editingFeature: Feature | null;
+  onClose: () => void;
+}) {
   const { message, modal } = App.useApp();
   const cleanedFeature = editingFeature ? pickBy(editingFeature, (v) => v !== "" && v != null) : {};
   const [form] = Form.useForm();
@@ -65,11 +71,21 @@ function EditorContent({ editingFeature, onClose }: { editingFeature: Feature | 
 
   return (
     <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-      <Form.Item label="标签名称" required name="name" rules={[{ required: true, message: "请输入标签名称" }]}>
+      <Form.Item
+        label="标签名称"
+        required
+        name="name"
+        rules={[{ required: true, message: "请输入标签名称" }]}
+      >
         <Input placeholder="请输入标签名称" />
       </Form.Item>
 
-      <Form.Item label="标签分类" required name="category" rules={[{ required: true, message: "请选择标签分类" }]}>
+      <Form.Item
+        label="标签分类"
+        required
+        name="category"
+        rules={[{ required: true, message: "请选择标签分类" }]}
+      >
         <Select
           placeholder="请选择标签分类"
           options={Object.values(FeatureCategory).map((item) => ({

@@ -35,11 +35,19 @@ export const EditOrganizationApiBody = z.object({
 });
 
 export const CreateOrganizationApiBody = EditOrganizationApiBody.extend({
-  slug: EditOrganizationApiBody.shape.slug.regex(/^[a-z0-9-]+$/, "只能使用小写英文字母、数字和连字符 -"),
+  slug: EditOrganizationApiBody.shape.slug.regex(
+    /^[a-z0-9-]+$/,
+    "只能使用小写英文字母、数字和连字符 -",
+  ),
 });
 
 export class OrganizationAPI {
-  static async getOrganizationList(params: { pageSize: number; current: number; name?: string; slug?: string }) {
+  static async getOrganizationList(params: {
+    pageSize: number;
+    current: number;
+    name?: string;
+    slug?: string;
+  }) {
     const res = await Axios.get<List<Organization>>("/cms/organization/list", {
       params,
     });
@@ -60,7 +68,10 @@ export class OrganizationAPI {
     return res.data;
   }
 
-  static async updateOrganization(id: string, organization: InferZodType<typeof EditOrganizationApiBody>) {
+  static async updateOrganization(
+    id: string,
+    organization: InferZodType<typeof EditOrganizationApiBody>,
+  ) {
     const res = await Axios.patch<Organization>(`/cms/organization/${id}`, organization);
 
     return res.data;

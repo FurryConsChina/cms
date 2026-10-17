@@ -26,8 +26,12 @@ export class AccessAPI {
   }
 
   static async invite(kind: EntityKind, id: string, email: string) {
-    return (await Axios.post<{ invitation: Invitation; token: string }>(`${base(kind)}/${id}/invitations`, { email }))
-      .data;
+    return (
+      await Axios.post<{ invitation: Invitation; token: string }>(
+        `${base(kind)}/${id}/invitations`,
+        { email },
+      )
+    ).data;
   }
 
   static async revokeInvitation(kind: EntityKind, id: string) {
@@ -39,7 +43,11 @@ export class AccessAPI {
   }
 
   static async claims(kind: EntityKind, pending: boolean) {
-    return (await Axios.get<Claim[]>(pending ? `/cms/admin/${kind}/claims/pending` : `${base(kind)}/claims`)).data;
+    return (
+      await Axios.get<Claim[]>(
+        pending ? `/cms/admin/${kind}/claims/pending` : `${base(kind)}/claims`,
+      )
+    ).data;
   }
 
   static async claim(kind: EntityKind, id: string, reason: string) {
@@ -47,7 +55,8 @@ export class AccessAPI {
   }
 
   static async reviewClaim(kind: EntityKind, id: string, approved: boolean, note?: string) {
-    return (await Axios.post<Claim>(`/cms/admin/${kind}/claims/${id}/review`, { approved, note })).data;
+    return (await Axios.post<Claim>(`/cms/admin/${kind}/claims/${id}/review`, { approved, note }))
+      .data;
   }
 
   static async auditLogs(id: string, params: PageQuery & { action?: string }) {

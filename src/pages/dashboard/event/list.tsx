@@ -5,7 +5,15 @@ import { EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/Layout/Container";
 import { EventScaleLabel, EventStatusColor, EventStatusLabel } from "@/consts/event";
 import { EventItem } from "@/types/event";
-import { IconCirclePlus, IconEdit, IconLink, IconMenu, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
+import {
+  IconCirclePlus,
+  IconEdit,
+  IconLink,
+  IconMenu,
+  IconRefresh,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
 import {
   Alert,
   App,
@@ -73,18 +81,29 @@ export default function EventPage() {
     message.success("刷新页面缓存成功");
   };
 
-  const handleSearch = (selectedKeys: string[], confirm: FilterDropdownProps["confirm"], field: SearchField) => {
+  const handleSearch = (
+    selectedKeys: string[],
+    confirm: FilterDropdownProps["confirm"],
+    field: SearchField,
+  ) => {
     void setFilters({ [field]: selectedKeys[0]?.trim() || null, currentPage: 1 });
     confirm();
   };
 
-  const handleReset = (clearFilters: () => void, confirm: FilterDropdownProps["confirm"], field: SearchField) => {
+  const handleReset = (
+    clearFilters: () => void,
+    confirm: FilterDropdownProps["confirm"],
+    field: SearchField,
+  ) => {
     void setFilters({ [field]: null, currentPage: 1 });
     clearFilters();
     confirm();
   };
 
-  const getColumnSearchProps = (field: SearchField, searchPlaceholder?: string): TableColumnType<EventItem> => ({
+  const getColumnSearchProps = (
+    field: SearchField,
+    searchPlaceholder?: string,
+  ): TableColumnType<EventItem> => ({
     filteredValue: filters[field] ? [filters[field]] : null,
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -106,7 +125,10 @@ export default function EventPage() {
             >
               搜索
             </Button>
-            <Button onClick={() => clearFilters && handleReset(clearFilters, confirm, field)} size="small">
+            <Button
+              onClick={() => clearFilters && handleReset(clearFilters, confirm, field)}
+              size="small"
+            >
               重置
             </Button>
             <Button
@@ -122,7 +144,9 @@ export default function EventPage() {
         </Space>
       </div>
     ),
-    filterIcon: (filtered: boolean) => <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />,
+    filterIcon: (filtered: boolean) => (
+      <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
   });
 
   const columns: ColumnsType<EventItem> = [
@@ -213,7 +237,10 @@ export default function EventPage() {
             label: "删除",
             danger: true,
             onClick: () => {
-              modal.confirm({ title: `确认删除活动“${record.name}”？`, onOk: () => handleDeleteEvent(record.id) });
+              modal.confirm({
+                title: `确认删除活动“${record.name}”？`,
+                onOk: () => handleDeleteEvent(record.id),
+              });
             },
           },
         ];

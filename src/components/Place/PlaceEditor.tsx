@@ -1,5 +1,17 @@
 import { useRef, useState } from "react";
-import { Alert, App, Button, Col, Form, Input, InputNumber, Row, Select, Typography, Modal } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Col,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Select,
+  Typography,
+  Modal,
+} from "antd";
 import { PlaceAPI, placeSchema } from "@/api/cms/place";
 import { RegionAPI } from "@/api/cms/region";
 import type { Place } from "@/types/place";
@@ -11,12 +23,26 @@ import EntitySelect from "@/components/Cms/EntitySelect";
 import { toOptions } from "@/consts/labels";
 import { timezoneOptions } from "@/consts/timezones";
 
-export const placeKinds = { venue: "场馆", food: "餐饮", attraction: "景点", hotel: "酒店", transport_hub: "交通枢纽" };
+export const placeKinds = {
+  venue: "场馆",
+  food: "餐饮",
+  attraction: "景点",
+  hotel: "酒店",
+  transport_hub: "交通枢纽",
+};
 const coordinateSources = { tencent: "腾讯地图", manual: "手动" };
 const coordinateSystems = [
   { value: "WGS84", label: "WGS84（GPS）", description: "全球通用的 GPS 坐标，未做地图偏移。" },
-  { value: "GCJ02", label: "GCJ-02（腾讯／高德）", description: "腾讯、高德等地图在中国大陆使用的偏移坐标。" },
-  { value: "BD09", label: "BD-09（百度）", description: "百度地图使用的坐标，在 GCJ-02 基础上再次偏移。" },
+  {
+    value: "GCJ02",
+    label: "GCJ-02（腾讯／高德）",
+    description: "腾讯、高德等地图在中国大陆使用的偏移坐标。",
+  },
+  {
+    value: "BD09",
+    label: "BD-09（百度）",
+    description: "百度地图使用的坐标，在 GCJ-02 基础上再次偏移。",
+  },
 ];
 
 export default function PlaceEditor({
@@ -132,12 +158,19 @@ export default function PlaceEditor({
           />
         )}
         <Form.Item label="完整地址" name="address">
-          <Input.TextArea placeholder="例如：广东省广州市海珠区阅江中路 380 号" autoSize={{ minRows: 2 }} />
+          <Input.TextArea
+            placeholder="例如：广东省广州市海珠区阅江中路 380 号"
+            autoSize={{ minRows: 2 }}
+          />
         </Form.Item>
         <Button type="primary" size="large" block className="mb-4" onClick={searchAddress}>
           按地址搜索腾讯地图
         </Button>
-        <Form.Item label="地点名称" name="name" rules={[{ required: true, message: "请填写地点名称" }]}>
+        <Form.Item
+          label="地点名称"
+          name="name"
+          rules={[{ required: true, message: "请填写地点名称" }]}
+        >
           <Input />
         </Form.Item>
         <Row gutter={16}>
@@ -210,7 +243,9 @@ export default function PlaceEditor({
                 placeholder="请选择，未知时可留空"
                 options={coordinateSystems}
                 labelRender={({ value, label }) =>
-                  coordinateSystems.some((option) => option.value === value) ? label : "历史坐标系，请重新选择"
+                  coordinateSystems.some((option) => option.value === value)
+                    ? label
+                    : "历史坐标系，请重新选择"
                 }
                 optionRender={(option) => (
                   <div className="whitespace-normal">

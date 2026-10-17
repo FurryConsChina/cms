@@ -1,7 +1,21 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import useSWR from "swr";
-import { Alert, App, Button, Form, Input, Modal, Radio, Segmented, Space, Table, Tabs, Tag, Typography } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Form,
+  Input,
+  Modal,
+  Radio,
+  Segmented,
+  Space,
+  Table,
+  Tabs,
+  Tag,
+  Typography,
+} from "antd";
 import { AccessAPI } from "@/api/cms/access";
 import type { Claim, EntityKind } from "@/types/access";
 import useAuthStore from "@/stores/auth";
@@ -12,7 +26,9 @@ export default function AccessPage() {
   const role = useAuthStore((state) => state.user?.role);
   const { message } = App.useApp();
   const [params, setParams] = useSearchParams();
-  const [kind, setKind] = useState<EntityKind>(params.get("kind") === "profile" ? "profile" : "organization");
+  const [kind, setKind] = useState<EntityKind>(
+    params.get("kind") === "profile" ? "profile" : "organization",
+  );
   const [tab, setTab] = useState(params.get("token") ? "accept" : "mine");
   const [requestOpen, setRequestOpen] = useState(false);
   const [reviewing, setReviewing] = useState<Claim>();
@@ -22,8 +38,9 @@ export default function AccessPage() {
   const [acceptForm] = Form.useForm();
   const canReview = isAdmin(role);
   const pending = tab === "pending" && canReview;
-  const { data, error, isLoading, mutate } = useSWR(tab === "accept" ? null : ["claims", kind, pending, role], () =>
-    AccessAPI.claims(kind, pending),
+  const { data, error, isLoading, mutate } = useSWR(
+    tab === "accept" ? null : ["claims", kind, pending, role],
+    () => AccessAPI.claims(kind, pending),
   );
   return (
     <div className="space-y-4">
@@ -57,7 +74,9 @@ export default function AccessPage() {
             setBusy(true);
             try {
               await AccessAPI.acceptInvitation(kind, token.trim());
-              message.success(`邀请已接受，现在可以在「${kind === "organization" ? "组织" : "主体资料"}」页面管理它`);
+              message.success(
+                `邀请已接受，现在可以在「${kind === "organization" ? "组织" : "主体资料"}」页面管理它`,
+              );
               acceptForm.resetFields();
               setParams({});
             } catch (e) {
@@ -77,7 +96,11 @@ export default function AccessPage() {
                 : "打开邀请链接会自动填写邀请凭证。也可以把凭证粘贴到下面。"
             }
           />
-          <Form.Item label="邀请凭证" name="token" rules={[{ required: true }, { min: 32 }, { max: 512 }]}>
+          <Form.Item
+            label="邀请凭证"
+            name="token"
+            rules={[{ required: true }, { min: 32 }, { max: 512 }]}
+          >
             <Input.TextArea autoComplete="off" />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={busy}>
@@ -102,13 +125,18 @@ export default function AccessPage() {
             columns={[
               {
                 title: "认领对象",
-                render: (_, v) => v.organization?.name || v.profile?.name || v.organizationId || v.profileId,
+                render: (_, v) =>
+                  v.organization?.name || v.profile?.name || v.organizationId || v.profileId,
               },
               { title: "申请人", render: (_, v) => v.user?.name || v.user?.email || v.userId },
               { title: "申请理由", dataIndex: "reason" },
               {
                 title: "状态",
-                render: (_, v) => <Tag>{{ pending: "待审核", approved: "已批准", rejected: "已拒绝" }[v.status]}</Tag>,
+                render: (_, v) => (
+                  <Tag>
+                    {{ pending: "待审核", approved: "已批准", rejected: "已拒绝" }[v.status]}
+                  </Tag>
+                ),
               },
               { title: "审核备注", dataIndex: "reviewNote" },
               ...(pending
@@ -162,11 +190,18 @@ export default function AccessPage() {
             label={kind === "organization" ? "组织标识" : "主体标识"}
             name="targetId"
             extra="填写目标实体的 UUID；未认领实体目前不在后台搜索列表中。"
-            rules={[{ required: true }, { pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i }]}
+            rules={[
+              { required: true },
+              { pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i },
+            ]}
           >
             <Input />
           </Form.Item>
-          <Form.Item label="认领理由" name="reason" rules={[{ required: true }, { min: 10 }, { max: 2000 }]}>
+          <Form.Item
+            label="认领理由"
+            name="reason"
+            rules={[{ required: true }, { min: 10 }, { max: 2000 }]}
+          >
             <Input.TextArea rows={5} showCount maxLength={2000} />
           </Form.Item>
         </Form>

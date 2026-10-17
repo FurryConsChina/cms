@@ -14,7 +14,12 @@ export class AuthAPI {
     return res.data;
   }
 
-  static async register(data: { name: string; password: string; email: string; captchaToken: string }) {
+  static async register(data: {
+    name: string;
+    password: string;
+    email: string;
+    captchaToken: string;
+  }) {
     const res = await Axios.post<{ token: string; user: User }>("/cms/auth/register", data);
     return res.data;
   }

@@ -22,7 +22,10 @@ export class AdminApplicationApi {
     return res.data;
   }
 
-  static async updateApplication(id: string, application: InferZodType<typeof EditApplicationApiBody>) {
+  static async updateApplication(
+    id: string,
+    application: InferZodType<typeof EditApplicationApiBody>,
+  ) {
     const res = await Axios.post<Application>(`/cms/admin/application/${id}`, application);
     return res.data;
   }

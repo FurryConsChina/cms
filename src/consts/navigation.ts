@@ -55,7 +55,12 @@ export const navigation: NavGroup[] = [
     label: "管理员",
     items: [
       { path: "/admin/application", label: "应用管理", icon: IconCode, roles: [UserRole.Admin] },
-      { path: "/admin/infrastructure", label: "运维工具", icon: IconServerCog, roles: [UserRole.Admin] },
+      {
+        path: "/admin/infrastructure",
+        label: "运维工具",
+        icon: IconServerCog,
+        roles: [UserRole.Admin],
+      },
     ],
   },
 ];
@@ -66,7 +71,8 @@ export const visibleNavigation = (role?: string) =>
       ...group,
       items: group.items.filter(
         (item) =>
-          (!item.platform || isPlatform(role)) && (!item.roles || item.roles.some((allowed) => allowed === role)),
+          (!item.platform || isPlatform(role)) &&
+          (!item.roles || item.roles.some((allowed) => allowed === role)),
       ),
     }))
     .filter((group) => group.items.length > 0);

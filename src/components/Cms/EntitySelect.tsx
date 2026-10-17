@@ -7,8 +7,10 @@ import type { List } from "@/types/Request";
 type EntityKind = "event" | "organization" | "profile" | "region";
 type OptionRecord = { id: string; name: string; slug?: string };
 
-const listEndpoint = (kind: EntityKind) => `/cms/${kind}${kind === "event" || kind === "organization" ? "/list" : ""}`;
-const detailEndpoint = (kind: EntityKind, id: string) => `/cms/${kind}${kind === "event" ? "/detail" : ""}/${id}`;
+const listEndpoint = (kind: EntityKind) =>
+  `/cms/${kind}${kind === "event" || kind === "organization" ? "/list" : ""}`;
+const detailEndpoint = (kind: EntityKind, id: string) =>
+  `/cms/${kind}${kind === "event" ? "/detail" : ""}/${id}`;
 
 function useDebounced<T>(value: T, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -57,7 +59,8 @@ export default function EntitySelect({
     async () => (await Axios.get<OptionRecord>(detailEndpoint(kind, value!))).data,
   );
   const records = data?.records ?? [];
-  const options = selected && !records.some((v) => v.id === selected.id) ? [selected, ...records] : records;
+  const options =
+    selected && !records.some((v) => v.id === selected.id) ? [selected, ...records] : records;
   return (
     <Select
       id={id}
@@ -68,7 +71,10 @@ export default function EntitySelect({
       loading={isLoading}
       status={error ? "error" : undefined}
       showSearch={{ onSearch: setSearch, filterOption: false }}
-      options={options.map((v) => ({ value: v.id, label: `${v.name}${v.slug ? `（${v.slug}）` : ""}` }))}
+      options={options.map((v) => ({
+        value: v.id,
+        label: `${v.name}${v.slug ? `（${v.slug}）` : ""}`,
+      }))}
       placeholder={placeholder ?? (kind === "region" ? "输入名称或代码搜索" : "输入名称搜索")}
       notFoundContent={error ? "加载失败，请重试" : isLoading ? "加载中…" : "没有匹配的结果"}
       style={{ minWidth: 220, ...style }}

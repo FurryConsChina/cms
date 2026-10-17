@@ -13,7 +13,9 @@ export default function AdminInfrastructurePage() {
         <Typography.Paragraph>
           根据所有未删除且经纬度完整的地点，重新生成地点坐标清单。用于批量导入或同步失败后的修复，日常编辑会自动同步。
         </Typography.Paragraph>
-        <Typography.Paragraph type="secondary">附近地点查询尚未接入此索引。重建不会修改地点资料。</Typography.Paragraph>
+        <Typography.Paragraph type="secondary">
+          附近地点查询尚未接入此索引。重建不会修改地点资料。
+        </Typography.Paragraph>
         <Button
           onClick={() =>
             modal.confirm({

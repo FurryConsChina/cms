@@ -18,7 +18,9 @@ export default function AdminApplicationsPage() {
       onPageChange={setCurrent}
       onRefresh={refetch}
       onSave={(value, id) =>
-        id ? AdminApplicationApi.updateApplication(id, value) : AdminApplicationApi.createApplication(value)
+        id
+          ? AdminApplicationApi.updateApplication(id, value)
+          : AdminApplicationApi.createApplication(value)
       }
       onDeleteApplication={AdminApplicationApi.deleteApplication}
     />

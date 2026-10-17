@@ -21,7 +21,12 @@ interface GeographicInfoProps {
   setSelectedRegion: (region?: Region) => void;
 }
 
-export default function GeographicInfo({ form, event, selectedRegion, setSelectedRegion }: GeographicInfoProps) {
+export default function GeographicInfo({
+  form,
+  event,
+  selectedRegion,
+  setSelectedRegion,
+}: GeographicInfoProps) {
   const { message } = App.useApp();
   const platform = isPlatform(useAuthStore((state) => state.user?.role));
   const regionSelector = useRef<RegionSelectorHandle>(null);
@@ -31,7 +36,13 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
   const [createdPlace, setCreatedPlace] = useState<Place>();
   const { data, isLoading, isValidating, error, mutate } = useSWR(
     selectedRegion ? ["places", selectedRegion.id, search] : null,
-    () => PlaceAPI.list({ current: 1, pageSize: 100, regionId: selectedRegion?.id, name: search || undefined }),
+    () =>
+      PlaceAPI.list({
+        current: 1,
+        pageSize: 100,
+        regionId: selectedRegion?.id,
+        name: search || undefined,
+      }),
   );
   const refreshRegions = async () => {
     setRefreshingRegions(true);
@@ -53,7 +64,9 @@ export default function GeographicInfo({ form, event, selectedRegion, setSelecte
   const places = data?.records || [];
   const selectedPlace = createdPlace ?? event?.place;
   const options = (
-    selectedPlace && selectedPlace.regionId === selectedRegion?.id && !places.some((p) => p.id === selectedPlace.id)
+    selectedPlace &&
+    selectedPlace.regionId === selectedRegion?.id &&
+    !places.some((p) => p.id === selectedPlace.id)
       ? [selectedPlace, ...places]
       : places
   ).map((p) => ({ value: p.id, label: `${p.name}${p.address ? `（${p.address}）` : ""}` }));

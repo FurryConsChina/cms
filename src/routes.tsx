@@ -23,7 +23,10 @@ const router = createBrowserRouter([
         children: [
           { index: true, lazy: page(() => import("@/pages/dashboard/event/list")) },
           { path: "create", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
-          { path: ":eventId/manage", lazy: page(() => import("@/pages/dashboard/event/manage/page")) },
+          {
+            path: ":eventId/manage",
+            lazy: page(() => import("@/pages/dashboard/event/manage/page")),
+          },
           { path: ":eventId/edit", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
         ],
       },
@@ -36,7 +39,10 @@ const router = createBrowserRouter([
             path: ":entityId/access",
             lazy: page(() => import("@/pages/dashboard/access/entity"), "OrganizationAccessPage"),
           },
-          { path: ":organizationId/edit", lazy: page(() => import("@/pages/dashboard/organization/edit")) },
+          {
+            path: ":organizationId/edit",
+            lazy: page(() => import("@/pages/dashboard/organization/edit")),
+          },
         ],
       },
       { path: "profile", lazy: page(() => import("@/pages/dashboard/profile")) },

@@ -3,7 +3,18 @@ import type { InferZodType } from "@/types/common";
 import type { List } from "@/types/Request";
 import ApplicationEditor from "@/components/Application/ApplicationEditor";
 import DefaultContainer from "@/components/Layout/Container";
-import { App, Button, Dropdown, Flex, MenuProps, Popover, Space, Table, Tag, Typography } from "antd";
+import {
+  App,
+  Button,
+  Dropdown,
+  Flex,
+  MenuProps,
+  Popover,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from "antd";
 import { IconCirclePlus, IconEdit, IconEye, IconMenu, IconTrash } from "@tabler/icons-react";
 import { ColumnsType } from "antd/es/table";
 import { Application } from "@/types/application";

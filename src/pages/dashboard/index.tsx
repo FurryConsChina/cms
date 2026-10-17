@@ -11,8 +11,9 @@ export default function Dashboard() {
   const platform = isPlatform(user?.role);
   const admin = isAdmin(user?.role);
   const { data: stats } = useSWR(platform ? ["dashboard-stats"] : null, getStats);
-  const { data: applications } = useSWR(user ? ["dashboard-applications", "mine", user.id] : null, () =>
-    ApplicationApi.getApplicationList(),
+  const { data: applications } = useSWR(
+    user ? ["dashboard-applications", "mine", user.id] : null,
+    () => ApplicationApi.getApplicationList(),
   );
   const cards = [
     ...(platform
@@ -23,7 +24,9 @@ export default function Dashboard() {
         ]
       : []),
     { label: "我的应用", value: applications?.total, path: "/developer/application" },
-    ...(admin ? [{ label: "应用管理", value: stats?.applicationCount, path: "/admin/application" }] : []),
+    ...(admin
+      ? [{ label: "应用管理", value: stats?.applicationCount, path: "/admin/application" }]
+      : []),
   ];
   return (
     <div className="space-y-4">

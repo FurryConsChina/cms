@@ -88,7 +88,13 @@ export interface IEvent extends BaseModel {
   locationType: (typeof EventLocationType)[keyof typeof EventLocationType] | null;
   sources: { url: string; name?: string | null; description?: string | null }[] | null;
   ticketChannels:
-    { type: "wxMiniProgram" | "url" | "qrcode" | "app"; name: string; url: string; available: boolean }[] | null;
+    | {
+        type: "wxMiniProgram" | "url" | "qrcode" | "app";
+        name: string;
+        url: string;
+        available: boolean;
+      }[]
+    | null;
   address: string | null;
   addressLat: string | null;
   addressLon: string | null;
