@@ -1,20 +1,17 @@
 import COS from "cos-js-sdk-v5";
 
-import type { MediaOwner } from "@/types/media";
 import { confirmUpload, getUploadSignature } from "@/api/cms/upload";
 
 export async function uploadToCOS({
   file,
-  owner,
   onProgress,
 }: {
   file: File;
-  owner?: MediaOwner;
   onProgress?: (percent: number) => void;
 }) {
   // 后端仅使用扩展名识别类型；裁剪后的 MIME 类型可能与原文件名不同。
   const fileName = `image.${file.type.split("/")[1]}`;
-  const signedKey = await getUploadSignature({ fileName, owner });
+  const signedKey = await getUploadSignature({ fileName });
 
   const { tempSecretId, tempSecretKey, sessionToken, startTime, expiredTime, bucket, region, key } =
     signedKey;

@@ -2,7 +2,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { App, Button, Flex, Image, Progress, Spin, Typography, Upload, theme } from "antd";
 import { IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
 import ImgCrop from "antd-img-crop";
-import type { MediaBinding, MediaOwner } from "@/types/media";
+import type { MediaBinding } from "@/types/media";
 import { uploadToCOS } from "@/utils/cos";
 import { imageUrl } from "@/utils/imageLoader";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -20,7 +20,6 @@ export default function UploadImage({
   value,
   onChange,
   onUploadSuccess,
-  owner,
   disabled,
   onBusyChange,
   hint,
@@ -34,7 +33,6 @@ export default function UploadImage({
   value?: MediaBinding | null;
   onChange?: (value: MediaBinding | null) => void;
   onUploadSuccess?: (asset: MediaBinding) => void;
-  owner?: MediaOwner;
   disabled?: boolean;
   onBusyChange?: (busy: boolean) => void;
   hint?: ReactNode;
@@ -111,7 +109,6 @@ export default function UploadImage({
           }
           const asset = await uploadToCOS({
             file: uploadFile,
-            owner,
             onProgress: (progress) => setPercent(Math.round(progress * 100)),
           });
           const binding = { mediaAssetId: asset.mediaAssetId, url: asset.url };

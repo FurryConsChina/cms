@@ -23,6 +23,7 @@ import useSWR from "swr";
 import { type ColumnsType } from "antd/es/table";
 import { toNullable } from "@/utils/form";
 import { apiErrorMessage } from "@/utils/apiError";
+import useMediaBusy from "@/components/media/useMediaBusy";
 import MediaPicker, { MediaListFields } from "@/components/media/MediaPicker";
 import { LinkFields } from "@/components/common/Fields";
 import { ProfileAPI, profileSchema } from "@/api/cms/profile";
@@ -55,6 +56,7 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState<Profile>();
   const [saving, setSaving] = useState(false);
   const submitting = useRef(false);
+  const { busy: mediaBusy, onBusyChange } = useMediaBusy();
   const [dirty, setDirty] = useState(false);
   const [openingId, setOpeningId] = useState<string>();
   const [form] = Form.useForm();
@@ -86,7 +88,7 @@ export default function ProfilePage() {
     }
   };
   const close = () => {
-    if (submitting.current) return;
+    if (submitting.current || mediaBusy) return;
     if (!dirty && !form.isFieldsTouched()) return setOpened(false);
     modal.confirm({
       title: "放弃未保存的修改？",
@@ -97,7 +99,7 @@ export default function ProfilePage() {
     });
   };
   const submit = async (values: Record<string, unknown>) => {
-    if (submitting.current) return;
+    if (submitting.current || mediaBusy) return;
     const parsed = profileSchema.safeParse(toNullable(values));
     if (!parsed.success) {
       form.setFields(
@@ -189,7 +191,7 @@ export default function ProfilePage() {
       ),
     },
   ];
-  const owner = editing ? { entityType: "profile" as const, entityId: editing.id } : undefined;
+
   return (
     <div className="space-y-4">
       <Flex justify="space-between" align="center" wrap gap={12}>
@@ -251,23 +253,20 @@ export default function ProfilePage() {
         size={Math.min(760, window.innerWidth)}
         destroyOnHidden
         footer=<Flex justify="flex-end" gap={8}>
-          <Button onClick={close} disabled={saving}>
+          <Button onClick={close} disabled={saving || mediaBusy}>
             {editing ? "关闭" : "取消"}
           </Button>
-          <Button type="primary" loading={saving} onClick={() => form.submit()}>
+          <Button
+            type="primary"
+            loading={saving}
+            disabled={mediaBusy}
+            onClick={() => form.submit()}
+          >
             {editing ? "保存" : "创建"}
           </Button>
         </Flex>
       >
         <>
-          {!editing && (
-            <Alert
-              type="info"
-              showIcon
-              title={"先填写基本信息并创建。创建后可以上传头像和图片。"}
-              className="mb-4"
-            />
-          )}
           <Form
             form={form}
             layout="vertical"
@@ -319,10 +318,20 @@ export default function ProfilePage() {
               <LinkFields />
               <Divider titlePlacement="start">图片</Divider>
               <Form.Item label="头像" name="avatar">
-                <MediaPicker owner={owner} />
+                <MediaPicker disabled={saving || mediaBusy} onBusyChange={onBusyChange} />
               </Form.Item>
-              <MediaListFields name="portrait" label="形象图" owner={owner} />
-              <MediaListFields name="gallery" label="相册" owner={owner} />
+              <MediaListFields
+                name="portrait"
+                label="形象图"
+                disabled={saving || mediaBusy}
+                onBusyChange={onBusyChange}
+              />
+              <MediaListFields
+                name="gallery"
+                label="相册"
+                disabled={saving || mediaBusy}
+                onBusyChange={onBusyChange}
+              />
             </>
           </Form>
         </>

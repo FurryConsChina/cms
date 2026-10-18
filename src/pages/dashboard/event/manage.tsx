@@ -32,6 +32,7 @@ import { type ColumnsType } from "antd/es/table";
 
 import EntitySelect from "@/components/common/EntitySelect";
 import { DateListInput, IsoDateTimeInput } from "@/components/common/Fields";
+import useMediaBusy from "@/components/media/useMediaBusy";
 import { MediaListFields } from "@/components/media/MediaPicker";
 import EventVisibility from "@/components/event/EventVisibility";
 import { EventAPI } from "@/api/cms/event";
@@ -769,6 +770,7 @@ function Participants({ eventId }: { eventId: string }) {
   const [editing, setEditing] = useState<Participant>();
   const [saving, setSaving] = useState(false);
   const submitting = useRef(false);
+  const { busy: mediaBusy, onBusyChange } = useMediaBusy();
   const [dirty, setDirty] = useState(false);
   const [openingId, setOpeningId] = useState<string>();
   const [sorting, setSorting] = useState(false);
@@ -811,7 +813,7 @@ function Participants({ eventId }: { eventId: string }) {
     }
   };
   const close = () => {
-    if (submitting.current) return;
+    if (submitting.current || mediaBusy) return;
     if (!dirty && !form.isFieldsTouched()) return setOpened(false);
     modal.confirm({
       title: "放弃未保存的修改？",
@@ -822,7 +824,7 @@ function Participants({ eventId }: { eventId: string }) {
     });
   };
   const submit = async (values: Record<string, unknown>) => {
-    if (submitting.current) return;
+    if (submitting.current || mediaBusy) return;
     const parsed = participantSchema.safeParse(transform(values));
     if (!parsed.success) {
       form.setFields(
@@ -1012,18 +1014,20 @@ function Participants({ eventId }: { eventId: string }) {
         size={Math.min(760, window.innerWidth)}
         destroyOnHidden
         footer=<Flex justify="flex-end" gap={8}>
-          <Button onClick={close} disabled={saving}>
+          <Button onClick={close} disabled={saving || mediaBusy}>
             {editing ? "关闭" : "取消"}
           </Button>
-          <Button type="primary" loading={saving} onClick={() => form.submit()}>
+          <Button
+            type="primary"
+            loading={saving}
+            disabled={mediaBusy}
+            onClick={() => form.submit()}
+          >
             {editing ? "保存" : "创建"}
           </Button>
         </Flex>
       >
         <>
-          {!editing && (
-            <Alert type="info" showIcon title={"创建后可以上传形象图和相册。"} className="mb-4" />
-          )}
           <Form
             form={form}
             layout="vertical"
@@ -1031,7 +1035,11 @@ function Participants({ eventId }: { eventId: string }) {
             onValuesChange={() => setDirty(true)}
             scrollToFirstError
           >
-            <ParticipantFields form={form} record={editing} />
+            <ParticipantFields
+              form={form}
+              disabled={saving || mediaBusy}
+              onBusyChange={onBusyChange}
+            />
           </Form>
         </>
       </Drawer>
@@ -1039,11 +1047,16 @@ function Participants({ eventId }: { eventId: string }) {
   );
 }
 
-function ParticipantFields({ form, record }: { form: FormInstance; record?: Participant }) {
+function ParticipantFields({
+  form,
+  disabled,
+  onBusyChange,
+}: {
+  form: FormInstance;
+  disabled: boolean;
+  onBusyChange: (key: string, busy: boolean) => void;
+}) {
   const subjectType = Form.useWatch("subjectType", form) as "profile" | "organization" | undefined;
-  const owner = record
-    ? { entityType: "event_participation" as const, entityId: record.id }
-    : undefined;
   return (
     <>
       <Form.Item name="eventId" hidden>
@@ -1108,8 +1121,18 @@ function ParticipantFields({ form, record }: { form: FormInstance; record?: Part
         <DateListInput />
       </Form.Item>
       <Divider titlePlacement="start">图片</Divider>
-      <MediaListFields name="portrait" label="形象图" owner={owner} />
-      <MediaListFields name="gallery" label="相册" owner={owner} />
+      <MediaListFields
+        name="portrait"
+        label="形象图"
+        disabled={disabled}
+        onBusyChange={onBusyChange}
+      />
+      <MediaListFields
+        name="gallery"
+        label="相册"
+        disabled={disabled}
+        onBusyChange={onBusyChange}
+      />
     </>
   );
 }

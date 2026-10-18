@@ -140,7 +140,7 @@ function EventEditorContent({
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
-        message.success("活动已创建，现在可以上传封面和详情海报");
+        message.success("活动已创建");
         void navigate(`/dashboard/event/${res.id}/edit`);
       }
     } catch (error) {
@@ -216,11 +216,7 @@ function EventEditorContent({
 
       <Divider dashed size="small" />
 
-      <EventMedia
-        owner={event?.id ? { entityType: "event", entityId: event.id } : undefined}
-        disabled={saving}
-        onBusyChange={setMediaUploading}
-      />
+      <EventMedia disabled={saving} onBusyChange={setMediaUploading} />
 
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
         <Button type="primary" htmlType="submit" loading={saving} disabled={mediaUploading}>

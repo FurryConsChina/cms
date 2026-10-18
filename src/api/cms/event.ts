@@ -101,12 +101,8 @@ export class EventAPI {
   }
 
   static async createEvent(event: EditableEvent) {
-    const { cover, poster, gallery, videos, lives, ...attributes } = event;
-    if (cover || poster?.length || gallery?.length || videos?.length || lives?.length) {
-      throw new Error("请先保存活动，再编辑媒体资源");
-    }
     const res = await Axios.post<{ id: string }>("/cms/event", {
-      event: attributes,
+      event,
     });
 
     return res.data;

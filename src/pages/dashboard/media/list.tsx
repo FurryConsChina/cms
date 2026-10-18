@@ -136,8 +136,10 @@ export default function MediaPage() {
           <div>
             <Typography.Text strong>2. 上传图片</Typography.Text>
             <Flex gap={8} wrap align="center" className="mt-2">
-              <UploadImage owner={owner} onUploadSuccess={() => mutate()} />
-              {!owner && <Typography.Text type="secondary">先完成第 1 步。</Typography.Text>}
+              <UploadImage onUploadSuccess={() => mutate()} />
+              <Typography.Text type="secondary">
+                上传后，在内容编辑页选择并保存绑定。
+              </Typography.Text>
             </Flex>
           </div>
           <div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import useSWR from "swr";
 import {
   Alert,
@@ -14,30 +14,38 @@ import {
   Space,
   Typography,
 } from "antd";
-import type { MediaBinding, MediaOwner } from "@/types/media";
+import type { MediaAsset, MediaBinding } from "@/types/media";
+import type { List } from "@/types/request";
 import { createExternalMedia, isImageAsset, listMediaAssets } from "@/api/cms/upload";
 import UploadImage from "@/components/media/UploadImage";
+import useMediaBusy from "./useMediaBusy";
 import { apiErrorMessage } from "@/utils/apiError";
 import { imageUrl } from "@/utils/imageLoader";
 
 export default function MediaPicker({
   value,
   onChange,
-  owner,
+  onBusyChange,
   disabled,
 }: {
   value?: MediaBinding | null;
   onChange?: (value: MediaBinding | null) => void;
-  owner?: MediaOwner;
+  onBusyChange?: (key: string, busy: boolean) => void;
   disabled?: boolean;
 }) {
   const { message } = App.useApp();
   const [opened, setOpened] = useState(false);
   const [current, setCurrent] = useState(1);
   const [url, setUrl] = useState("");
-  const [busy, setBusy] = useState(false);
-  const { data, error, mutate } = useSWR(opened ? ["media-picker", current] : null, () =>
-    listMediaAssets({ current, pageSize: 12 }),
+  const { busy, onBusyChange: updateBusy } = useMediaBusy();
+  const busyId = useId();
+  useEffect(() => {
+    onBusyChange?.(busyId, busy);
+    return () => onBusyChange?.(busyId, false);
+  }, [busy, busyId, onBusyChange]);
+  const { data, error, mutate } = useSWR<List<MediaAsset>, Error>(
+    opened ? ["media-picker", current] : null,
+    () => listMediaAssets({ current, pageSize: 12 }),
   );
   const select = (asset: MediaBinding) => {
     onChange?.({ ...value, ...asset });
@@ -56,19 +64,19 @@ export default function MediaPicker({
         <Typography.Text>已选择媒体资源</Typography.Text>
       ) : null}
       <Space wrap>
-        <Button disabled={disabled} onClick={() => setOpened(true)}>
+        <Button disabled={disabled || busy} onClick={() => setOpened(true)}>
           选择媒体
         </Button>
         <UploadImage
-          owner={owner}
-          disabled={disabled}
+          onBusyChange={(next) => updateBusy("upload", next)}
+          disabled={disabled || busy}
           onUploadSuccess={(asset) => {
             select(asset);
             void mutate();
           }}
         />
         {value && (
-          <Button disabled={disabled} onClick={() => onChange?.(null)}>
+          <Button disabled={disabled || busy} onClick={() => onChange?.(null)}>
             移除
           </Button>
         )}
@@ -76,7 +84,7 @@ export default function MediaPicker({
       <Modal
         title="选择媒体资源"
         open={opened}
-        onCancel={() => setOpened(false)}
+        onCancel={() => !busy && setOpened(false)}
         footer={null}
         width={850}
       >
@@ -88,20 +96,23 @@ export default function MediaPicker({
           />
           <Button
             loading={busy}
-            onClick={async () => {
-              try {
-                const parsed = new URL(url);
-                if (!["https:", "http:"].includes(parsed.protocol))
-                  throw new Error("请使用 HTTP 或 HTTPS 链接");
-                setBusy(true);
-                const asset = await createExternalMedia(parsed.toString());
-                select({ mediaAssetId: asset.id, url: asset.url });
-              } catch (e) {
-                message.error(apiErrorMessage(e, "请输入有效链接"));
-              } finally {
-                setBusy(false);
-              }
-            }}
+            disabled={disabled || busy}
+            onClick={() =>
+              void (async () => {
+                try {
+                  const parsed = new URL(url);
+                  if (!["https:", "http:"].includes(parsed.protocol))
+                    throw new Error("请使用 HTTP 或 HTTPS 链接");
+                  updateBusy("external", true);
+                  const asset = await createExternalMedia(parsed.toString());
+                  select({ mediaAssetId: asset.id, url: asset.url });
+                } catch (e) {
+                  message.error(apiErrorMessage(e, "请输入有效链接"));
+                } finally {
+                  updateBusy("external", false);
+                }
+              })()
+            }
           >
             添加并选择
           </Button>
@@ -128,7 +139,7 @@ export default function MediaPicker({
               )}
               <Button
                 block
-                disabled={asset.status !== "ready"}
+                disabled={disabled || busy || asset.status !== "ready"}
                 onClick={() => select({ mediaAssetId: asset.id, url: asset.url })}
               >
                 {asset.status === "ready" ? "选择" : "尚未可用"}
@@ -152,12 +163,12 @@ export default function MediaPicker({
 export function MediaListFields({
   name,
   label,
-  owner,
+  onBusyChange,
   disabled,
 }: {
   name: string;
   label: string;
-  owner?: MediaOwner;
+  onBusyChange?: (key: string, busy: boolean) => void;
   disabled?: boolean;
 }) {
   return (
@@ -167,11 +178,8 @@ export function MediaListFields({
           <Flex justify="space-between" align="center">
             <Space orientation="vertical" size={0}>
               <Typography.Text>{label}</Typography.Text>
-              {!owner && (
-                <Typography.Text type="secondary">创建后可以添加{label}。</Typography.Text>
-              )}
             </Space>
-            <Button disabled={disabled || !owner} onClick={() => add({})}>
+            <Button disabled={disabled} onClick={() => add({})}>
               添加{label}
             </Button>
           </Flex>
@@ -181,12 +189,12 @@ export function MediaListFields({
                 name={field.name}
                 rules={[
                   {
-                    validator: (_, v) =>
+                    validator: (_, v: MediaBinding | undefined) =>
                       v?.mediaAssetId ? Promise.resolve() : Promise.reject(new Error("请选择媒体")),
                   },
                 ]}
               >
-                <MediaPicker owner={owner} disabled={disabled} />
+                <MediaPicker onBusyChange={onBusyChange} disabled={disabled} />
               </Form.Item>
               <Form.Item label="标题" name={[field.name, "title"]}>
                 <Input />
@@ -198,16 +206,16 @@ export function MediaListFields({
                 <Input />
               </Form.Item>
               <Space>
-                <Button disabled={!index} onClick={() => move(index, index - 1)}>
+                <Button disabled={disabled || !index} onClick={() => move(index, index - 1)}>
                   上移
                 </Button>
                 <Button
-                  disabled={index === fields.length - 1}
+                  disabled={disabled || index === fields.length - 1}
                   onClick={() => move(index, index + 1)}
                 >
                   下移
                 </Button>
-                <Button danger onClick={() => remove(field.name)}>
+                <Button danger disabled={disabled} onClick={() => remove(field.name)}>
                   移除
                 </Button>
               </Space>

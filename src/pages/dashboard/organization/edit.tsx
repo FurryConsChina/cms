@@ -185,11 +185,6 @@ function OrganizationEditorContent({
               crop
               aspect={1}
               label="组织头像"
-              owner={
-                organization?.id
-                  ? { entityType: "organization", entityId: organization.id }
-                  : undefined
-              }
               disabled={saving}
               onBusyChange={setAvatarBusy}
             />
