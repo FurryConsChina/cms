@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import { z } from "zod";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 import type { Benefit, Offer } from "@/types/participant";
 
 export const benefitSchema = z.object({

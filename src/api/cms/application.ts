@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import { InferZodType } from "@/types/common";
-import { List } from "@/types/Request";
+import { List } from "@/types/request";
 import { Application } from "@/types/application";
 import { z } from "zod";
 

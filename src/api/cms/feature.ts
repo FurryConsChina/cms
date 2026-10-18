@@ -1,7 +1,7 @@
 import Axios from "@/api";
 import { InferZodType } from "@/types/common";
 import type { Feature } from "@/types/feature";
-import type { List } from "@/types/Request";
+import type { List } from "@/types/request";
 import { z } from "zod";
 
 export const EditFeatureApiBody = z.object({

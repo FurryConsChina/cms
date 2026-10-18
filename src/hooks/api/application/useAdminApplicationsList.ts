@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AdminApplicationApi } from "@/api/cms/admin/application";
 import useAuthStore from "@/stores/auth";
-import type { PageQuery } from "@/types/Request";
+import type { PageQuery } from "@/types/request";
 import { isAdmin } from "@/utils/permissions";
 
 export function useAdminApplicationsList({ current, pageSize }: PageQuery) {

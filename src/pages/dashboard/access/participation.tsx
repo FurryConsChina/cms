@@ -1,5 +1,5 @@
 import { Alert, App, Button, Form, Input, Typography } from "antd";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { useState } from "react";
 import { ParticipantAPI } from "@/api/cms/participant";
 import { apiErrorMessage } from "@/utils/apiError";

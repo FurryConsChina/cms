@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import useSWR from "swr";
 import { Card, Col, Row, Statistic, Typography } from "antd";
 import { getStats } from "@/api/cms/analysis";

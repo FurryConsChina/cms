@@ -1,16 +1,16 @@
 import { useState } from "react";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
-import UploadImage from "@/components/UploadImage";
-import { LinkFields } from "@/components/Cms/Fields";
+import UploadImage from "@/components/media/UploadImage";
+import { LinkFields } from "@/components/common/Fields";
 import { apiErrorMessage } from "@/utils/apiError";
 import {
   CreateOrganizationApiBody,
   EditOrganizationApiBody,
   OrganizationAPI,
 } from "@/api/cms/organization";
-import DefaultContainer from "@/components/Layout/Container";
-import LoadError from "@/components/Layout/LoadError";
+import DefaultContainer from "@/components/layout/Container";
+import LoadError from "@/components/layout/LoadError";
 import type { MediaBinding } from "@/types/media";
 import { InferZodType } from "@/types/common";
 import {
@@ -39,7 +39,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { pickBy } from "es-toolkit";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router";
 import useSWR from "swr";
 
 const { Title } = Typography;
@@ -136,7 +136,7 @@ function OrganizationEditorContent({
       } else {
         const res = await OrganizationAPI.createOrganization(value);
         message.success("组织创建成功");
-        navigate(`/dashboard/organization/${res.id}/edit`);
+        void navigate(`/dashboard/organization/${res.id}/edit`);
       }
     } catch (error) {
       message.error(apiErrorMessage(error));

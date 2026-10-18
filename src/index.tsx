@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
+import { RouterProvider } from "react-router/dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConfigProvider, App as AntdApp } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import { StyleProvider } from "@ant-design/cssinjs";
 import * as z from "zod";
 import { zhCN as zhCNZod } from "zod/locales";
-import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
+import { NuqsAdapter } from "nuqs/adapters/react-router/v8";
 
 z.config(zhCNZod());
 

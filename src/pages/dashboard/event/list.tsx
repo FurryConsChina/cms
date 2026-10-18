@@ -2,7 +2,7 @@ import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
 import { cleanPageCache } from "@/api/cms/cache";
 import { EventAPI } from "@/api/cms/event";
-import DefaultContainer from "@/components/Layout/Container";
+import DefaultContainer from "@/components/layout/Container";
 import { EventScaleLabel, EventStatusColor, EventStatusLabel } from "@/consts/event";
 import { EventItem } from "@/types/event";
 import {
@@ -32,7 +32,7 @@ import {
 import { ColumnsType, FilterDropdownProps } from "antd/es/table/interface";
 import dayjs from "dayjs";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useEventsList } from "@/hooks/api/event/useEventsList";
 import { apiErrorMessage } from "@/utils/apiError";
 
@@ -282,7 +282,7 @@ export default function EventPage() {
             type="primary"
             icon={<IconCirclePlus size={16} stroke={1.5} />}
             onClick={() => {
-              navigate("/dashboard/event/create");
+              void navigate("/dashboard/event/create");
             }}
           >
             添加展会

@@ -1,7 +1,7 @@
 import Axios from "@/api";
 import { InferZodType } from "@/types/common";
 import { RegionType, type Region } from "@/types/region";
-import type { List } from "@/types/Request";
+import type { List } from "@/types/request";
 import { z } from "zod";
 
 export const EditRegionApiBody = z.object({

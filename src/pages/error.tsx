@@ -1,5 +1,5 @@
 import { Button, Result } from "antd";
-import { useRouteError, isRouteErrorResponse } from "react-router-dom";
+import { useRouteError, isRouteErrorResponse } from "react-router";
 
 export default function ErrorPage() {
   const error = useRouteError();

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import useSWR from "swr";
 import {
   Alert,
@@ -81,7 +81,7 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
         <Typography.Title level={3} style={{ margin: 0 }}>
           {entity?.name ?? "成员管理"}
         </Typography.Title>
-        <Button onClick={() => navigate(`/dashboard/${kind}`)}>返回列表</Button>
+        <Button onClick={() => void navigate(`/dashboard/${kind}`)}>返回列表</Button>
       </Space>
       <Alert
         type="info"
@@ -114,7 +114,7 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                   () => AccessAPI.leave(kind, id),
                   () => {},
                 );
-                navigate(`/dashboard/${kind}`);
+                void navigate(`/dashboard/${kind}`);
               },
             })
           }
