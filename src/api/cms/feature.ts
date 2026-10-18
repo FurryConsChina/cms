@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import { InferZodType } from "@/types/common";
-import type { Feature } from "@/types/feature";
+import type { Feature, FeatureEvent } from "@/types/feature";
 import type { List } from "@/types/request";
 import { z } from "zod";
 
@@ -11,8 +11,22 @@ export const EditFeatureApiBody = z.object({
 });
 
 export class FeatureAPI {
-  static async getFeatureList(params: { pageSize: number; current: number; name?: string }) {
+  static async getFeatureList(params: {
+    pageSize: number;
+    current: number;
+    name?: string;
+    category?: string;
+    isPublic?: boolean;
+  }) {
     const res = await Axios.get<List<Feature>>("/cms/event/feature", {
+      params,
+    });
+
+    return res.data;
+  }
+
+  static async getFeatureEvents(id: string, params: { pageSize: number; current: number }) {
+    const res = await Axios.get<List<FeatureEvent>>(`/cms/event/feature/${id}/events`, {
       params,
     });
 

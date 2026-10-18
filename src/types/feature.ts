@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { EventItem } from "@/types/event";
 
 export enum FeatureCategory {
   Event = "event",
@@ -21,6 +22,9 @@ export const FeatureSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   deletedAt: z.date().nullable(),
+
+  eventCount: z.number().optional(),
 });
 
 export type Feature = z.infer<typeof FeatureSchema>;
+export type FeatureEvent = Pick<EventItem, "id" | "name" | "startAt" | "endAt" | "status">;
