@@ -10,7 +10,7 @@ import { Region } from "@/types/region";
 import { EditEventApiBody, EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/layout/Container";
 import LoadError from "@/components/layout/LoadError";
-import { useZodValidateData } from "@/utils/form";
+import { useZodValidateData as validateData } from "@/utils/form";
 
 import BasicInfo from "./components/BasicInfo";
 import GeographicInfo from "./components/GeographicInfo";
@@ -37,9 +37,9 @@ const { Title } = Typography;
 export default function EventEditPage() {
   const { eventId } = useParams();
 
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error } = useSWR<EventItem, Error>(
     ["event-detail", eventId],
-    eventId ? () => EventAPI.getEventDetail({ id: eventId as string }) : null,
+    eventId ? () => EventAPI.getEventDetail({ id: eventId }) : null,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -102,8 +102,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     placeId: cleanedEvent.placeId,
     locationNotes: cleanedEvent.locationNotes,
     regionId: cleanedEvent.regionId,
-    features: cleanedEvent.features?.self || [],
-    featureIds: cleanedEvent.features?.common || [],
+    features: cleanedEvent.features || [],
     cover: cleanedEvent.cover || null,
     poster: cleanedEvent.poster || [],
     organization: cleanedEvent.organization?.id,
@@ -144,15 +143,14 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       message.warning("请等待图片上传完成后再保存");
       return;
     }
-    const processedValues = useZodValidateData(
+    const processedValues = validateData(
       {
         ...value,
         startAt: value.startAt instanceof dayjs ? value.startAt.toISOString() : value.startAt,
         endAt: value.endAt instanceof dayjs ? value.endAt.toISOString() : value.endAt,
-        features: [
-          ...(value.features || []).map((name) => ({ name })),
-          ...(value.featureIds || []).map((id) => ({ id })),
-        ],
+        features: (value.features || []).map((feature) =>
+          feature.isPublic ? { id: feature.id } : { name: feature.name },
+        ),
         organizations: [
           { id: value.organization, isPrimary: true },
           ...(value.organizations || [])
@@ -173,13 +171,20 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       });
     }
     if (processedValues.values) {
-      return onSubmit(processedValues.values);
+      void onSubmit(processedValues.values);
     }
     return;
   };
 
   return (
-    <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
+    <Form
+      form={form}
+      onFinish={(value: typeof initialValues) => {
+        void handleFinish(value);
+      }}
+      layout="vertical"
+      initialValues={initialValues}
+    >
       <BasicInfo
         selectedOrganizations={selectedOrganizations}
         setSelectedOrganizations={(v) => setSelectedOrganizations(v || [])}
@@ -196,7 +201,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
       <Divider dashed size="small" />
 
-      <EventAdditionalInfo form={form} event={event} />
+      <EventAdditionalInfo />
 
       <Divider dashed size="small" />
 

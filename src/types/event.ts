@@ -77,6 +77,12 @@ export enum EventTicketChannelType {
 
 export type EventScaleKeyType = keyof typeof EventScale;
 
+export interface EventFeature {
+  id?: string;
+  name: string;
+  isPublic: boolean;
+}
+
 export interface IEvent extends BaseModel {
   name: string;
   slug: string;
@@ -103,11 +109,7 @@ export interface IEvent extends BaseModel {
   detail: string | null;
   organization: Organization | null;
   organizations: Organization[];
-  features: {
-    self: string[];
-    common: string[];
-  };
-  featureIds: string[];
+  features: EventFeature[];
   regionId: string | null;
   region: Region | null;
   place: Place | null;
@@ -136,7 +138,6 @@ export type EventResponse = Omit<
   | "organization"
   | "organizations"
   | "features"
-  | "featureIds"
   | "regionId"
   | "placeId"
   | "address"

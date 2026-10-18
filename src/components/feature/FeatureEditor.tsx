@@ -1,9 +1,11 @@
+import { apiErrorMessage } from "@/utils/apiError";
+import { useState } from "react";
 import { EditFeatureApiBody, FeatureAPI } from "@/api/cms/feature";
 import { Feature, FeatureCategory, FeatureCategoryLabel } from "@/types/feature";
 import { InferZodType } from "@/types/common";
-import { useZodValidateData } from "@/utils/form";
+import { useZodValidateData as validateData } from "@/utils/form";
 import { pickBy } from "es-toolkit";
-import { App, Button, Flex, Form, Input, Modal, Select } from "antd";
+import { Alert, App, Button, Flex, Form, Input, Modal, Select } from "antd";
 
 const { TextArea } = Input;
 
@@ -11,14 +13,23 @@ export default function FeatureEditor({
   opened,
   onClose,
   editingFeature,
+  onSaved,
 }: {
   opened: boolean;
   onClose: () => void;
   editingFeature: Feature | null;
+  onSaved?: (feature: Feature) => void;
 }) {
   return (
-    <Modal open={opened} onCancel={onClose} title="标签编辑" centered destroyOnHidden footer={null}>
-      <EditorContent editingFeature={editingFeature} onClose={onClose} />
+    <Modal
+      open={opened}
+      onCancel={onClose}
+      title={editingFeature ? "编辑公共标签" : "添加公共标签"}
+      centered
+      destroyOnHidden
+      footer={null}
+    >
+      <EditorContent editingFeature={editingFeature} onClose={onClose} onSaved={onSaved} />
     </Modal>
   );
 }
@@ -26,13 +37,16 @@ export default function FeatureEditor({
 function EditorContent({
   editingFeature,
   onClose,
+  onSaved,
 }: {
   editingFeature: Feature | null;
   onClose: () => void;
+  onSaved?: (feature: Feature) => void;
 }) {
   const { message, modal } = App.useApp();
   const cleanedFeature = editingFeature ? pickBy(editingFeature, (v) => v !== "" && v != null) : {};
   const [form] = Form.useForm();
+  const [saving, setSaving] = useState(false);
 
   const initialValues = {
     name: cleanedFeature.name,
@@ -41,22 +55,24 @@ function EditorContent({
   };
 
   const onSubmit = async (value: InferZodType<typeof EditFeatureApiBody>) => {
+    if (saving) return;
+    setSaving(true);
     try {
-      if (editingFeature?.id) {
-        await FeatureAPI.updateFeature(editingFeature.id, value);
-        message.success("更新标签成功");
-        return onClose();
-      }
-      await FeatureAPI.createFeature(value);
-      message.success("创建标签成功");
-      return onClose();
+      const feature = editingFeature?.id
+        ? await FeatureAPI.updateFeature(editingFeature.id, value)
+        : await FeatureAPI.createFeature(value);
+      onSaved?.(feature);
+      message.success(editingFeature ? "更新标签成功" : "创建标签成功");
+      onClose();
     } catch (error) {
-      message.error(`有错误发生: ${JSON.stringify(error)}`);
+      message.error(apiErrorMessage(error));
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleFinish = (value: typeof initialValues) => {
-    const processedValues = useZodValidateData(value, EditFeatureApiBody);
+    const processedValues = validateData(value, EditFeatureApiBody);
     if (processedValues.errors.length > 0) {
       return modal.warning({
         title: "接口数据校验失败☹️",
@@ -64,13 +80,30 @@ function EditorContent({
       });
     }
     if (processedValues.values) {
-      return onSubmit(processedValues.values);
+      void onSubmit(processedValues.values);
     }
     return;
   };
 
   return (
-    <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
+    <Form
+      form={form}
+      name="public-feature"
+      onFinish={(value: typeof initialValues) => {
+        void handleFinish(value);
+      }}
+      layout="vertical"
+      initialValues={initialValues}
+    >
+      {editingFeature && (
+        <Alert
+          type="warning"
+          showIcon
+          title="公共标签由多个活动共用"
+          description="保存后立即生效，将影响所有引用此标签的活动。"
+          style={{ marginBottom: 16 }}
+        />
+      )}
       <Form.Item
         label="标签名称"
         required
@@ -100,8 +133,8 @@ function EditorContent({
       </Form.Item>
 
       <Flex justify="flex-end" style={{ marginTop: 16 }}>
-        <Button type="primary" htmlType="submit">
-          提交
+        <Button type="primary" htmlType="submit" loading={saving}>
+          {editingFeature ? "保存公共标签" : "添加公共标签"}
         </Button>
       </Flex>
     </Form>

@@ -8,11 +8,6 @@ export function toEventItem(event: EventResponse, usages: MediaUsage[] = []): Ev
     ...event,
     organization: primary ?? null,
     organizations: organizations.filter((item) => item.id !== primary?.id),
-    features: {
-      self: event.features.filter((item) => !item.isPublic).map((item) => item.name),
-      common: event.features.filter((item) => item.isPublic).map((item) => item.id),
-    },
-    featureIds: event.features.filter((item) => item.isPublic).map((item) => item.id),
     regionId: event.region?.id ?? null,
     placeId: event.place?.id ?? null,
     address: event.place?.address ?? null,
