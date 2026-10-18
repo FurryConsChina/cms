@@ -14,6 +14,8 @@ import {
   EventTypeLabel,
 } from "@/consts/event";
 import EventFeatureSelector from "@/components/feature/EventFeatureSelector";
+import useAuthStore from "@/stores/auth";
+import { isPlatform } from "@/utils/permissions";
 import { Typography, Flex, Form, Select, Input, Col, Row, Button, Space } from "antd";
 import type { FormInstance } from "antd";
 import { IconArrowDown, IconArrowUp, IconPlus, IconTrash } from "@tabler/icons-react";
@@ -27,6 +29,8 @@ interface EventAdditionalInfoProps {
 }
 
 export default function EventAdditionalInfo({ form, event }: EventAdditionalInfoProps) {
+  const platform = isPlatform(useAuthStore((state) => state.user?.role));
+
   return (
     <div>
       <Title level={5} style={{ margin: "12px 0" }}>
@@ -108,12 +112,16 @@ export default function EventAdditionalInfo({ form, event }: EventAdditionalInfo
         <Select mode="tags" placeholder="请输入展会专属的标签" />
       </Form.Item>
 
-      <Form.Item label="活动标签" name="featureIds">
-        <EventFeatureSelector
-          antdSelectProps={{
-            placeholder: "请选择活动标签",
-          }}
-        />
+      <Form.Item label="活动标签" name="featureIds" hidden={!platform}>
+        {platform ? (
+          <EventFeatureSelector
+            antdSelectProps={{
+              placeholder: "请选择活动标签",
+            }}
+          />
+        ) : (
+          <Select mode="multiple" disabled />
+        )}
       </Form.Item>
 
       <Form.List name={["extra", "overrideOrganizationContact", "qqGroups"]}>

@@ -8,8 +8,9 @@ export default function TableFilterDropdown({
   confirm,
   clearFilters,
   placeholder,
+  confirmText = "筛选",
   region = false,
-}: FilterDropdownProps & { placeholder: string; region?: boolean }) {
+}: FilterDropdownProps & { placeholder: string; confirmText?: string; region?: boolean }) {
   const value = selectedKeys[0] as string | undefined;
   const apply = () => {
     const trimmed = value?.trim();
@@ -40,7 +41,7 @@ export default function TableFilterDropdown({
         )}
         <Space>
           <Button type="primary" size="small" onClick={apply}>
-            筛选
+            {confirmText}
           </Button>
           <Button
             size="small"
