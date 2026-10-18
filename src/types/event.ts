@@ -107,8 +107,7 @@ export interface IEvent extends BaseModel {
   thumbnail: string | null;
   media: Record<string, unknown> | null;
   detail: string | null;
-  organization: Organization | null;
-  organizations: Organization[];
+  organizers: { isPrimary: boolean; sortOrder: number; organization: Organization }[];
   features: EventFeature[];
   regionId: string | null;
   region: Region | null;
@@ -135,8 +134,6 @@ export type EditableEvent = InferZodType<typeof EditEventApiBody>;
 
 export type EventResponse = Omit<
   IEvent,
-  | "organization"
-  | "organizations"
   | "features"
   | "regionId"
   | "placeId"
@@ -149,6 +146,5 @@ export type EventResponse = Omit<
   | "videos"
   | "lives"
 > & {
-  organizers: { isPrimary: boolean; organization: Organization }[];
   features: { id: string; name: string; isPublic: boolean }[];
 };

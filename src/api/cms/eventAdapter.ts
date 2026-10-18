@@ -2,12 +2,8 @@ import type { EventItem, EventResponse } from "@/types/event";
 import type { MediaUsage } from "@/types/media";
 
 export function toEventItem(event: EventResponse, usages: MediaUsage[] = []): EventItem {
-  const organizations = event.organizers.map((item) => item.organization);
-  const primary = event.organizers.find((item) => item.isPrimary)?.organization ?? organizations[0];
   return {
     ...event,
-    organization: primary ?? null,
-    organizations: organizations.filter((item) => item.id !== primary?.id),
     regionId: event.region?.id ?? null,
     placeId: event.place?.id ?? null,
     address: event.place?.address ?? null,
