@@ -13,13 +13,7 @@ export async function uploadStatic(form: FormData) {
   ).data;
 }
 
-export async function getUploadSignature({
-  fileName,
-  owner,
-}: {
-  fileName: string;
-  owner?: MediaOwner;
-}) {
+export async function getUploadSignature({ fileName }: { fileName: string }) {
   return (
     await Axios.post<{
       mediaAssetId: string;
@@ -32,7 +26,7 @@ export async function getUploadSignature({
       bucket: string;
       region: string;
       key: string;
-    }>("/cms/infra/upload/sign", { pathKey: fileName, owner })
+    }>("/cms/media/uploads", { fileName })
   ).data;
 }
 

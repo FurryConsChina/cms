@@ -1,19 +1,17 @@
 import { useRef, useState } from "react";
 import { Button, Card, Flex, Form, Input, Typography } from "antd";
 import { IconArrowDown, IconArrowUp, IconPlus, IconTrash } from "@tabler/icons-react";
-import type { MediaBinding, MediaOwner } from "@/types/media";
+import type { MediaBinding } from "@/types/media";
 import styles from "./EventMedia.module.css";
 import UploadImage from "@/components/media/UploadImage";
 
 const imageHint = "支持 JPEG、PNG、WebP、GIF、AVIF 和 BMP，最大 50 MB。";
 
 export default function EventMedia({
-  owner,
   disabled,
   onBusyChange,
 }: {
   disabled: boolean;
-  owner?: MediaOwner;
   onBusyChange: (busy: boolean) => void;
 }) {
   const form = Form.useFormInstance();
@@ -35,8 +33,7 @@ export default function EventMedia({
           label="封面"
           previewWidth={240}
           crop={false}
-          owner={owner}
-          disabled={disabled || !owner}
+          disabled={disabled}
           onBusyChange={(next) => updateBusy("cover", next)}
         />
       </Form.Item>
@@ -47,9 +44,7 @@ export default function EventMedia({
               {fields.length === 0 && (
                 <div className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center">
                   <Typography.Text type="secondary">
-                    {owner
-                      ? "暂无详情海报，添加后可上传图片并填写说明。"
-                      : "创建活动后可以添加详情海报。"}
+                    暂无详情海报，添加后可上传图片并填写说明。
                   </Typography.Text>
                 </div>
               )}
@@ -109,8 +104,7 @@ export default function EventMedia({
                           previewWidth={240}
                           fillHeight
                           crop={false}
-                          owner={owner}
-                          disabled={disabled || !owner}
+                          disabled={disabled}
                           onBusyChange={(next) => updateBusy(field.key, next)}
                         />
                       </Form.Item>
@@ -141,7 +135,7 @@ export default function EventMedia({
                 type="dashed"
                 block
                 icon={<IconPlus size={18} />}
-                disabled={disabled || busy || !owner}
+                disabled={disabled || busy}
                 onClick={() => add({})}
               >
                 添加详情海报

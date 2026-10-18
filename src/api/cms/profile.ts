@@ -47,14 +47,12 @@ export class ProfileAPI {
     };
   }
 
-  /** 新建接口不接受媒体字段，媒体在记录保存后再绑定。 */
   static async create(data: ProfileInput, platform: boolean) {
-    const { avatar: _avatar, portrait: _portrait, gallery: _gallery, ...attributes } = data;
-    const { slug, name, kind, description, contactMail, links } = data;
+    const { status: _status, ...ownedData } = data;
     return (
       await Axios.post<Profile>(
         platform ? "/cms/profile" : "/cms/profile/owned",
-        platform ? attributes : { slug, name, kind, description, contactMail, links },
+        platform ? data : ownedData,
       )
     ).data;
   }
