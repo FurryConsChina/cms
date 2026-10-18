@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import { z } from "zod";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 import type { Place } from "@/types/place";
 
 export const placeSchema = z

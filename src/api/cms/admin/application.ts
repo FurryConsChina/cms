@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import type { InferZodType } from "@/types/common";
-import type { List } from "@/types/Request";
+import type { List } from "@/types/request";
 import type { Application } from "@/types/application";
 import { EditApplicationApiBody } from "../application";
 

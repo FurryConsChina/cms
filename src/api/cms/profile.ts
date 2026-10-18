@@ -1,7 +1,7 @@
 import Axios from "@/api";
 import { z } from "zod";
 import { contactLinkTypeSchema } from "@/types/contactLink";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 import type { Profile } from "@/types/profile";
 import { getMediaUsages } from "./upload";
 import { mediaBindingSchema, singleMediaBindingSchema } from "./mediaSchema";

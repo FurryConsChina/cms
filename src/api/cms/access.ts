@@ -1,5 +1,5 @@
 import Axios from "@/api";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 import type { AuditLog, Claim, EntityKind, Invitation, Member } from "@/types/access";
 
 const base = (kind: EntityKind) => `/cms/${kind}`;

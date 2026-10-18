@@ -7,7 +7,7 @@ import {
   EventType,
   type EditableEvent,
 } from "@/types/event";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 import z from "zod";
 import { getMediaUsages } from "./upload";
 import type { EventResponse } from "@/types/event";

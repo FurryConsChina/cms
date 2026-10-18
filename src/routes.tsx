@@ -1,10 +1,10 @@
 import App from "@/App";
-import FullScreenLoading from "@/components/Layout/FullScreenLoading";
-import Auth from "@/pages/auth";
+import FullScreenLoading from "@/components/layout/FullScreenLoading";
+import Auth from "@/pages/auth/login";
 import ErrorPage from "@/pages/error";
 import useAuthStore from "@/stores/auth";
 import type { ComponentType } from "react";
-import { createBrowserRouter, Navigate, redirect } from "react-router-dom";
+import { createBrowserRouter, Navigate, redirect } from "react-router";
 
 const page =
   <M extends Record<string, unknown>>(load: () => Promise<M>, name: keyof M = "default") =>
@@ -22,18 +22,18 @@ const router = createBrowserRouter([
         path: "event",
         children: [
           { index: true, lazy: page(() => import("@/pages/dashboard/event/list")) },
-          { path: "create", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
+          { path: "create", lazy: page(() => import("@/pages/dashboard/event/edit")) },
           {
             path: ":eventId/manage",
-            lazy: page(() => import("@/pages/dashboard/event/manage/page")),
+            lazy: page(() => import("@/pages/dashboard/event/manage")),
           },
-          { path: ":eventId/edit", lazy: page(() => import("@/pages/dashboard/event/edit/page")) },
+          { path: ":eventId/edit", lazy: page(() => import("@/pages/dashboard/event/edit")) },
         ],
       },
       {
         path: "organization",
         children: [
-          { index: true, lazy: page(() => import("@/pages/dashboard/organization/page")) },
+          { index: true, lazy: page(() => import("@/pages/dashboard/organization/list")) },
           { path: "create", lazy: page(() => import("@/pages/dashboard/organization/edit")) },
           {
             path: ":entityId/access",
@@ -45,25 +45,25 @@ const router = createBrowserRouter([
           },
         ],
       },
-      { path: "profile", lazy: page(() => import("@/pages/dashboard/profile")) },
+      { path: "profile", lazy: page(() => import("@/pages/dashboard/profile/list")) },
       {
         path: "profile/:entityId/access",
         lazy: page(() => import("@/pages/dashboard/access/entity"), "ProfileAccessPage"),
       },
-      { path: "place", lazy: page(() => import("@/pages/dashboard/place")) },
+      { path: "place", lazy: page(() => import("@/pages/dashboard/place/list")) },
       { path: "access", lazy: page(() => import("@/pages/dashboard/access")) },
       { path: "participation", lazy: page(() => import("@/pages/dashboard/access/participation")) },
-      { path: "media", lazy: page(() => import("@/pages/dashboard/media")) },
+      { path: "media", lazy: page(() => import("@/pages/dashboard/media/list")) },
       {
-        lazy: page(() => import("@/components/Cms/PlatformGuard")),
+        lazy: page(() => import("@/components/guards/PlatformGuard")),
         children: [
           { path: "feature", lazy: page(() => import("@/pages/dashboard/feature/list")) },
-          { path: "region", lazy: page(() => import("@/pages/dashboard/region")) },
-          { path: "feedback", lazy: page(() => import("@/pages/dashboard/feedback")) },
-          { path: "cache-manager", lazy: page(() => import("@/pages/dashboard/cacheManager")) },
+          { path: "region", lazy: page(() => import("@/pages/dashboard/region/list")) },
+          { path: "feedback", lazy: page(() => import("@/pages/dashboard/feedback/list")) },
+          { path: "cache-manager", lazy: page(() => import("@/pages/dashboard/cache-manager")) },
         ],
       },
-      { path: "user/me", lazy: page(() => import("@/pages/user/detail")) },
+      { path: "user/me", lazy: page(() => import("@/pages/dashboard/user/detail")) },
     ],
   },
   {
@@ -74,7 +74,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "application",
-        lazy: page(() => import("@/pages/dashboard/developer/application/list")),
+        lazy: page(() => import("@/pages/developer/application/list")),
       },
     ],
   },
@@ -85,7 +85,7 @@ const router = createBrowserRouter([
     hydrateFallbackElement: <FullScreenLoading />,
     children: [
       {
-        lazy: page(() => import("@/components/Cms/AdminGuard")),
+        lazy: page(() => import("@/components/guards/AdminGuard")),
         children: [
           { index: true, element: <Navigate to="/admin/application" replace /> },
           { path: "application", lazy: page(() => import("@/pages/admin/application/list")) },

@@ -1,7 +1,7 @@
 import { apiErrorMessage } from "@/utils/apiError";
 import { FeatureAPI } from "@/api/cms/feature";
-import DefaultContainer from "@/components/Layout/Container";
-import FeatureEditor from "@/components/EventFeature/FeatureEditor";
+import DefaultContainer from "@/components/layout/Container";
+import FeatureEditor from "@/components/feature/FeatureEditor";
 import { FeatureCategory, FeatureCategoryLabel, type Feature } from "@/types/feature";
 import { IconCirclePlus, IconEdit, IconMenu, IconTrash } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import { App, Button, Dropdown, Flex, MenuProps, Space, Tag, Typography } from "
 import Table, { ColumnsType } from "antd/es/table";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const { Title } = Typography;
 

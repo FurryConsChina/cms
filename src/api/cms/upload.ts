@@ -1,6 +1,6 @@
 import Axios from "@/api";
 import type { MediaAsset, MediaOwner, MediaUsage } from "@/types/media";
-import type { List, PageQuery } from "@/types/Request";
+import type { List, PageQuery } from "@/types/request";
 
 export async function uploadStatic(form: FormData) {
   return (

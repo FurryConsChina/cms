@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminApplicationApi } from "@/api/cms/admin/application";
-import ApplicationList from "@/components/Application/ApplicationList";
+import ApplicationList from "@/components/application/ApplicationList";
 import { useAdminApplicationsList } from "@/hooks/api/application/useAdminApplicationsList";
 
 export default function AdminApplicationsPage() {

@@ -9,7 +9,7 @@
 - **UI 组件库**: Ant Design + Tailwind CSS
 - **状态管理**: Zustand + TanStack Query
 - **表单处理**: React Hook Form + Zod
-- **路由**: React Router DOM
+- **路由**: React Router 8 Data Mode（`createBrowserRouter` + `RouterProvider`）
 - **样式**: Tailwind CSS + PostCSS
 
 ## 开发环境要求
@@ -79,19 +79,34 @@ yarn preview
 - 后端已移除 `POST /cms/organization/owned`；已有组织的编辑权限仍由服务端检查。
 - 管理员和编辑均可删除组织、审核组织认领，前端入口与后端平台内容权限保持一致。
 
+## 路由与页面
+
+路由在 `src/routes.tsx` 中显式配置，页面目录与路由路径对齐，页面文件统一使用简短小写命名（如 `list.tsx`、`edit.tsx`、`manage.tsx`、`detail.tsx`），页面私有组件归入同级 `components/` 目录。页面通过 `lazy` 按需加载，新建和编辑路由可以复用同一个页面。
+
+路由 API 从直接依赖 `react-router` 导入，浏览器入口的 `RouterProvider` 从 `react-router/dom` 导入。查询参数继续使用 nuqs 的 React Router v8 适配器。
+
+构建工具仍为 Rsbuild，静态部署产物仍为 `dist/`。
+
 ## 项目结构
 
 ```
 src/
 ├── api/              # API 调用相关
 │   ├── auth/         # 认证相关 API
-│   └── dashboard/    # 仪表板相关 API
-├── components/       # 可复用组件
-├── pages/           # 页面组件
-│   ├── auth/        # 认证相关页面
-│   └── dashboard/   # 仪表板页面
-├── stores/          # 状态管理
-├── types/           # TypeScript 类型定义
-├── utils/           # 工具函数
-└── styles/          # 样式文件
+│   └── cms/          # CMS 业务 API
+├── components/       # 可复用组件（按 kebab-case 业务/功能分子目录）
+│   ├── common/       # 通用表单、表格、选择器组件
+│   ├── guards/       # 路由权限守卫
+│   └── layout/       # 全局布局与容器组件
+├── consts/           # 常量配置
+├── hooks/            # 自定义 Hooks
+├── pages/            # 页面组件（与路由结构对齐）
+│   ├── admin/        # 管理后台页面
+│   ├── auth/         # 认证相关页面
+│   ├── dashboard/    # 仪表盘业务页面
+│   └── developer/    # 开发者应用页面
+├── stores/           # 状态管理
+├── types/            # TypeScript 类型定义（统一 camelCase）
+├── utils/            # 工具函数
+└── styles/           # 样式文件
 ```

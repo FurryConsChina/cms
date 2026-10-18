@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { App, Button, Card, Form, Input, Segmented, Typography } from "antd";
 import { AuthAPI } from "@/api/auth";
-import { CapWidget, type CapWidgetRef } from "@/components/CapWidget";
+import { CapWidget, type CapWidgetRef } from "@/components/cap-widget/CapWidget";
 import { apiErrorMessage } from "@/utils/apiError";
 
 export default function ResetPasswordPage() {

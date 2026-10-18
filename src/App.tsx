@@ -1,13 +1,13 @@
 import useSWR from "swr";
 import { AuthAPI } from "@/api/auth";
-import LoadError from "@/components/Layout/LoadError";
-import { Navigate } from "react-router-dom";
+import LoadError from "@/components/layout/LoadError";
+import { Navigate } from "react-router";
 
 import useAuthStore from "@/stores/auth";
 import "@/api/interceptors";
 
-import FullScreenLoading from "@/components/Layout/FullScreenLoading";
-import DashboardLayout from "@/pages/dashboard/layout";
+import FullScreenLoading from "@/components/layout/FullScreenLoading";
+import DashboardLayout from "@/components/layout/AppLayout";
 
 import "@/styles/global.css";
 

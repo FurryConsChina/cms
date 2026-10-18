@@ -1,7 +1,7 @@
 import Axios from "@/api";
 import { z } from "zod";
 
-import type { User } from "@/types/User";
+import type { User } from "@/types/user";
 import { InferZodType } from "@/types/common";
 
 export const UpdatePasswordApiBody = z.object({

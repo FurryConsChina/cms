@@ -3,7 +3,7 @@ import { singleMediaBindingSchema } from "./mediaSchema";
 import { getMediaUsages } from "./upload";
 import { InferZodType } from "@/types/common";
 import { Organization, OrganizationStatus, OrganizationType } from "@/types/organization";
-import { List } from "@/types/Request";
+import { List } from "@/types/request";
 import { z } from "zod";
 import { contactLinkTypeSchema } from "@/types/contactLink";
 

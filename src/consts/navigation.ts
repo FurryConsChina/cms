@@ -14,7 +14,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import { isPlatform } from "@/utils/permissions";
-import { UserRole } from "@/types/User";
+import { UserRole } from "@/types/user";
 
 type NavItem = { path: string; label: string; icon: Icon; platform?: boolean; roles?: UserRole[] };
 type NavGroup = { label?: string; items: NavItem[] };
