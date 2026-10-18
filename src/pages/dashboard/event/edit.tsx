@@ -1,16 +1,15 @@
 import { apiErrorMessage } from "@/utils/apiError";
 import { useNavigate, useParams } from "react-router";
 import { useState } from "react";
-import { pickBy, uniqBy } from "es-toolkit";
+import { pickBy } from "es-toolkit";
 import useSWR from "swr";
 import dayjs from "dayjs";
 import { Button, Divider, Typography, Flex, App, Form, Spin } from "antd";
-import { Organization } from "@/types/organization";
 import { Region } from "@/types/region";
 import { EditEventApiBody, EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/layout/Container";
 import LoadError from "@/components/layout/LoadError";
-import { useZodValidateData } from "@/utils/form";
+import { useZodValidateData as validateData } from "@/utils/form";
 
 import BasicInfo from "./components/BasicInfo";
 import GeographicInfo from "./components/GeographicInfo";
@@ -37,9 +36,9 @@ const { Title } = Typography;
 export default function EventEditPage() {
   const { eventId } = useParams();
 
-  const { data, isLoading, error } = useSWR(
+  const { data, isLoading, error, mutate } = useSWR<EventItem, Error>(
     ["event-detail", eventId],
-    eventId ? () => EventAPI.getEventDetail({ id: eventId as string }) : null,
+    eventId ? () => EventAPI.getEventDetail({ id: eventId }) : null,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -64,14 +63,28 @@ export default function EventEditPage() {
             <Spin />
           </Flex>
         ) : (
-          <EventEditorContent event={data} />
+          <EventEditorContent
+            key={eventId ?? "create"}
+            event={data}
+            reloadEvent={async () => {
+              const refreshed = await EventAPI.getEventDetail({ id: eventId! });
+              await mutate(refreshed, { revalidate: false });
+              return refreshed;
+            }}
+          />
         )}
       </DefaultContainer>
     </div>
   );
 }
 
-function EventEditorContent({ event }: { event?: EventItem }) {
+function EventEditorContent({
+  event,
+  reloadEvent,
+}: {
+  event?: EventItem;
+  reloadEvent: () => Promise<EventItem>;
+}) {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const cleanedEvent = event ? pickBy(event, (v) => v !== "" && v != null) : {};
@@ -79,12 +92,6 @@ function EventEditorContent({ event }: { event?: EventItem }) {
   const [selectedRegion, setSelectedRegion] = useState<Region | undefined>(
     event?.region ?? undefined,
   );
-  const [selectedOrganizations, setSelectedOrganizations] = useState<Organization[]>(() => {
-    return uniqBy(
-      [...(event?.organization ? [event.organization] : []), ...(event?.organizations || [])],
-      (o) => o.id,
-    );
-  });
 
   const defaultStartAt = new Date(new Date().setHours(10, 0, 0, 0)).toISOString();
   const defaultEndAt = new Date(new Date().setHours(18, 0, 0, 0)).toISOString();
@@ -102,12 +109,14 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     placeId: cleanedEvent.placeId,
     locationNotes: cleanedEvent.locationNotes,
     regionId: cleanedEvent.regionId,
-    features: cleanedEvent.features?.self || [],
-    featureIds: cleanedEvent.features?.common || [],
+    features: cleanedEvent.features || [],
     cover: cleanedEvent.cover || null,
     poster: cleanedEvent.poster || [],
-    organization: cleanedEvent.organization?.id,
-    organizations: cleanedEvent.organizations?.map((o) => o.id) || [],
+    organizations:
+      cleanedEvent.organizers?.map(({ organization, isPrimary }) => ({
+        id: organization.id,
+        isPrimary,
+      })) ?? [],
     detail: cleanedEvent.detail,
     status: cleanedEvent.status || EventStatus.EventScheduled,
     type: cleanedEvent.type || EventType.AllInCon,
@@ -126,6 +135,8 @@ function EventEditorContent({ event }: { event?: EventItem }) {
     try {
       if (event?.id) {
         await EventAPI.updateEvent(event.id, value);
+        const refreshed = await reloadEvent();
+        form.setFieldValue("features", refreshed.features);
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
@@ -144,24 +155,17 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       message.warning("请等待图片上传完成后再保存");
       return;
     }
-    const processedValues = useZodValidateData(
+    const processedValues = validateData(
       {
         ...value,
         startAt: value.startAt instanceof dayjs ? value.startAt.toISOString() : value.startAt,
         endAt: value.endAt instanceof dayjs ? value.endAt.toISOString() : value.endAt,
-        features: [
-          ...(value.features || []).map((name) => ({ name })),
-          ...(value.featureIds || []).map((id) => ({ id })),
-        ],
-        organizations: [
-          { id: value.organization, isPrimary: true },
-          ...(value.organizations || [])
-            .filter((id) => id !== value.organization)
-            .map((id) => ({
-              id,
-              isPrimary: false,
-            })),
-        ],
+        features: (value.features || []).map((feature) => {
+          const original = event?.features.find((item) => item.id === feature.id);
+          return feature.id && (feature.isPublic || original?.name === feature.name)
+            ? { id: feature.id }
+            : { name: feature.name };
+        }),
       },
       EditEventApiBody,
     );
@@ -173,17 +177,21 @@ function EventEditorContent({ event }: { event?: EventItem }) {
       });
     }
     if (processedValues.values) {
-      return onSubmit(processedValues.values);
+      void onSubmit(processedValues.values);
     }
     return;
   };
 
   return (
-    <Form form={form} onFinish={handleFinish} layout="vertical" initialValues={initialValues}>
-      <BasicInfo
-        selectedOrganizations={selectedOrganizations}
-        setSelectedOrganizations={(v) => setSelectedOrganizations(v || [])}
-      />
+    <Form
+      form={form}
+      onFinish={(value: typeof initialValues) => {
+        void handleFinish(value);
+      }}
+      layout="vertical"
+      initialValues={initialValues}
+    >
+      <BasicInfo organizations={event?.organizers.map(({ organization }) => organization) ?? []} />
 
       <Divider dashed size="small" />
 
@@ -196,7 +204,7 @@ function EventEditorContent({ event }: { event?: EventItem }) {
 
       <Divider dashed size="small" />
 
-      <EventAdditionalInfo form={form} event={event} />
+      <EventAdditionalInfo />
 
       <Divider dashed size="small" />
 

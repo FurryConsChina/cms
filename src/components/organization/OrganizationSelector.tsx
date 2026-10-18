@@ -12,6 +12,7 @@ interface OrganizationSelectorProps {
   onSelect?: (value: Organization[] | undefined) => void;
   selectedOptionId?: string;
   selectedOptions?: Organization[];
+  disabledIds?: string[];
   antdSelectProps?: SelectProps;
 }
 
@@ -21,6 +22,7 @@ export default function OrganizationSelector({
   onChange,
   onSelect,
   selectedOptions,
+  disabledIds = [],
   antdSelectProps,
 }: OrganizationSelectorProps) {
   const [searchValue, setSearchValue] = useState("");
@@ -36,7 +38,8 @@ export default function OrganizationSelector({
 
   const selectOptions = organizations.map((organization) => ({
     value: organization.id,
-    label: `${organization.name} (${organization.slug})`,
+    label: `${organization.name} (${organization.slug})${disabledIds.includes(organization.id) ? "（已添加）" : ""}`,
+    disabled: disabledIds.includes(organization.id),
   }));
 
   const handleSearch = useCallback(

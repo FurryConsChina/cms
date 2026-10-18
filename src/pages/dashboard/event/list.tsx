@@ -152,7 +152,8 @@ export default function EventPage() {
   const columns: ColumnsType<EventItem> = [
     {
       title: "展商",
-      dataIndex: ["organization", "name"],
+      render: (_, event) =>
+        event.organizers.map(({ organization }) => organization.name).join("、"),
       key: "organizationName",
       ...getColumnSearchProps("orgSearch", "请输入展商名称"),
     },

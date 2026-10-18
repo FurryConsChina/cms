@@ -1,5 +1,5 @@
 import { Organization } from "@/types/organization";
-import OrganizationSelector from "@/components/organization/OrganizationSelector";
+import EventOrganizerList from "@/components/organization/EventOrganizerList";
 import { Typography, Row, Col, Form, Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-cn";
@@ -8,15 +8,7 @@ dayjs.locale("zh-cn");
 
 const { Title } = Typography;
 
-interface BasicInfoProps {
-  selectedOrganizations?: Organization[];
-  setSelectedOrganizations: (orgs?: Organization[]) => void;
-}
-
-export default function BasicInfo({
-  selectedOrganizations,
-  setSelectedOrganizations,
-}: BasicInfoProps) {
+export default function BasicInfo({ organizations }: { organizations: Organization[] }) {
   return (
     <div>
       <Title level={5} style={{ margin: "12px 0" }}>
@@ -31,40 +23,12 @@ export default function BasicInfo({
         <Input placeholder="请输入展会名称" />
       </Form.Item>
 
-      <Row gutter={8}>
-        <Col span={12}>
-          <Form.Item
-            label="展会主办方"
-            required
-            name="organization"
-            rules={[{ required: true, message: "请选择展会主办方" }]}
-          >
-            <OrganizationSelector
-              selectedOptions={selectedOrganizations}
-              onSelect={(value) => {
-                setSelectedOrganizations(value);
-              }}
-            />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            label="展会协办方"
-            help="可以选很多，但是请注意，主办方不能在协办方中"
-            name="organizations"
-          >
-            <OrganizationSelector
-              selectedOptions={selectedOrganizations}
-              onSelect={(value) => {
-                setSelectedOrganizations(value);
-              }}
-              antdSelectProps={{
-                mode: "multiple",
-              }}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
+      <Form.Item
+        name="organizations"
+        rules={[{ required: true, type: "array", min: 1, message: "请选择至少一个主办组织" }]}
+      >
+        <EventOrganizerList organizations={organizations} />
+      </Form.Item>
 
       <Row gutter={8}>
         <Col flex={1}>

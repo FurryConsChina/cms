@@ -77,6 +77,12 @@ export enum EventTicketChannelType {
 
 export type EventScaleKeyType = keyof typeof EventScale;
 
+export interface EventFeature {
+  id?: string;
+  name: string;
+  isPublic: boolean;
+}
+
 export interface IEvent extends BaseModel {
   name: string;
   slug: string;
@@ -101,13 +107,8 @@ export interface IEvent extends BaseModel {
   thumbnail: string | null;
   media: Record<string, unknown> | null;
   detail: string | null;
-  organization: Organization | null;
-  organizations: Organization[];
-  features: {
-    self: string[];
-    common: string[];
-  };
-  featureIds: string[];
+  organizers: { isPrimary: boolean; sortOrder: number; organization: Organization }[];
+  features: EventFeature[];
   regionId: string | null;
   region: Region | null;
   place: Place | null;
@@ -133,10 +134,7 @@ export type EditableEvent = InferZodType<typeof EditEventApiBody>;
 
 export type EventResponse = Omit<
   IEvent,
-  | "organization"
-  | "organizations"
   | "features"
-  | "featureIds"
   | "regionId"
   | "placeId"
   | "address"
@@ -148,6 +146,5 @@ export type EventResponse = Omit<
   | "videos"
   | "lives"
 > & {
-  organizers: { isPrimary: boolean; organization: Organization }[];
   features: { id: string; name: string; isPublic: boolean }[];
 };
