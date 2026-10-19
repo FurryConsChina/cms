@@ -22,7 +22,7 @@ const regionFields = {
   timezone: z.string().nullish(),
   isoCode: z.string().nullish(),
   displayOrder: z.number(),
-  heatScore: z.number().optional(),
+  eventCount: z.number().optional(),
   createdAt: z.string().nullish(),
   updatedAt: z.string().nullish(),
   deletedAt: z.string().nullish(),
