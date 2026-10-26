@@ -25,6 +25,7 @@ const { Title, Text } = Typography;
 
 export default function ApplicationList({
   title,
+  showCurrentRpm = false,
   data,
   isPending,
   current,
@@ -35,6 +36,7 @@ export default function ApplicationList({
   onDeleteApplication,
 }: {
   title: string;
+  showCurrentRpm?: boolean;
   data?: List<Application>;
   isPending: boolean;
   current: number;
@@ -67,6 +69,17 @@ export default function ApplicationList({
     });
   };
 
+  const currentRpmColumn: ColumnsType<Application>[number] = {
+    title: "当前 RPM（近 60 秒）",
+    dataIndex: "currentRpm",
+    key: "currentRpm",
+    width: 180,
+    render: (_, record) =>
+      record.currentRpm === null || record.currentRpm === undefined
+        ? "—"
+        : record.currentRpm.toLocaleString(),
+  };
+
   const columns: ColumnsType<Application> = [
     {
       title: "应用名称",
@@ -91,6 +104,7 @@ export default function ApplicationList({
         );
       },
     },
+    ...(showCurrentRpm ? [currentRpmColumn] : []),
     {
       title: "权限",
       dataIndex: "permission",
