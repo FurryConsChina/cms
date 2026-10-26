@@ -11,6 +11,7 @@ export default function AdminApplicationsPage() {
   return (
     <ApplicationList
       title="应用管理"
+      showCurrentRpm
       data={data}
       isPending={isPending}
       current={current}
@@ -22,7 +23,7 @@ export default function AdminApplicationsPage() {
           ? AdminApplicationApi.updateApplication(id, value)
           : AdminApplicationApi.createApplication(value)
       }
-      onDeleteApplication={AdminApplicationApi.deleteApplication}
+      onDeleteApplication={(id) => AdminApplicationApi.deleteApplication(id)}
     />
   );
 }
