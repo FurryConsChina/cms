@@ -1,10 +1,33 @@
 import { App, Button, Card, Typography } from "antd";
+import useSWR from "swr";
+import { AdminAuditLogApi } from "@/api/cms/admin/auditLog";
 import { refreshSitemap } from "@/api/cms/cache";
 import { PlaceAPI } from "@/api/cms/place";
 import { apiErrorMessage } from "@/utils/apiError";
+import type { AuditLog } from "@/types/access";
+import type { List } from "@/types/request";
 
 export default function AdminInfrastructurePage() {
   const { message, modal } = App.useApp();
+  const {
+    data: auditLogs,
+    error: auditLogError,
+    isLoading: auditLogLoading,
+  } = useSWR<List<AuditLog>, unknown>("admin-last-sitemap-generation", () =>
+    AdminAuditLogApi.list({
+      current: 1,
+      pageSize: 1,
+      action: "infra.sitemap_generated",
+    }),
+  );
+  const lastGeneration = auditLogs?.records[0];
+  const lastGenerationText = auditLogLoading
+    ? "查询中..."
+    : auditLogError
+      ? "查询失败"
+      : lastGeneration
+        ? new Date(lastGeneration.createdAt).toLocaleString("zh-CN")
+        : "暂无记录";
 
   return (
     <div className="space-y-4">
@@ -37,6 +60,9 @@ export default function AdminInfrastructurePage() {
         </Button>
       </Card>
       <Card title="站点地图">
+        <Typography.Paragraph type="secondary">
+          上次定时生成：{lastGenerationText}
+        </Typography.Paragraph>
         <Button
           onClick={() =>
             modal.confirm({

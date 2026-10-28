@@ -90,6 +90,7 @@ const router = createBrowserRouter([
           { index: true, element: <Navigate to="/admin/application" replace /> },
           { path: "application", lazy: page(() => import("@/pages/admin/application/list")) },
           { path: "infrastructure", lazy: page(() => import("@/pages/admin/infrastructure")) },
+          { path: "audit-log", lazy: page(() => import("@/pages/admin/audit-log")) },
         ],
       },
     ],

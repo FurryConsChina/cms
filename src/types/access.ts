@@ -44,5 +44,8 @@ export type AuditLog = {
   metadata: Record<string, unknown>;
   actorUserId: string | null;
   actor?: { name: string; email: string };
+  organizationId?: string | null;
+  ipAddress?: string | null;
+  requestId?: string | null;
   createdAt: string;
 };

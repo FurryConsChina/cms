@@ -73,6 +73,7 @@ const auditVerbLabels: Record<string, string> = {
   usages_replaced: "更新绑定",
   cache_cleaned: "清理缓存",
   sitemap_refreshed: "刷新站点地图",
+  sitemap_generated: "生成站点地图",
   password_changed: "修改密码",
   password_reset: "重置密码",
 };
