@@ -4,7 +4,6 @@ import {
   Alert,
   App,
   Button,
-  Card,
   Flex,
   Image,
   Input,
@@ -30,6 +29,7 @@ import { mediaOwnerLabels, mediaRoleLabels, toOptions } from "@/consts/labels";
 import type { MediaAsset, MediaOwner, MediaUsage } from "@/types/media";
 import { apiErrorMessage } from "@/utils/apiError";
 import { imageUrl } from "@/utils/imageLoader";
+import DefaultContainer from "@/components/layout/Container";
 
 const statusLabels = {
   pending: "待确认",
@@ -80,10 +80,12 @@ export default function MediaPage() {
   };
   return (
     <div className="space-y-4">
-      <Typography.Title level={3} style={{ margin: 0 }}>
-        媒体资源库
-      </Typography.Title>
-      <Card size="small">
+      <DefaultContainer className="sticky top-0 z-20">
+        <Typography.Title level={3} className="m-0">
+          媒体资源库
+        </Typography.Title>
+      </DefaultContainer>
+      <DefaultContainer>
         <Space orientation="vertical" size={12} style={{ width: "100%" }}>
           <div>
             <Typography.Text strong>1. 选择资源属于哪个内容</Typography.Text>
@@ -172,7 +174,7 @@ export default function MediaPage() {
             </Space.Compact>
           </div>
         </Space>
-      </Card>
+      </DefaultContainer>
       {error && <Alert type="error" showIcon title={apiErrorMessage(error)} />}
       <Typography.Text type="secondary">
         {owner ? `正在显示所选${mediaOwnerLabels[entityType]}的资源。` : "正在显示全部资源。"}

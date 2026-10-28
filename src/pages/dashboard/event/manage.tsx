@@ -49,6 +49,7 @@ import { toOptions } from "@/consts/labels";
 import type { Participant, Benefit, Offer } from "@/types/participant";
 import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
+import DefaultContainer from "@/components/layout/Container";
 
 const roles = { guest: "嘉宾", exhibitor: "展商", sponsor: "赞助商", media: "媒体" };
 const availability = { upcoming: "待售", onSale: "售卖中", soldOut: "售罄", ended: "已结束" };
@@ -74,33 +75,35 @@ export default function EventManagePage() {
   if (error) return <Alert type="error" showIcon title={apiErrorMessage(error)} />;
   return (
     <div className="space-y-4">
-      <Flex justify="space-between" align="center" wrap gap={12}>
-        <Space align="center">
-          <Button
-            type="text"
-            aria-label="返回活动列表"
-            icon={<IconArrowLeft size={18} />}
-            onClick={() => void navigate("/dashboard/event")}
-          />
-          <div>
-            <Typography.Title level={3} style={{ margin: 0 }}>
-              {event?.name ?? "活动管理"}
-            </Typography.Title>
-            {event?.startAt && (
-              <Typography.Text type="secondary">
-                {dayjs(event.startAt).format("YYYY年M月D日")}
-                {event.endAt ? ` – ${dayjs(event.endAt).format("M月D日")}` : ""}
-              </Typography.Text>
-            )}
-          </div>
-        </Space>
-        <Space wrap>
-          {event && <EventVisibility event={event} onChange={() => void mutate()} />}
-          <Button onClick={() => void navigate(`/dashboard/event/${eventId}/edit`)}>
-            编辑活动资料
-          </Button>
-        </Space>
-      </Flex>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center" wrap gap={12}>
+          <Space align="center">
+            <Button
+              type="text"
+              aria-label="返回活动列表"
+              icon={<IconArrowLeft size={18} />}
+              onClick={() => void navigate("/dashboard/event")}
+            />
+            <div>
+              <Typography.Title level={3} className="m-0">
+                {event?.name ?? "活动管理"}
+              </Typography.Title>
+              {event?.startAt && (
+                <Typography.Text type="secondary">
+                  {dayjs(event.startAt).format("YYYY年M月D日")}
+                  {event.endAt ? ` – ${dayjs(event.endAt).format("M月D日")}` : ""}
+                </Typography.Text>
+              )}
+            </div>
+          </Space>
+          <Space wrap>
+            {event && <EventVisibility event={event} onChange={() => void mutate()} />}
+            <Button onClick={() => void navigate(`/dashboard/event/${eventId}/edit`)}>
+              编辑活动资料
+            </Button>
+          </Space>
+        </Flex>
+      </DefaultContainer>
       <Tabs
         items={[
           { key: "participants", label: "参加者", children: <Participants eventId={eventId!} /> },
@@ -514,6 +517,10 @@ function Offers({ eventId }: { eventId: string }) {
     { title: "价格", render: (_, v) => (v.price == null ? "待公布" : `${v.price} ${v.currency}`) },
     {
       title: "状态",
+      key: "availability",
+      filters: Object.entries(availability).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: status ? [status] : null,
       render: (_, v) => (
         <Tag color={availabilityColors[v.availability]}>{availability[v.availability]}</Tag>
       ),
@@ -567,17 +574,7 @@ function Offers({ eventId }: { eventId: string }) {
   ];
   return (
     <div className="space-y-4">
-      <Flex justify="space-between" align="center" wrap gap={12}>
-        <div>
-          <Select
-            placeholder="全部售卖状态"
-            allowClear
-            style={{ width: 180 }}
-            value={status}
-            onChange={setStatus}
-            options={toOptions(availability)}
-          />
-        </div>
+      <Flex justify="flex-end" align="center" wrap gap={12}>
         <Space>
           <Button onClick={() => void mutate()}>刷新</Button>
           <Button type="primary" onClick={() => void open()}>
@@ -600,6 +597,10 @@ function Offers({ eventId }: { eventId: string }) {
         dataSource={records}
         loading={isLoading || sorting}
         scroll={{ x: "max-content" }}
+        onChange={(_pagination, values, _sorter, extra) => {
+          if (extra.action !== "filter") return;
+          setStatus(values.availability?.[0] as Offer["availability"] | undefined);
+        }}
         pagination={{
           current,
           pageSize,
@@ -914,7 +915,14 @@ function Participants({ eventId }: { eventId: string }) {
         </Space>
       ),
     },
-    { title: "角色", render: (_, v) => roles[v.role] },
+    {
+      title: "角色",
+      key: "role",
+      filters: Object.entries(roles).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: role ? [role] : null,
+      render: (_, v) => roles[v.role],
+    },
     { title: "摊位", dataIndex: "booth" },
     { title: "级别", dataIndex: "tier" },
     { title: "重点展示", render: (_, v) => (v.isFeatured ? <Tag color="gold">重点</Tag> : "—") },
@@ -963,17 +971,7 @@ function Participants({ eventId }: { eventId: string }) {
   ];
   return (
     <div className="space-y-4">
-      <Flex justify="space-between" align="center" wrap gap={12}>
-        <div>
-          <Select
-            placeholder="全部角色"
-            value={role}
-            onChange={setRole}
-            allowClear
-            style={{ width: 160 }}
-            options={toOptions(roles)}
-          />
-        </div>
+      <Flex justify="flex-end" align="center" wrap gap={12}>
         <Space>
           <Button onClick={() => void mutate()}>刷新</Button>
           <Button type="primary" onClick={() => void open()}>
@@ -996,6 +994,10 @@ function Participants({ eventId }: { eventId: string }) {
         dataSource={records}
         loading={isLoading || sorting}
         scroll={{ x: "max-content" }}
+        onChange={(_pagination, values, _sorter, extra) => {
+          if (extra.action !== "filter") return;
+          setRole(values.role?.[0] as Participant["role"] | undefined);
+        }}
         pagination={{
           current,
           pageSize,

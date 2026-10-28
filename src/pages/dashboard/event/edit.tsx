@@ -52,7 +52,7 @@ export default function EventEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
-        <Title level={2} style={{ margin: 0 }}>
+        <Title level={3} className="m-0">
           {eventId ? "编辑展会" : "新建展会"}
         </Title>
       </DefaultContainer>

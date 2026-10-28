@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Avatar,
   Button,
@@ -32,6 +32,9 @@ import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
 import { imageUrl } from "@/utils/imageLoader";
 import type { Profile } from "@/types/profile";
+import DefaultContainer from "@/components/layout/Container";
+import { IconCirclePlus, IconRefresh, IconSearch } from "@tabler/icons-react";
+import TableFilterDropdown from "@/components/common/TableFilterDropdown";
 
 const kindLabels = { individual: "个人", group: "团体", brand: "品牌", media: "媒体" };
 const statusLabels = { active: "活跃", inactive: "停用" };
@@ -45,9 +48,6 @@ export default function ProfilePage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  useEffect(() => {
-    setCurrent(1);
-  }, [search, kind]);
   const { data, error, isLoading, mutate } = useSWR(
     ["profiles", search, kind, current, pageSize],
     () => ProfileAPI.list({ current, pageSize, name: search || undefined, kind }),
@@ -135,6 +135,14 @@ export default function ProfilePage() {
   const columns: ColumnsType<Profile> = [
     {
       title: "名称",
+      key: "name",
+      filteredValue: search ? [search] : null,
+      filterDropdown: (props) => (
+        <TableFilterDropdown {...props} placeholder="搜索名称" confirmText="搜索" />
+      ),
+      filterIcon: (filtered) => (
+        <IconSearch size={14} style={{ color: filtered ? "#1677ff" : undefined }} />
+      ),
       render: (_, v) => (
         <Space>
           <Avatar src={v.avatarUrl ? imageUrl(v.avatarUrl) : undefined}>
@@ -145,7 +153,14 @@ export default function ProfilePage() {
       ),
     },
     { title: "标识", dataIndex: "slug" },
-    { title: "类型", render: (_, v) => kindLabels[v.kind] },
+    {
+      title: "类型",
+      key: "kind",
+      filters: Object.entries(kindLabels).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: kind ? [kind] : null,
+      render: (_, v) => kindLabels[v.kind],
+    },
     {
       title: "状态",
       render: (_, v) => (
@@ -194,33 +209,25 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-4">
-      <Flex justify="space-between" align="center" wrap gap={12}>
-        <Typography.Title level={3} style={{ margin: 0 }}>
-          主体资料
-        </Typography.Title>
-        <Space>
-          <Button onClick={() => void mutate()}>刷新</Button>
-          <Button type="primary" onClick={() => void open()}>
-            新建主体资料
-          </Button>
-        </Space>
-      </Flex>
-      <Space wrap>
-        <Input.Search
-          allowClear
-          placeholder="搜索名称"
-          onSearch={setSearch}
-          style={{ width: 260 }}
-        />
-        <Select
-          allowClear
-          placeholder="全部类型"
-          style={{ width: 140 }}
-          value={kind}
-          onChange={setKind}
-          options={toOptions(kindLabels)}
-        />
-      </Space>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center" wrap gap={12}>
+          <Typography.Title level={3} className="m-0">
+            主体资料
+          </Typography.Title>
+          <Space wrap>
+            <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => void mutate()}>
+              刷新
+            </Button>
+            <Button
+              type="primary"
+              icon={<IconCirclePlus size={16} stroke={1.5} />}
+              onClick={() => void open()}
+            >
+              新建主体资料
+            </Button>
+          </Space>
+        </Flex>
+      </DefaultContainer>
       {error && (
         <Alert
           type="error"
@@ -235,6 +242,12 @@ export default function ProfilePage() {
         dataSource={records}
         loading={isLoading}
         scroll={{ x: "max-content" }}
+        onChange={(_pagination, values, _sorter, extra) => {
+          if (extra.action !== "filter") return;
+          setSearch((values.name?.[0] as string | undefined)?.trim() ?? "");
+          setKind(values.kind?.[0] as Profile["kind"] | undefined);
+          setCurrent(1);
+        }}
         pagination={{
           current,
           pageSize,

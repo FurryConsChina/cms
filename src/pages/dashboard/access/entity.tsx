@@ -7,6 +7,7 @@ import {
   Button,
   Descriptions,
   Form,
+  Flex,
   Input,
   Modal,
   Space,
@@ -20,6 +21,8 @@ import type { EntityKind, Invitation, Member } from "@/types/access";
 import { auditActionLabel, targetTypeLabels } from "@/consts/labels";
 import useAuthStore from "@/stores/auth";
 import { apiErrorMessage } from "@/utils/apiError";
+import DefaultContainer from "@/components/layout/Container";
+import { IconArrowLeft, IconCirclePlus } from "@tabler/icons-react";
 
 const inviteLink = (kind: EntityKind, token: string) =>
   `${window.location.origin}/dashboard/access?kind=${kind}&token=${encodeURIComponent(token)}`;
@@ -77,12 +80,53 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
   if (entityError) return <Alert type="error" title={apiErrorMessage(entityError)} />;
   return (
     <div className="space-y-4">
-      <Space wrap>
-        <Typography.Title level={3} style={{ margin: 0 }}>
-          {entity?.name ?? "成员管理"}
-        </Typography.Title>
-        <Button onClick={() => void navigate(`/dashboard/${kind}`)}>返回列表</Button>
-      </Space>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center" wrap gap={12}>
+          <Space align="center">
+            <Button
+              type="text"
+              aria-label="返回列表"
+              icon={<IconArrowLeft size={18} />}
+              onClick={() => void navigate(`/dashboard/${kind}`)}
+            />
+            <Typography.Title level={3} className="m-0">
+              {entity?.name ?? "成员管理"}
+            </Typography.Title>
+          </Space>
+          <Space wrap>
+            {canManage && (
+              <Button
+                type="primary"
+                icon={<IconCirclePlus size={16} stroke={1.5} />}
+                onClick={() => setInviteOpen(true)}
+              >
+                邀请成员
+              </Button>
+            )}
+            <Button
+              danger
+              disabled={members?.records.some(
+                (member) => member.userId === user?.id && member.role === "owner",
+              )}
+              onClick={() =>
+                modal.confirm({
+                  title: "退出此实体？",
+                  content: "退出后将失去相应管理权限。所有者不能通过此入口退出。",
+                  onOk: async () => {
+                    await run(
+                      () => AccessAPI.leave(kind, id),
+                      () => {},
+                    );
+                    void navigate(`/dashboard/${kind}`);
+                  },
+                })
+              }
+            >
+              退出成员关系
+            </Button>
+          </Space>
+        </Flex>
+      </DefaultContainer>
       <Alert
         type="info"
         title="所有者可邀请和移除成员；所有者转移暂不支持。普通成员可以主动退出。"
@@ -94,34 +138,6 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
           description={apiErrorMessage(membersError)}
         />
       )}
-      <Space>
-        {canManage && (
-          <Button type="primary" onClick={() => setInviteOpen(true)}>
-            邀请成员
-          </Button>
-        )}
-        <Button
-          danger
-          disabled={members?.records.some(
-            (member) => member.userId === user?.id && member.role === "owner",
-          )}
-          onClick={() =>
-            modal.confirm({
-              title: "退出此实体？",
-              content: "退出后将失去相应管理权限。所有者不能通过此入口退出。",
-              onOk: async () => {
-                await run(
-                  () => AccessAPI.leave(kind, id),
-                  () => {},
-                );
-                void navigate(`/dashboard/${kind}`);
-              },
-            })
-          }
-        >
-          退出成员关系
-        </Button>
-      </Space>
       <Tabs
         activeKey={tab}
         onChange={setTab}

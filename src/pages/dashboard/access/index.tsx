@@ -6,6 +6,7 @@ import {
   App,
   Button,
   Form,
+  Flex,
   Input,
   Modal,
   Radio,
@@ -21,6 +22,8 @@ import type { Claim, EntityKind } from "@/types/access";
 import useAuthStore from "@/stores/auth";
 import { isAdmin } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
+import DefaultContainer from "@/components/layout/Container";
+import { IconCirclePlus, IconRefresh } from "@tabler/icons-react";
 
 export default function AccessPage() {
   const role = useAuthStore((state) => state.user?.role);
@@ -44,7 +47,29 @@ export default function AccessPage() {
   );
   return (
     <div className="space-y-4">
-      <Typography.Title level={3}>认领与邀请</Typography.Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center" wrap gap={12}>
+          <Typography.Title level={3} className="m-0">
+            认领与邀请
+          </Typography.Title>
+          {tab !== "accept" && (
+            <Space wrap>
+              <Button icon={<IconRefresh size={16} stroke={1.5} />} onClick={() => void mutate()}>
+                刷新
+              </Button>
+              {!pending && (
+                <Button
+                  type="primary"
+                  icon={<IconCirclePlus size={16} stroke={1.5} />}
+                  onClick={() => setRequestOpen(true)}
+                >
+                  申请认领
+                </Button>
+              )}
+            </Space>
+          )}
+        </Flex>
+      </DefaultContainer>
       <Segmented
         value={kind}
         onChange={(value) => {
@@ -109,14 +134,6 @@ export default function AccessPage() {
         </Form>
       ) : (
         <>
-          <Space>
-            <Button onClick={() => void mutate()}>刷新</Button>
-            {!pending && (
-              <Button type="primary" onClick={() => setRequestOpen(true)}>
-                申请认领
-              </Button>
-            )}
-          </Space>
           {error && <Alert type="error" title={apiErrorMessage(error)} />}
           <Table<Claim>
             rowKey="id"

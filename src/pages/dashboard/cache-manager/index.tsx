@@ -2,6 +2,7 @@ import { useState } from "react";
 import { App, Button, Card, Form, Input, Statistic, Typography } from "antd";
 import { cleanPageCache, getPageview } from "@/api/cms/cache";
 import { apiErrorMessage } from "@/utils/apiError";
+import DefaultContainer from "@/components/layout/Container";
 
 export default function InfrastructurePage() {
   const { message } = App.useApp();
@@ -9,7 +10,11 @@ export default function InfrastructurePage() {
   const [count, setCount] = useState<number>();
   return (
     <div className="space-y-4">
-      <Typography.Title level={3}>页面缓存与浏览量</Typography.Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Typography.Title level={3} className="m-0">
+          页面缓存与浏览量
+        </Typography.Title>
+      </DefaultContainer>
       <Card title="刷新页面缓存">
         <Form
           layout="vertical"
