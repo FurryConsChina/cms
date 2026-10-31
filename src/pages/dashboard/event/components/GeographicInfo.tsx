@@ -4,15 +4,14 @@ import type { Place } from "@/types/place";
 import PlaceEditor from "@/components/place/PlaceEditor";
 import RegionEditor from "@/components/region/RegionEditor";
 import RegionSelector, { type RegionSelectorHandle } from "@/components/region/RegionSelector";
-import { PlaceAPI } from "@/api/cms/place";
-import { Typography, Form, Input, Select, Alert, Row, Col, App, Button, Flex, Space } from "antd";
+import PlaceSelector, { type PlaceSelectorHandle } from "@/components/place/PlaceSelector";
+import { Typography, Form, Input, Row, Col, App, Button, Flex, Space } from "antd";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
 import { apiErrorMessage } from "@/utils/apiError";
 import type { FormInstance } from "antd";
 import { useRef, useState } from "react";
-import useSWR from "swr";
 
 interface GeographicInfoProps {
   form: FormInstance;
@@ -30,20 +29,11 @@ export default function GeographicInfo({
   const { message } = App.useApp();
   const platform = isPlatform(useAuthStore((state) => state.user?.role));
   const regionSelector = useRef<RegionSelectorHandle>(null);
+  const placeSelector = useRef<PlaceSelectorHandle>(null);
   const [refreshingRegions, setRefreshingRegions] = useState(false);
-  const [search, setSearch] = useState("");
+  const [refreshingPlaces, setRefreshingPlaces] = useState(false);
   const [creating, setCreating] = useState<"region" | "place">();
   const [createdPlace, setCreatedPlace] = useState<Place>();
-  const { data, isLoading, isValidating, error, mutate } = useSWR(
-    selectedRegion ? ["places", selectedRegion.id, search] : null,
-    () =>
-      PlaceAPI.list({
-        current: 1,
-        pageSize: 100,
-        regionId: selectedRegion?.id,
-        name: search || undefined,
-      }),
-  );
   const refreshRegions = async () => {
     setRefreshingRegions(true);
     try {
@@ -55,25 +45,18 @@ export default function GeographicInfo({
     }
   };
   const refreshPlaces = async () => {
+    setRefreshingPlaces(true);
     try {
-      await mutate();
+      await placeSelector.current?.refresh();
     } catch (error) {
       message.error(apiErrorMessage(error));
+    } finally {
+      setRefreshingPlaces(false);
     }
   };
-  const places = data?.records || [];
-  const selectedPlace = createdPlace ?? event?.place;
-  const options = (
-    selectedPlace &&
-    selectedPlace.regionId === selectedRegion?.id &&
-    !places.some((p) => p.id === selectedPlace.id)
-      ? [selectedPlace, ...places]
-      : places
-  ).map((p) => ({ value: p.id, label: `${p.name}${p.address ? `（${p.address}）` : ""}` }));
   return (
     <div>
       <Typography.Title level={5}>地理信息</Typography.Title>
-      {error && <Alert type="error" title="场地加载失败，请稍后重试" />}
       <Row gutter={16}>
         <Col xs={24} md={8}>
           <Flex justify="space-between" align="center" gap={8} className="mb-2">
@@ -118,7 +101,7 @@ export default function GeographicInfo({
                 icon={<IconRefresh size={14} />}
                 aria-label="刷新活动场地"
                 title="刷新活动场地"
-                loading={isValidating}
+                loading={refreshingPlaces}
                 disabled={!selectedRegion}
                 onClick={() => void refreshPlaces()}
               />
@@ -133,17 +116,15 @@ export default function GeographicInfo({
               )}
             </Space>
           </Flex>
-          <Form.Item name="placeId">
-            <Select
-              disabled={!selectedRegion}
-              allowClear
-              showSearch
-              filterOption={false}
-              loading={isLoading || isValidating}
-              options={options}
-              onSearch={setSearch}
-              onClear={() => form.setFieldValue("placeId", null)}
-              placeholder="搜索并选择场地"
+          <Form.Item
+            name="placeId"
+            getValueFromEvent={(value: string | undefined) => value ?? null}
+          >
+            <PlaceSelector
+              key={`${selectedRegion?.id ?? ""}:${createdPlace?.id ?? ""}`}
+              ref={placeSelector}
+              regionId={selectedRegion?.id}
+              selectedOption={createdPlace ?? event?.place}
             />
           </Form.Item>
         </Col>
@@ -157,7 +138,6 @@ export default function GeographicInfo({
           onSaved={(region) => {
             setSelectedRegion(region);
             setCreatedPlace(undefined);
-            setSearch("");
             form.setFieldsValue({ regionId: region.id, placeId: null });
             setCreating(undefined);
             void refreshRegions();
@@ -171,7 +151,6 @@ export default function GeographicInfo({
           onSaved={(place) => {
             setCreatedPlace(place);
             setSelectedRegion(place.region);
-            setSearch("");
             form.setFieldsValue({ regionId: place.regionId, placeId: place.id });
             setCreating(undefined);
             void refreshPlaces();

@@ -30,7 +30,9 @@ import dayjs from "dayjs";
 
 import { type ColumnsType } from "antd/es/table";
 
-import EntitySelect from "@/components/common/EntitySelect";
+import BenefitSelector from "@/components/benefit/BenefitSelector";
+import OrganizationSelector from "@/components/organization/OrganizationSelector";
+import ProfileSelector from "@/components/profile/ProfileSelector";
 import { DateListInput, IsoDateTimeInput } from "@/components/common/Fields";
 import useMediaBusy from "@/components/media/useMediaBusy";
 import { MediaListFields } from "@/components/media/MediaPicker";
@@ -47,6 +49,7 @@ import {
 } from "@/api/cms/offer";
 import { toOptions } from "@/consts/labels";
 import type { Participant, Benefit, Offer } from "@/types/participant";
+import type { List } from "@/types/request";
 import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
 import DefaultContainer from "@/components/layout/Container";
@@ -644,10 +647,9 @@ function Offers({ eventId }: { eventId: string }) {
 }
 
 function OfferFields({ eventId }: { eventId: string }) {
-  const { data, error } = useSWR(["offer-benefit-options", eventId], () =>
+  const { data, error } = useSWR<List<Benefit>, Error>(["offer-benefit-options", eventId], () =>
     BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
   );
-  const benefitOptions = data?.records.map((v) => ({ value: v.id, label: v.name })) ?? [];
   return (
     <>
       <Form.Item name="eventId" hidden>
@@ -724,7 +726,7 @@ function OfferFields({ eventId }: { eventId: string }) {
                     rules={[{ required: true, message: "请选择权益" }]}
                     style={{ flex: 1, minWidth: 200, marginBottom: 0 }}
                   >
-                    <Select placeholder="选择权益" options={benefitOptions} />
+                    <BenefitSelector eventId={eventId} />
                   </Form.Item>
                   <Form.Item name={[field.name, "quantity"]} style={{ marginBottom: 0 }}>
                     <InputNumber min={1} precision={0} prefix="×" style={{ width: 100 }} />
@@ -741,7 +743,7 @@ function OfferFields({ eventId }: { eventId: string }) {
             <Button
               type="dashed"
               block
-              disabled={!benefitOptions.length}
+              disabled={!data?.records.length}
               onClick={() => add({ quantity: 1 })}
             >
               添加权益
@@ -1082,7 +1084,7 @@ function ParticipantFields({
           name="organizationId"
           rules={[{ required: true, message: "请选择组织" }]}
         >
-          <EntitySelect kind="organization" />
+          <OrganizationSelector antdSelectProps={{ allowClear: true, style: { minWidth: 220 } }} />
         </Form.Item>
       ) : (
         <Form.Item
@@ -1091,7 +1093,7 @@ function ParticipantFields({
           rules={[{ required: true, message: "请选择主体资料" }]}
           extra="找不到？先在「主体资料」页面创建。"
         >
-          <EntitySelect kind="profile" />
+          <ProfileSelector antdSelectProps={{ style: { minWidth: 220 } }} />
         </Form.Item>
       )}
       <Row gutter={16}>
