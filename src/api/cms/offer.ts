@@ -1,5 +1,6 @@
 import Axios from "@/api";
 import { z } from "zod";
+import dayjs from "dayjs";
 import type { List, PageQuery } from "@/types/request";
 import type { Benefit, Offer } from "@/types/participant";
 
@@ -32,7 +33,7 @@ export const offerSchema = z
     currency: z.string().length(3, "货币请使用三位代码，例如 CNY"),
     saleStartAt: z.iso.datetime().nullish(),
     saleEndAt: z.iso.datetime().nullish(),
-    admissionDates: z.array(z.iso.date()).nullish(),
+    admissionDates: z.array(z.iso.datetime()).nullish(),
     sortOrder: z.number().int().min(0),
     benefits: z
       .array(
@@ -69,7 +70,7 @@ export const toOfferInput = (v: Offer): OfferInput => ({
   currency: v.currency,
   saleStartAt: v.saleStartAt,
   saleEndAt: v.saleEndAt,
-  admissionDates: v.admissionDates,
+  admissionDates: v.admissionDates?.map((value) => dayjs(value).toISOString()),
   sortOrder: v.sortOrder,
 });
 

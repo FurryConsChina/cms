@@ -46,6 +46,19 @@ export class ParticipantAPI {
     return (await Axios.get<List<Participant>>("/cms/participant", { params })).data;
   }
 
+  static async detailById(eventId: string, participantId: string): Promise<Participant> {
+    const pageSize = 100;
+    for (let current = 1; ; current += 1) {
+      const { records, total } = await ParticipantAPI.list({ eventId, current, pageSize });
+      const record = records.find(
+        (record) => record.id === participantId && record.eventId === eventId,
+      );
+      if (record) return ParticipantAPI.detail(record);
+      if (current * pageSize >= total) break;
+    }
+    throw new Error("未找到当前展会的参加关系，可能已被移除");
+  }
+
   static async detail(record: Participant): Promise<Participant> {
     const media = await getMediaUsages({ entityType: "event_participation", entityId: record.id });
     return {
@@ -70,6 +83,6 @@ export class ParticipantAPI {
   }
 
   static async delete(id: string) {
-    return (await Axios.delete(`/cms/participant/${id}`)).data;
+    return (await Axios.delete<unknown>(`/cms/participant/${id}`)).data;
   }
 }

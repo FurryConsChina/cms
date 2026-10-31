@@ -267,14 +267,11 @@ export default function EventPage() {
 
         return (
           <Space size="middle" wrap>
-            {/* 暂不开放，后续恢复。
-            <Button onClick={() => navigate(`/dashboard/event/${record.id}/manage`)}>参加者与票档</Button>
-            */}
             <Button
               type="primary"
               ghost
               onClick={() => {
-                window.open(`/dashboard/event/${record.id}/edit`);
+                window.open(`/dashboard/event/${record.id}`);
               }}
               icon={<IconEdit size={14} />}
             >

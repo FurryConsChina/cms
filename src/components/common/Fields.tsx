@@ -75,6 +75,51 @@ export function IsoDateTimeInput({
   );
 }
 
+export function IsoDateTimeListInput({
+  value,
+  onChange,
+}: {
+  value?: string[] | null;
+  onChange?: (value: string[]) => void;
+}) {
+  const dates = value ?? [];
+  return (
+    <Flex vertical gap={8}>
+      {dates.map((date, index) => (
+        <Flex key={index} gap={8}>
+          <DatePicker
+            showTime={{ format: "HH:mm" }}
+            format="YYYY-MM-DD HH:mm"
+            style={{ width: "100%" }}
+            value={dayjs(date)}
+            onChange={(next) => {
+              const updated = [...dates];
+              if (next) updated[index] = next.toISOString();
+              else updated.splice(index, 1);
+              onChange?.(updated);
+            }}
+          />
+          <Button
+            danger
+            type="text"
+            aria-label="删除时间"
+            icon={<IconTrash size={16} />}
+            onClick={() => onChange?.(dates.filter((_, i) => i !== index))}
+          />
+        </Flex>
+      ))}
+      <Button
+        type="dashed"
+        block
+        icon={<IconPlus size={16} />}
+        onClick={() => onChange?.([...dates, dayjs().startOf("hour").toISOString()])}
+      >
+        添加时间
+      </Button>
+    </Flex>
+  );
+}
+
 export function DateListInput({
   value,
   onChange,
