@@ -230,6 +230,7 @@ export default function EventPage() {
     {
       title: "操作",
       key: "action",
+      fixed: "right",
       render: (_, record) => {
         const menuItems: MenuProps["items"] = [
           {
