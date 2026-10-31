@@ -21,17 +21,20 @@ import UploadImage from "@/components/media/UploadImage";
 import useMediaBusy from "./useMediaBusy";
 import { apiErrorMessage } from "@/utils/apiError";
 import { imageUrl } from "@/utils/imageLoader";
+import { IconPhoto, IconTrash, IconUser } from "@tabler/icons-react";
 
 export default function MediaPicker({
   value,
   onChange,
   onBusyChange,
   disabled,
+  variant = "default",
 }: {
   value?: MediaBinding | null;
   onChange?: (value: MediaBinding | null) => void;
   onBusyChange?: (key: string, busy: boolean) => void;
   disabled?: boolean;
+  variant?: "default" | "gallery" | "avatar";
 }) {
   const { message } = App.useApp();
   const [opened, setOpened] = useState(false);
@@ -51,36 +54,119 @@ export default function MediaPicker({
     onChange?.({ ...value, ...asset });
     setOpened(false);
   };
+  const selectButton = (
+    <Button
+      type={variant === "gallery" ? "text" : "default"}
+      className={variant === "gallery" ? "h-9 w-full rounded-none border-0 shadow-none" : undefined}
+      icon={variant === "default" ? undefined : <IconPhoto size={16} stroke={1.5} />}
+      disabled={disabled || busy}
+      onClick={() => setOpened(true)}
+    >
+      {variant === "avatar" ? "从媒体库选择" : variant === "gallery" ? "媒体库" : "选择媒体"}
+    </Button>
+  );
+  const uploadButton = (
+    <UploadImage
+      trigger={variant === "avatar" ? "button" : variant === "gallery" ? "toolbar" : "dropzone"}
+      crop={variant === "avatar"}
+      aspect={1}
+      label={variant === "avatar" ? "头像" : "图片"}
+      onBusyChange={(next) => updateBusy("upload", next)}
+      disabled={disabled || busy}
+      onUploadSuccess={(asset) => {
+        select(asset);
+        void mutate();
+      }}
+    />
+  );
+  const removeButton = value ? (
+    <Button
+      type={variant === "avatar" ? "text" : "default"}
+      danger={variant === "avatar"}
+      icon={variant === "avatar" ? <IconTrash size={16} stroke={1.5} /> : undefined}
+      disabled={disabled || busy}
+      onClick={() => onChange?.(null)}
+    >
+      移除
+    </Button>
+  ) : null;
+
   return (
-    <div className="space-y-2">
-      {value?.url ? (
-        <Image
-          src={imageUrl(value.url)}
-          width={120}
-          height={100}
-          style={{ objectFit: "contain" }}
-        />
-      ) : value?.mediaAssetId ? (
-        <Typography.Text>已选择媒体资源</Typography.Text>
-      ) : null}
-      <Space wrap>
-        <Button disabled={disabled || busy} onClick={() => setOpened(true)}>
-          选择媒体
-        </Button>
-        <UploadImage
-          onBusyChange={(next) => updateBusy("upload", next)}
-          disabled={disabled || busy}
-          onUploadSuccess={(asset) => {
-            select(asset);
-            void mutate();
-          }}
-        />
-        {value && (
-          <Button disabled={disabled || busy} onClick={() => onChange?.(null)}>
-            移除
-          </Button>
-        )}
-      </Space>
+    <div className={variant === "avatar" ? undefined : "space-y-2"}>
+      {variant === "avatar" ? (
+        <Flex align="center" wrap gap={16} className="rounded-xl bg-slate-100/60 p-4">
+          <div className="size-24 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white">
+            {value?.url ? (
+              <Image
+                src={imageUrl(value.url)}
+                alt={value.altText ?? value.title ?? "主体头像"}
+                width={96}
+                height={96}
+                style={{ objectFit: "cover", display: "block" }}
+              />
+            ) : (
+              <Flex align="center" justify="center" className="h-full text-slate-400">
+                <IconUser size={36} stroke={1.25} />
+              </Flex>
+            )}
+          </div>
+          <div className="min-w-56 flex-1 space-y-3">
+            <Typography.Text type="secondary" className="block">
+              用于列表和资料页展示，建议使用正方形图片。
+            </Typography.Text>
+            <Space wrap>
+              {selectButton}
+              {uploadButton}
+              {removeButton}
+            </Space>
+          </div>
+        </Flex>
+      ) : (
+        <>
+          {variant === "gallery" ? (
+            <div>
+              <div className="overflow-hidden rounded-lg">
+                {value?.url ? (
+                  <Image
+                    src={imageUrl(value.url)}
+                    alt={value.altText ?? value.title ?? "相册图片"}
+                    width="100%"
+                    height={140}
+                    style={{ objectFit: "cover", display: "block" }}
+                  />
+                ) : (
+                  <Flex vertical align="center" justify="center" gap={6} className="h-[140px]">
+                    <IconPhoto size={24} stroke={1.25} className="text-slate-400" />
+                    <Typography.Text type="secondary">
+                      {value?.mediaAssetId ? "已选择媒体资源" : "尚未选择图片"}
+                    </Typography.Text>
+                  </Flex>
+                )}
+              </div>
+              <div className="mt-1 grid grid-cols-2 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                {selectButton}
+                {uploadButton}
+              </div>
+            </div>
+          ) : value?.url ? (
+            <Image
+              src={imageUrl(value.url)}
+              width={120}
+              height={100}
+              style={{ objectFit: "contain" }}
+            />
+          ) : value?.mediaAssetId ? (
+            <Typography.Text>已选择媒体资源</Typography.Text>
+          ) : null}
+          {variant !== "gallery" && (
+            <Space wrap>
+              {selectButton}
+              {uploadButton}
+              {variant === "default" && removeButton}
+            </Space>
+          )}
+        </>
+      )}
       <Modal
         title="选择媒体资源"
         open={opened}

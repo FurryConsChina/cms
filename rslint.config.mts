@@ -15,6 +15,8 @@ export default defineConfig([
       parserOptions: { project: "./tsconfig.json" },
     },
     rules: {
+      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/no-misused-promises": "warn",
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
       "react/prop-types": "off",

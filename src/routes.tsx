@@ -46,6 +46,11 @@ const router = createBrowserRouter([
         ],
       },
       { path: "profile", lazy: page(() => import("@/pages/dashboard/profile/list")) },
+      { path: "profile/create", lazy: page(() => import("@/pages/dashboard/profile/edit")) },
+      {
+        path: "profile/:profileId/edit",
+        lazy: page(() => import("@/pages/dashboard/profile/edit")),
+      },
       {
         path: "profile/:entityId/access",
         lazy: page(() => import("@/pages/dashboard/access/entity"), "ProfileAccessPage"),
