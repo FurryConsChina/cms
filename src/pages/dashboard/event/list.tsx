@@ -22,6 +22,7 @@ import {
   Flex,
   Input,
   MenuProps,
+  Popover,
   Space,
   Table,
   TableColumnType,
@@ -152,8 +153,26 @@ export default function EventPage() {
   const columns: ColumnsType<EventItem> = [
     {
       title: "展商",
-      render: (_, event) =>
-        event.organizers.map(({ organization }) => organization.name).join("、"),
+      render: (_, event) => {
+        const exhibitors = event.organizers.map(({ organization }) => organization);
+        if (exhibitors.length <= 1) return exhibitors[0]?.name;
+
+        return (
+          <Popover
+            content={
+              <Flex vertical gap={4}>
+                {exhibitors.map(({ id, name }) => (
+                  <Typography.Text key={id}>{name}</Typography.Text>
+                ))}
+              </Flex>
+            }
+          >
+            <Typography.Text>
+              {exhibitors[0].name} 等 {exhibitors.length} 家
+            </Typography.Text>
+          </Popover>
+        );
+      },
       key: "organizationName",
       ...getColumnSearchProps("orgSearch", "请输入展商名称"),
     },
