@@ -259,7 +259,7 @@ export default function UploadImage({
         }}
       >
         {value && (
-          <div style={fillHeight ? { position: "absolute", inset: 0 } : undefined}>
+          <div className="flex" style={fillHeight ? { position: "absolute", inset: 0 } : undefined}>
             <Image
               src={value.url ? imageUrl(value.url) : undefined}
               alt={label}
