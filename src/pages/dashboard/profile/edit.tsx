@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import { Alert, App, Avatar, Button, Flex, Form, Input, Select, Spin, Typography } from "antd";
+import { App, Avatar, Button, Flex, Form, Input, Select, Typography } from "antd";
 import { IconArrowLeft, IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
-import { useLocation, useNavigate, useParams } from "react-router";
-import useSWR, { useSWRConfig } from "swr";
+import { useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs } from "react-router";
+import { useSWRConfig } from "swr";
 import { ProfileAPI, profileSchema, type ProfileInput } from "@/api/cms/profile";
 import { LinkFields } from "@/components/common/Fields";
 import DefaultContainer from "@/components/layout/Container";
@@ -28,70 +28,19 @@ const statusLabels = { active: "活跃", inactive: "停用" };
 
 type EditorSession = { mode: "create" } | { mode: "edit"; profile: Profile };
 
-export default function ProfileEditPage() {
-  const { profileId } = useParams();
-  return profileId ? (
-    <ProfileDetailPage key={profileId} profileId={profileId} />
-  ) : (
-    <ProfileEditor key="create" session={{ mode: "create" }} />
-  );
+export async function loader({ params }: LoaderFunctionArgs): Promise<EditorSession> {
+  return params.profileId
+    ? { mode: "edit", profile: await ProfileAPI.detail(params.profileId) }
+    : { mode: "create" };
 }
 
-function ProfileDetailPage({ profileId }: { profileId: string }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { message } = App.useApp();
-  const {
-    data: profile,
-    error,
-    isLoading,
-    mutate,
-  } = useSWR<Profile, Error>(["profile-detail", profileId], () => ProfileAPI.detail(profileId), {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-  });
-  const backToList = () => {
-    navigate(`/dashboard/profile${location.search}`);
-  };
-
-  if (profile) {
-    return <ProfileEditor session={{ mode: "edit", profile }} />;
-  }
-
+export default function ProfileEditPage() {
+  const session = useLoaderData<typeof loader>();
   return (
-    <div className="space-y-4">
-      <DefaultContainer className="sticky top-0 z-20">
-        <Flex justify="space-between" align="center" wrap gap={12}>
-          <Typography.Title level={3} className="m-0">
-            编辑主体资料
-          </Typography.Title>
-          <Button onClick={backToList}>返回列表</Button>
-        </Flex>
-      </DefaultContainer>
-      <DefaultContainer>
-        {error ? (
-          <Alert
-            type="error"
-            showIcon
-            title={apiErrorMessage(error)}
-            action={
-              <Button
-                loading={isLoading}
-                onClick={() => {
-                  mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
-                }}
-              >
-                重试
-              </Button>
-            }
-          />
-        ) : (
-          <Flex justify="center" className="py-12">
-            <Spin aria-label="正在加载主体资料" />
-          </Flex>
-        )}
-      </DefaultContainer>
-    </div>
+    <ProfileEditor
+      key={session.mode === "edit" ? session.profile.id : "create"}
+      session={session}
+    />
   );
 }
 

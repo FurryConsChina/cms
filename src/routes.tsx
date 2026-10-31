@@ -54,10 +54,19 @@ const router = createBrowserRouter([
         ],
       },
       { path: "profile", lazy: page(() => import("@/pages/dashboard/profile/list")) },
-      { path: "profile/create", lazy: page(() => import("@/pages/dashboard/profile/edit")) },
+      {
+        path: "profile/create",
+        lazy: async () => {
+          const { default: Component, loader } = await import("@/pages/dashboard/profile/edit");
+          return { Component, loader };
+        },
+      },
       {
         path: "profile/:profileId/edit",
-        lazy: page(() => import("@/pages/dashboard/profile/edit")),
+        lazy: async () => {
+          const { default: Component, loader } = await import("@/pages/dashboard/profile/edit");
+          return { Component, loader };
+        },
       },
       {
         path: "profile/:entityId/access",
