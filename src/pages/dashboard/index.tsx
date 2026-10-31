@@ -5,6 +5,7 @@ import { getStats } from "@/api/cms/analysis";
 import { ApplicationApi } from "@/api/cms/application";
 import useAuthStore from "@/stores/auth";
 import { isAdmin, isPlatform } from "@/utils/permissions";
+import DefaultContainer from "@/components/layout/Container";
 
 export default function Dashboard() {
   const user = useAuthStore((state) => state.user);
@@ -30,7 +31,11 @@ export default function Dashboard() {
   ];
   return (
     <div className="space-y-4">
-      <Typography.Title level={2}>欢迎回来，{user?.name || user?.email}</Typography.Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Typography.Title level={3} className="m-0">
+          欢迎回来，{user?.name || user?.email}
+        </Typography.Title>
+      </DefaultContainer>
       <Row gutter={[16, 16]}>
         {cards.map((card) => (
           <Col xs={24} sm={12} lg={8} key={card.label}>

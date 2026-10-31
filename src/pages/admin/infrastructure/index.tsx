@@ -6,6 +6,7 @@ import { PlaceAPI } from "@/api/cms/place";
 import { apiErrorMessage } from "@/utils/apiError";
 import type { AuditLog } from "@/types/access";
 import type { List } from "@/types/request";
+import DefaultContainer from "@/components/layout/Container";
 
 export default function AdminInfrastructurePage() {
   const { message, modal } = App.useApp();
@@ -31,7 +32,11 @@ export default function AdminInfrastructurePage() {
 
   return (
     <div className="space-y-4">
-      <Typography.Title level={3}>管理员运维</Typography.Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Typography.Title level={3} className="m-0">
+          管理员运维
+        </Typography.Title>
+      </DefaultContainer>
       <Card title="地点地理索引">
         <Typography.Paragraph>
           根据所有未删除且经纬度完整的地点，重新生成地点坐标清单。用于批量导入或同步失败后的修复，日常编辑会自动同步。

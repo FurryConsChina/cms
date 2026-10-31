@@ -81,7 +81,7 @@ export default function OrganizationEditPage() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
-        <Title level={2} style={{ margin: 0 }}>
+        <Title level={3} className="m-0">
           {organizationId ? "编辑展商" : "新建展商"}
         </Title>
       </DefaultContainer>

@@ -25,7 +25,7 @@ export default function UserDetail() {
   return (
     <div className="relative">
       <DefaultContainer className="sticky top-0 z-20">
-        <Title level={3} style={{ margin: 0 }}>
+        <Title level={3} className="m-0">
           用户详情
         </Title>
       </DefaultContainer>

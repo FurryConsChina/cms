@@ -24,10 +24,18 @@ const router = createBrowserRouter([
           { index: true, lazy: page(() => import("@/pages/dashboard/event/list")) },
           { path: "create", lazy: page(() => import("@/pages/dashboard/event/edit")) },
           {
-            path: ":eventId/manage",
-            lazy: page(() => import("@/pages/dashboard/event/manage")),
+            path: ":eventId",
+            children: [
+              { index: true, lazy: page(() => import("@/pages/dashboard/event/edit")) },
+              { path: "offers", lazy: page(() => import("@/pages/dashboard/event/edit")) },
+              { path: "benefits", lazy: page(() => import("@/pages/dashboard/event/edit")) },
+              { path: "participants", lazy: page(() => import("@/pages/dashboard/event/edit")) },
+              {
+                path: "participants/:participantId/edit",
+                lazy: page(() => import("@/pages/dashboard/event/edit")),
+              },
+            ],
           },
-          { path: ":eventId/edit", lazy: page(() => import("@/pages/dashboard/event/edit")) },
         ],
       },
       {
@@ -46,6 +54,20 @@ const router = createBrowserRouter([
         ],
       },
       { path: "profile", lazy: page(() => import("@/pages/dashboard/profile/list")) },
+      {
+        path: "profile/create",
+        lazy: async () => {
+          const { default: Component, loader } = await import("@/pages/dashboard/profile/edit");
+          return { Component, loader };
+        },
+      },
+      {
+        path: "profile/:profileId/edit",
+        lazy: async () => {
+          const { default: Component, loader } = await import("@/pages/dashboard/profile/edit");
+          return { Component, loader };
+        },
+      },
       {
         path: "profile/:entityId/access",
         lazy: page(() => import("@/pages/dashboard/access/entity"), "ProfileAccessPage"),

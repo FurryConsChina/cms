@@ -1,6 +1,6 @@
 import { Button, Input, Space } from "antd";
 import type { FilterDropdownProps } from "antd/es/table/interface";
-import EntitySelect from "./EntitySelect";
+import RegionSelector from "@/components/region/RegionSelector";
 
 export default function TableFilterDropdown({
   selectedKeys,
@@ -22,12 +22,10 @@ export default function TableFilterDropdown({
     <div style={{ padding: 8 }} onKeyDown={(event) => event.stopPropagation()}>
       <Space orientation="vertical">
         {region ? (
-          <EntitySelect
-            kind="region"
+          <RegionSelector
             value={value}
             onChange={(id) => setSelectedKeys(id ? [id] : [])}
-            placeholder={placeholder}
-            style={{ width: 240 }}
+            antdSelectProps={{ allowClear: true, placeholder, style: { width: 240 } }}
           />
         ) : (
           <Input

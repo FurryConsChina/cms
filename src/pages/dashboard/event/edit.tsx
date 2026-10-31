@@ -1,15 +1,20 @@
 import { apiErrorMessage } from "@/utils/apiError";
-import { useNavigate, useParams } from "react-router";
-import { useState } from "react";
-import { pickBy } from "es-toolkit";
+import { useMatch, useNavigate, useParams } from "react-router";
+import { lazy, Suspense, useState } from "react";
 import useSWR from "swr";
+import { IconArrowLeft } from "@tabler/icons-react";
+import { pickBy } from "es-toolkit";
 import dayjs from "dayjs";
-import { Button, Divider, Typography, Flex, App, Form, Spin } from "antd";
+import { Button, Divider, Typography, Flex, App, Form, Space, Spin, Tabs, Tag } from "antd";
 import { Region } from "@/types/region";
 import { EditEventApiBody, EventAPI } from "@/api/cms/event";
 import DefaultContainer from "@/components/layout/Container";
-import LoadError from "@/components/layout/LoadError";
+import useUnsavedChangesGuard from "@/hooks/useUnsavedChangesGuard";
 import { useZodValidateData as validateData } from "@/utils/form";
+import EventVisibility from "@/components/event/EventVisibility";
+import LoadError from "@/components/layout/LoadError";
+import useAuthStore from "@/stores/auth";
+import { isAdmin } from "@/utils/permissions";
 
 import BasicInfo from "./components/BasicInfo";
 import GeographicInfo from "./components/GeographicInfo";
@@ -22,7 +27,7 @@ import "dayjs/locale/zh-cn";
 
 import {
   type EditableEvent,
-  EventItem,
+  type EventItem,
   EventStatus,
   EventType,
   EventScale,
@@ -33,58 +38,162 @@ dayjs.locale("zh-cn");
 
 const { Title } = Typography;
 
-export default function EventEditPage() {
-  const { eventId } = useParams();
+const OfferPanel = lazy(() => import("@/components/event/edit/OfferPanel"));
+const BenefitPanel = lazy(() => import("@/components/event/edit/BenefitPanel"));
+const ParticipantPanel = lazy(() => import("@/components/event/edit/ParticipantPanel"));
+const ParticipantEditor = lazy(() => import("@/components/event/edit/ParticipantEditor"));
 
-  const { data, isLoading, error, mutate } = useSWR<EventItem, Error>(
-    ["event-detail", eventId],
-    eventId ? () => EventAPI.getEventDetail({ id: eventId }) : null,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    },
+export default function EventEditPage() {
+  const { eventId, participantId } = useParams();
+  const sectionMatch = useMatch("/dashboard/event/:eventId/:section/*");
+  const section = sectionMatch?.params.section ?? "basic";
+  const navigate = useNavigate();
+  const { message } = App.useApp();
+  const admin = isAdmin(useAuthStore((state) => state.user?.role));
+  const {
+    data: event,
+    error,
+    mutate,
+  } = useSWR<EventItem, Error>(
+    eventId ? ["event-detail", eventId] : null,
+    () => EventAPI.getEventDetail({ id: eventId! }),
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
+  );
+  const reloadEvent = async () => {
+    const refreshed = await EventAPI.getEventDetail({ id: eventId! });
+    await mutate(refreshed, { revalidate: false });
+    return refreshed;
+  };
+  const loading = (
+    <DefaultContainer>
+      <Flex justify="center" align="center">
+        <Spin aria-label="正在加载编辑内容" />
+      </Flex>
+    </DefaultContainer>
   );
 
-  if (error) {
-    return <LoadError />;
+  if (error) return <LoadError />;
+
+  if (!eventId) {
+    return (
+      <div className="space-y-4">
+        <DefaultContainer className="sticky top-0 z-20">
+          <Title level={3} className="m-0">
+            新建展会
+          </Title>
+        </DefaultContainer>
+        <DefaultContainer>
+          <EventEditorContent key="create" />
+        </DefaultContainer>
+      </div>
+    );
   }
 
-  return (
-    <div className="relative">
-      <DefaultContainer className="sticky top-0 z-20">
-        <Title level={2} style={{ margin: 0 }}>
-          {eventId ? "编辑展会" : "新建展会"}
-        </Title>
-      </DefaultContainer>
+  const basePath = `/dashboard/event/${eventId}`;
 
-      <DefaultContainer className="mt-4">
-        {isLoading ? (
-          <Flex justify="center" align="center">
-            <Spin />
-          </Flex>
-        ) : (
-          <EventEditorContent
-            key={eventId ?? "create"}
-            event={data}
-            reloadEvent={async () => {
-              const refreshed = await EventAPI.getEventDetail({ id: eventId! });
-              await mutate(refreshed, { revalidate: false });
-              return refreshed;
+  return (
+    <div className="space-y-4">
+      <DefaultContainer className="sticky top-0 z-20">
+        <Flex justify="space-between" align="center" wrap gap={12}>
+          <Space align="center">
+            <Button
+              type="text"
+              aria-label="返回展会列表"
+              icon={<IconArrowLeft size={18} />}
+              onClick={() => {
+                Promise.resolve(navigate("/dashboard/event")).catch((error: unknown) => {
+                  message.error(apiErrorMessage(error));
+                });
+              }}
+            />
+            <div className="flex flex-col">
+              <Space size={8} align="center">
+                <Title level={3} className="m-0">
+                  {event?.name ?? "编辑展会"}
+                </Title>
+                {event && (
+                  <Tag color={event.isSuspended ? "red" : event.isPublished ? "green" : "default"}>
+                    {event.isSuspended ? "平台暂停" : event.isPublished ? "已发布" : "已下架"}
+                  </Tag>
+                )}
+              </Space>
+              {event && (event.organizers.length > 0 || event.startAt) && (
+                <Space size={12} wrap>
+                  {event.organizers.length > 0 && (
+                    <Typography.Text type="secondary">
+                      {event.organizers.map(({ organization }) => organization.name).join("、")}
+                    </Typography.Text>
+                  )}
+                  {event.startAt && (
+                    <Typography.Text type="secondary">
+                      {dayjs(event.startAt).format("YYYY年M月D日")}
+                      {event.endAt ? ` 至 ${dayjs(event.endAt).format("M月D日")}` : ""}
+                    </Typography.Text>
+                  )}
+                </Space>
+              )}
+            </div>
+          </Space>
+          {event && (
+            <EventVisibility
+              event={event}
+              onChange={() => {
+                reloadEvent().catch((error: unknown) => message.error(apiErrorMessage(error)));
+              }}
+            />
+          )}
+        </Flex>
+      </DefaultContainer>
+      {admin && (
+        <nav aria-label="展会编辑导航">
+          <Tabs
+            activeKey={section === "basic" ? basePath : `${basePath}/${section}`}
+            className="[&_.ant-tabs-nav]:mb-0 [&_.ant-tabs-nav::before]:border-b-0"
+            items={[
+              { key: basePath, label: "基础资料" },
+              { key: `${basePath}/offers`, label: "票档" },
+              { key: `${basePath}/benefits`, label: "票档权益" },
+              { key: `${basePath}/participants`, label: "参加者" },
+            ]}
+            onChange={(path) => {
+              Promise.resolve(navigate(path)).catch((error: unknown) => {
+                message.error(apiErrorMessage(error));
+              });
             }}
           />
-        )}
-      </DefaultContainer>
+        </nav>
+      )}
+      {event ? (
+        <Suspense key={eventId} fallback={loading}>
+          {section === "offers" ? (
+            <OfferPanel eventId={eventId} />
+          ) : section === "benefits" ? (
+            <BenefitPanel eventId={eventId} />
+          ) : section === "participants" ? (
+            participantId ? (
+              <ParticipantEditor eventId={eventId} participantId={participantId} />
+            ) : (
+              <ParticipantPanel eventId={eventId} />
+            )
+          ) : (
+            <DefaultContainer>
+              <EventEditorContent event={event} onSaved={reloadEvent} />
+            </DefaultContainer>
+          )}
+        </Suspense>
+      ) : (
+        loading
+      )}
     </div>
   );
 }
 
 function EventEditorContent({
   event,
-  reloadEvent,
-}: {
-  event?: EventItem;
-  reloadEvent: () => Promise<EventItem>;
-}) {
+  onSaved,
+}:
+  | { event: EventItem; onSaved: () => Promise<EventItem> }
+  | { event?: undefined; onSaved?: never }) {
   const navigate = useNavigate();
   const { message, modal } = App.useApp();
   const cleanedEvent = event ? pickBy(event, (v) => v !== "" && v != null) : {};
@@ -129,23 +238,34 @@ function EventEditorContent({
 
   const [saving, setSaving] = useState(false);
   const [mediaUploading, setMediaUploading] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  Form.useWatch([], form);
+  const { allowNavigation, clearAllowedNavigation, confirmationModal } = useUnsavedChangesGuard({
+    dirty: dirty || form.isFieldsTouched(),
+    busy: saving || mediaUploading,
+  });
   const onSubmit = async (value: EditableEvent) => {
     if (saving) return;
     setSaving(true);
     try {
-      if (event?.id) {
+      if (event) {
         await EventAPI.updateEvent(event.id, value);
-        const refreshed = await reloadEvent();
+        const refreshed = await onSaved();
         form.setFieldValue("features", refreshed.features);
+        form.setFields(form.getFieldsError().map(({ name }) => ({ name, touched: false })));
+        setDirty(false);
         message.success("已保存");
       } else {
         const res = await EventAPI.createEvent(value);
         message.success("活动已创建");
-        void navigate(`/dashboard/event/${res.id}/edit`);
+        const destination = `/dashboard/event/${res.id}`;
+        allowNavigation(destination);
+        await navigate(destination);
       }
     } catch (error) {
       message.error(apiErrorMessage(error));
     } finally {
+      clearAllowedNavigation();
       setSaving(false);
     }
   };
@@ -171,13 +291,16 @@ function EventEditorContent({
     );
 
     if (processedValues.errors.length > 0) {
-      return modal.warning({
-        title: "接口数据校验失败☹️",
+      modal.warning({
+        title: "接口数据校验失败",
         content: processedValues.prettyErrors,
       });
+      return;
     }
     if (processedValues.values) {
-      void onSubmit(processedValues.values);
+      onSubmit(processedValues.values).catch((error: unknown) => {
+        message.error(apiErrorMessage(error));
+      });
     }
     return;
   };
@@ -185,12 +308,12 @@ function EventEditorContent({
   return (
     <Form
       form={form}
-      onFinish={(value: typeof initialValues) => {
-        void handleFinish(value);
-      }}
+      onFinish={handleFinish}
+      onValuesChange={() => setDirty(true)}
       layout="vertical"
       initialValues={initialValues}
     >
+      {confirmationModal}
       <BasicInfo organizations={event?.organizers.map(({ organization }) => organization) ?? []} />
 
       <Divider dashed size="small" />

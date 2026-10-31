@@ -55,6 +55,7 @@ export const targetTypeLabels: Record<string, string> = {
   profile_invitation: "主体邀请",
   profile_member: "主体成员",
   region: "地区",
+  site_setting: "站点设置",
   user: "用户",
   auth: "账户",
 };

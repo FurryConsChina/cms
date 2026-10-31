@@ -19,7 +19,7 @@ import type { Region } from "@/types/region";
 import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
 import LocationSearch from "@/components/event/LocationSearch";
-import EntitySelect from "@/components/common/EntitySelect";
+import RegionSelector from "@/components/region/RegionSelector";
 import { toOptions } from "@/consts/labels";
 import { timezoneOptions } from "@/consts/timezones";
 
@@ -103,7 +103,9 @@ export default function PlaceEditor({
   };
   const [search, setSearch] = useState<string>();
   const [regionNeedsSelection, setRegionNeedsSelection] = useState(false);
-  const selectedRegionId = Form.useWatch("regionId", form);
+  const watchedRegionId = Form.useWatch("regionId", form) as string | null | undefined;
+  const selectedRegionId =
+    watchedRegionId === undefined ? (place?.regionId ?? regionId) : watchedRegionId;
   const timezone = Form.useWatch("timezone", form) as string | null | undefined;
   const availableTimezones =
     timezone && !timezoneOptions.some((option) => option.value === timezone)
@@ -145,7 +147,7 @@ export default function PlaceEditor({
           coordinateSource: "manual",
           ...place,
         }}
-        onFinish={submit}
+        onFinish={(values: Record<string, unknown>) => void submit(values)}
         onValuesChange={() => setDirty(true)}
         scrollToFirstError
       >
@@ -178,10 +180,18 @@ export default function PlaceEditor({
             <Form.Item
               label="所属地区"
               name="regionId"
+              getValueFromEvent={(value: string | undefined) => value ?? null}
               rules={[{ required: true, message: "请选择所属地区" }]}
               extra={place ? "修改地区后，使用此地点的活动会同步更新地区和页面地址。" : undefined}
             >
-              <EntitySelect kind="region" style={{ width: "100%", minWidth: 0 }} />
+              <RegionSelector
+                selectedOption={place?.region}
+                antdSelectProps={{
+                  allowClear: true,
+                  placeholder: "输入名称或代码搜索",
+                  style: { width: "100%", minWidth: 0 },
+                }}
+              />
             </Form.Item>
           </Col>
           <Col xs={24} sm={6}>

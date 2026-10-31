@@ -41,7 +41,7 @@ const columns: ColumnsType<FeatureEvent> = [
     key: "action",
     width: 80,
     render: (_, record) => (
-      <Button size="small" onClick={() => window.open(`/dashboard/event/${record.id}/edit`)}>
+      <Button size="small" onClick={() => window.open(`/dashboard/event/${record.id}`)}>
         编辑
       </Button>
     ),

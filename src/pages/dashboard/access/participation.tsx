@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router";
 import { useState } from "react";
 import { ParticipantAPI } from "@/api/cms/participant";
 import { apiErrorMessage } from "@/utils/apiError";
+import DefaultContainer from "@/components/layout/Container";
 
 export default function OwnParticipationPage() {
   const [params] = useSearchParams();
@@ -10,7 +11,11 @@ export default function OwnParticipationPage() {
   const [busy, setBusy] = useState(false);
   return (
     <div className="space-y-4">
-      <Typography.Title level={3}>参加者自助</Typography.Title>
+      <DefaultContainer className="sticky top-0 z-20">
+        <Typography.Title level={3} className="m-0">
+          参加者自助
+        </Typography.Title>
+      </DefaultContainer>
       <Alert
         type="info"
         title="参加方成员可以修改自身参加记录的介绍；角色、摊位和顺序由活动管理者维护。"

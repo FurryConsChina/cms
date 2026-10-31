@@ -1,6 +1,17 @@
 import { useRef, useState, type ReactNode } from "react";
-import { App, Button, Flex, Image, Progress, Spin, Typography, Upload, theme } from "antd";
-import { IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  App,
+  Button,
+  Flex,
+  Image,
+  Spin,
+  Typography,
+  Upload,
+  theme,
+  type UploadFile,
+  type UploadProps,
+} from "antd";
+import { IconPencil, IconPlus, IconTrash, IconUpload } from "@tabler/icons-react";
 import ImgCrop from "antd-img-crop";
 import type { MediaBinding } from "@/types/media";
 import { uploadToCOS } from "@/utils/cos";
@@ -29,6 +40,7 @@ export default function UploadImage({
   previewWidth = 120,
   previewHeight,
   fillHeight = false,
+  trigger = "dropzone",
 }: {
   value?: MediaBinding | null;
   onChange?: (value: MediaBinding | null) => void;
@@ -45,14 +57,15 @@ export default function UploadImage({
   previewHeight?: number;
   /** 撑满父级 Flex 容器的可用高度。 */
   fillHeight?: boolean;
+  /** 选择上传入口的外观。 */
+  trigger?: "dropzone" | "button" | "toolbar";
 }) {
   const { message } = App.useApp();
   const { token } = theme.useToken();
   const rejectedFiles = useRef(new WeakSet<File>());
   const busyRef = useRef(false);
   const [busy, setBusy] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [percent, setPercent] = useState(0);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const updateBusy = (next: boolean) => {
     busyRef.current = next;
@@ -70,21 +83,52 @@ export default function UploadImage({
     }
     return true;
   };
+  const customRequest: UploadProps["customRequest"] = (options) => {
+    (async () => {
+      try {
+        const asset = await uploadToCOS({
+          file: options.file as File,
+          onProgress: (progress) => {
+            options.onProgress?.({ percent: Math.round(progress * 100) });
+          },
+        });
+        const binding = { mediaAssetId: asset.mediaAssetId, url: asset.url };
+        onChange?.(binding);
+        onUploadSuccess?.(binding);
+        message.success(`${label}上传成功`);
+        options.onSuccess?.(asset);
+      } finally {
+        updateBusy(false);
+      }
+    })().catch((error: unknown) => {
+      message.error(apiErrorMessage(error, `${label}上传失败，请重试`));
+      options.onError?.(error instanceof Error ? error : new Error(String(error)));
+    });
+  };
 
   const upload = (
     <Upload
       accept={imageTypes.join(",")}
-      listType={value || fillHeight ? "text" : "picture-card"}
-      showUploadList={false}
+      listType={trigger !== "dropzone" || value || fillHeight ? "text" : "picture-card"}
+      fileList={fileList}
+      maxCount={1}
+      showUploadList={{ showRemoveIcon: false }}
+      progress={{ showInfo: true }}
+      customRequest={customRequest}
+      onChange={({ file, fileList: nextFileList }) => {
+        setFileList(file.status === "uploading" ? nextFileList : []);
+      }}
       styles={
-        !value && fillHeight
-          ? {
-              root: { width: "100%", height: "100%" },
-              trigger: { width: "100%", height: "100%" },
-            }
-          : !value && previewHeight
-            ? { trigger: { width: previewWidth, height: previewHeight, margin: 0 } }
-            : undefined
+        trigger === "toolbar"
+          ? { root: { width: "100%" }, trigger: { width: "100%" } }
+          : !value && fillHeight
+            ? {
+                root: { width: "100%", height: "100%" },
+                trigger: { width: "100%", height: "100%" },
+              }
+            : !value && previewHeight
+              ? { trigger: { width: previewWidth, height: previewHeight, margin: 0 } }
+              : undefined
       }
       disabled={disabled || busy}
       beforeUpload={async (file) => {
@@ -94,43 +138,42 @@ export default function UploadImage({
           if (disabled || busyRef.current || !validate(file)) return Upload.LIST_IGNORE;
           updateBusy(true);
         }
-        setUploading(true);
-        setPercent(0);
         try {
           if (file.size > 50 * 1024 * 1024) throw new Error("图片不能超过 50 MB");
-          let uploadFile: File = file;
           if (crop && file.type !== "image/png") {
             // Canvas 不支持原格式时会导出 PNG，但裁剪库仍沿用原文件的 MIME 类型。
             const header = new Uint8Array(await file.slice(0, 8).arrayBuffer());
             const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
             if (pngSignature.every((byte, index) => header[index] === byte)) {
-              uploadFile = new File([file], file.name, { type: "image/png" });
+              return new File([file], file.name, { type: "image/png" });
             }
           }
-          const asset = await uploadToCOS({
-            file: uploadFile,
-            onProgress: (progress) => setPercent(Math.round(progress * 100)),
-          });
-          const binding = { mediaAssetId: asset.mediaAssetId, url: asset.url };
-          onChange?.(binding);
-          onUploadSuccess?.(binding);
-          message.success(`${label}上传成功`);
+          return file;
         } catch (error) {
-          message.error(apiErrorMessage(error, `${label}上传失败，请重试`));
-        } finally {
-          setUploading(false);
+          message.error(apiErrorMessage(error));
           updateBusy(false);
+          return Upload.LIST_IGNORE;
         }
-        return false;
       }}
     >
-      {value ? (
+      {trigger !== "dropzone" ? (
+        <Button
+          type={trigger === "toolbar" ? "text" : "default"}
+          block={trigger === "toolbar"}
+          className={trigger === "toolbar" ? "h-9 rounded-none border-0 shadow-none" : undefined}
+          icon={<IconUpload size={16} stroke={1.5} />}
+          loading={busy}
+          disabled={disabled || busy}
+        >
+          {trigger === "toolbar" ? "本地上传" : `上传${label}`}
+        </Button>
+      ) : value ? (
         <Button
           type="text"
           aria-label={`编辑${label}`}
           title={`编辑${label}`}
           icon={<IconPencil size={20} />}
-          loading={uploading}
+          loading={busy}
           disabled={disabled || busy}
           style={{ color: "white" }}
         />
@@ -153,13 +196,49 @@ export default function UploadImage({
           }
         >
           <Flex vertical align="center" gap={8}>
-            {uploading ? <Spin size="small" /> : <IconPlus size={24} aria-hidden />}
-            <span>{uploading ? "正在上传" : `上传${label}`}</span>
+            {busy ? <Spin size="small" /> : <IconPlus size={24} aria-hidden />}
+            <span>上传{label}</span>
           </Flex>
         </button>
       )}
     </Upload>
   );
+
+  const uploadControl = crop ? (
+    <ImgCrop
+      aspect={aspect}
+      quality={0.92}
+      fillColor="transparent"
+      rotationSlider
+      showReset
+      modalTitle={`裁剪${label}`}
+      modalOk="裁剪并上传"
+      modalCancel="取消"
+      resetText="重置"
+      beforeCrop={(file) => {
+        if (disabled || busyRef.current || !validate(file)) {
+          rejectedFiles.current.add(file);
+          return false;
+        }
+        updateBusy(true);
+        return true;
+      }}
+      onModalCancel={() => updateBusy(false)}
+    >
+      {upload}
+    </ImgCrop>
+  ) : (
+    upload
+  );
+
+  if (trigger !== "dropzone") {
+    return (
+      <Flex vertical gap={8} align="start" className={trigger === "toolbar" ? "w-full" : undefined}>
+        {uploadControl}
+        {hint != null && <Typography.Text type="secondary">{hint}</Typography.Text>}
+      </Flex>
+    );
+  }
 
   return (
     <Flex
@@ -180,7 +259,7 @@ export default function UploadImage({
         }}
       >
         {value && (
-          <div style={fillHeight ? { position: "absolute", inset: 0 } : undefined}>
+          <div className="flex" style={fillHeight ? { position: "absolute", inset: 0 } : undefined}>
             <Image
               src={value.url ? imageUrl(value.url) : undefined}
               alt={label}
@@ -209,32 +288,7 @@ export default function UploadImage({
                 : undefined
           }
         >
-          {crop ? (
-            <ImgCrop
-              aspect={aspect}
-              quality={0.92}
-              fillColor="transparent"
-              rotationSlider
-              showReset
-              modalTitle={`裁剪${label}`}
-              modalOk="裁剪并上传"
-              modalCancel="取消"
-              resetText="重置"
-              beforeCrop={(file) => {
-                if (disabled || busyRef.current || !validate(file)) {
-                  rejectedFiles.current.add(file);
-                  return false;
-                }
-                updateBusy(true);
-                return true;
-              }}
-              onModalCancel={() => updateBusy(false)}
-            >
-              {upload}
-            </ImgCrop>
-          ) : (
-            upload
-          )}
+          {uploadControl}
           {value && (
             <Button
               type="text"
@@ -248,14 +302,6 @@ export default function UploadImage({
           )}
         </Flex>
       </div>
-      {uploading && (
-        <div style={{ width: 240 }}>
-          <Progress percent={percent} status="active" />
-          <Typography.Text type="secondary">
-            {percent === 100 ? "正在确认上传结果…" : `正在上传${label}…`}
-          </Typography.Text>
-        </div>
-      )}
       {hint != null && <Typography.Text type="secondary">{hint}</Typography.Text>}
     </Flex>
   );
