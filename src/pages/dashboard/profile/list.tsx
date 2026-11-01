@@ -7,6 +7,7 @@ import { apiErrorMessage } from "@/utils/apiError";
 import { ProfileAPI } from "@/api/cms/profile";
 import useAuthStore from "@/stores/auth";
 import { isPlatform } from "@/utils/permissions";
+import { publishStatusLabels } from "@/consts/publishStatus";
 import { imageUrl } from "@/utils/imageLoader";
 import type { Profile } from "@/types/profile";
 import type { List } from "@/types/request";
@@ -26,6 +27,7 @@ export default function ProfilePage() {
     {
       search: parseAsString.withDefault(""),
       kind: parseAsStringLiteral(["individual", "group", "brand", "media"]),
+      publishStatus: parseAsStringLiteral(["draft", "published"]),
       current: parseAsInteger.withDefault(1),
       pageSize: parseAsInteger.withDefault(20),
     },
@@ -33,12 +35,14 @@ export default function ProfilePage() {
   );
   const search = filters.search.trim();
   const kind = filters.kind ?? undefined;
+  const publishStatus = filters.publishStatus ?? undefined;
   const current = filters.current > 0 ? filters.current : 1;
   const pageSize = filters.pageSize > 0 ? filters.pageSize : 20;
   const { message, modal } = App.useApp();
+  const params = { current, pageSize, name: search || undefined, kind, publishStatus };
   const { data, error, isLoading, mutate } = useSWR<List<Profile>, Error>(
-    ["profiles", search, kind, current, pageSize],
-    () => ProfileAPI.list({ current, pageSize, name: search || undefined, kind }),
+    ["profiles", params],
+    () => ProfileAPI.list(params),
   );
   const records = data?.records ?? [];
   const columns: ColumnsType<Profile> = [
@@ -74,6 +78,18 @@ export default function ProfilePage() {
       title: "状态",
       render: (_, v) => (
         <Tag color={v.status === "active" ? "green" : "default"}>{statusLabels[v.status]}</Tag>
+      ),
+    },
+    {
+      title: "发布状态",
+      key: "publishStatus",
+      filters: Object.entries(publishStatusLabels).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: publishStatus ? [publishStatus] : null,
+      render: (_, v) => (
+        <Tag color={v.publishStatus === "published" ? "green" : "default"}>
+          {publishStatusLabels[v.publishStatus] ?? "未知"}
+        </Tag>
       ),
     },
     {
@@ -156,6 +172,8 @@ export default function ProfilePage() {
           setFilters({
             search: (values.name?.[0] as string | undefined)?.trim() ?? "",
             kind: (values.kind?.[0] as Profile["kind"] | undefined) ?? null,
+            publishStatus:
+              (values.publishStatus?.[0] as Profile["publishStatus"] | undefined) ?? null,
             current: 1,
           });
         }}

@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
-import { App, Avatar, Button, Flex, Form, Input, Select, Typography } from "antd";
+import { App, Avatar, Button, Flex, Form, Input, Select, Tag, Typography } from "antd";
 import { IconArrowLeft, IconDeviceFloppy, IconPlus } from "@tabler/icons-react";
 import { useLoaderData, useLocation, useNavigate, type LoaderFunctionArgs } from "react-router";
 import { useSWRConfig } from "swr";
-import { ProfileAPI, profileSchema, type ProfileInput } from "@/api/cms/profile";
+import { ProfileAPI, profileSchema } from "@/api/cms/profile";
 import { LinkFields } from "@/components/common/Fields";
 import DefaultContainer from "@/components/layout/Container";
 import MediaPicker from "@/components/media/MediaPicker";
@@ -11,6 +11,7 @@ import GalleryFields from "@/components/media/GalleryFields";
 import useMediaBusy from "@/components/media/useMediaBusy";
 import useUnsavedChangesGuard from "@/hooks/useUnsavedChangesGuard";
 import { toOptions } from "@/consts/labels";
+import { publishStatusLabels } from "@/consts/publishStatus";
 import useAuthStore from "@/stores/auth";
 import type { Profile } from "@/types/profile";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -53,6 +54,9 @@ function ProfileEditor({ session }: { session: EditorSession }) {
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [savedPublishStatus, setSavedPublishStatus] = useState(
+    session.mode === "edit" ? session.profile.publishStatus : undefined,
+  );
   const submitting = useRef(false);
   const { busy: mediaBusy, onBusyChange } = useMediaBusy();
   const busy = saving || mediaBusy;
@@ -67,6 +71,7 @@ function ProfileEditor({ session }: { session: EditorSession }) {
     links: [],
     avatar: null,
     gallery: [],
+    ...(session.mode === "create" ? { publishStatus: "draft" } : {}),
     ...profileWithoutPortrait,
   };
   const currentName = Form.useWatch("name", form) as string | undefined;
@@ -100,7 +105,7 @@ function ProfileEditor({ session }: { session: EditorSession }) {
       message.error(parsed.error.issues[0]?.message ?? "请检查表单内容");
       return;
     }
-    const input: ProfileInput = parsed.data;
+    const input = parsed.data;
     submitting.current = true;
     setSaving(true);
     let saved: Profile;
@@ -115,6 +120,7 @@ function ProfileEditor({ session }: { session: EditorSession }) {
       return;
     }
 
+    setSavedPublishStatus(saved.publishStatus);
     form.setFields(form.getFieldsError().map(({ name }) => ({ name, touched: false })));
     setDirty(false);
     mutate((key) => Array.isArray(key) && key[0] === "profiles", undefined, {
@@ -169,6 +175,11 @@ function ProfileEditor({ session }: { session: EditorSession }) {
                 <Typography.Title level={3} className="m-0 truncate text-lg sm:text-xl">
                   {headerTitle}
                 </Typography.Title>
+                {session.mode === "edit" && (
+                  <Tag color={savedPublishStatus === "published" ? "green" : "default"}>
+                    {savedPublishStatus ? publishStatusLabels[savedPublishStatus] : "状态未知"}
+                  </Tag>
+                )}
               </Flex>
               <Typography.Text type="secondary" className="block truncate text-xs sm:text-sm">
                 {headerDescription}
@@ -230,7 +241,7 @@ function ProfileEditor({ session }: { session: EditorSession }) {
               <Select options={toOptions(kindLabels)} />
             </Form.Item>
             <Form.Item
-              label="状态"
+              label="主体状态"
               name="status"
               extra={!platform && session.mode === "create" ? "创建时使用默认状态。" : undefined}
             >
@@ -238,6 +249,18 @@ function ProfileEditor({ session }: { session: EditorSession }) {
                 disabled={saving || (!platform && session.mode === "create")}
                 options={toOptions(statusLabels)}
               />
+            </Form.Item>
+            <Form.Item
+              label="发布状态"
+              name="publishStatus"
+              extra={
+                session.mode === "create"
+                  ? "新建主体默认为草稿，可选择发布。"
+                  : "草稿不会在公开页面展示。修改后，点击“保存更改”生效。"
+              }
+              rules={[{ required: true, message: "请选择发布状态" }]}
+            >
+              <Select disabled={saving} options={toOptions(publishStatusLabels)} />
             </Form.Item>
           </div>
           <Form.Item label="简介" name="description">

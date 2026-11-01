@@ -27,7 +27,8 @@ export default function OwnParticipationPage() {
         onFinish={async ({ id, description }: { id: string; description?: string }) => {
           setBusy(true);
           try {
-            await ParticipantAPI.updateOwn(id, description || null);
+            // 自助接口只更新介绍，后端校验发布状态但不会使用该值。
+            await ParticipantAPI.updateOwn(id, description || null, "draft");
             message.success("介绍已更新");
           } catch (e) {
             message.error(apiErrorMessage(e));

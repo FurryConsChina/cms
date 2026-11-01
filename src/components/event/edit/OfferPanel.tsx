@@ -30,6 +30,8 @@ import BenefitSelector from "@/components/benefit/BenefitSelector";
 import DefaultContainer from "@/components/layout/Container";
 import { IsoDateTimeInput, IsoDateTimeListInput } from "@/components/common/Fields";
 import { toOptions } from "@/consts/labels";
+import { publishStatusLabels } from "@/consts/publishStatus";
+import type { PublishStatus } from "@/types/publishStatus";
 
 const availability = { upcoming: "待售", onSale: "售卖中", soldOut: "售罄", ended: "已结束" };
 const availabilityColors = {
@@ -49,15 +51,16 @@ const currencies = [
 
 export default function EventOfferPanel({ eventId }: { eventId: string }) {
   const [status, setStatus] = useState<Offer["availability"]>();
+  const [publishStatus, setPublishStatus] = useState<PublishStatus>();
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   useEffect(() => {
     setCurrent(1);
-  }, [eventId, status]);
+  }, [eventId, status, publishStatus]);
   const { data, error, isLoading, mutate } = useSWR<List<Offer>, Error>(
-    ["offers", eventId, status, current, pageSize],
-    () => OfferAPI.list({ current, pageSize, eventId, availability: status }),
+    ["offers", eventId, status, publishStatus, current, pageSize],
+    () => OfferAPI.list({ current, pageSize, eventId, availability: status, publishStatus }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Offer>();
@@ -90,6 +93,7 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
       : {
           eventId,
           availability: "upcoming",
+          publishStatus: "draft",
           currency: "CNY",
           sortOrder: data?.total ?? 0,
           price: null,
@@ -101,10 +105,15 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
     setEditing(record);
     setDirty(false);
   };
-  const open = (record?: Offer) => {
+  const open = async (record?: Offer) => {
     try {
       setOpeningId(record?.id);
+      const total =
+        !record && (status || publishStatus)
+          ? (await OfferAPI.list({ eventId, current: 1, pageSize: 1 })).total
+          : undefined;
       fill(record);
+      if (total !== undefined) form.setFieldValue("sortOrder", total);
       setOpened(true);
     } catch (error) {
       message.error(apiErrorMessage(error));
@@ -155,9 +164,10 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
     }
   };
   const records = data?.records ?? [];
-  const reorder: ((record: Offer, sortOrder: number) => Promise<Offer>) | undefined = status
-    ? undefined
-    : (record, sortOrder) => OfferAPI.save(record.id, { ...toOfferInput(record), sortOrder });
+  const reorder: ((record: Offer, sortOrder: number) => Promise<Offer>) | undefined =
+    status || publishStatus
+      ? undefined
+      : (record, sortOrder) => OfferAPI.save(record.id, { ...toOfferInput(record), sortOrder });
   const move = async (index: number, offset: -1 | 1) => {
     if (!reorder) return;
     const next = [...records];
@@ -214,13 +224,25 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
     { title: "票档", dataIndex: "name" },
     { title: "价格", render: (_, v) => (v.price == null ? "待公布" : `${v.price} ${v.currency}`) },
     {
-      title: "状态",
+      title: "售卖状态",
       key: "availability",
       filters: Object.entries(availability).map(([value, text]) => ({ value, text })),
       filterMultiple: false,
       filteredValue: status ? [status] : null,
       render: (_, v) => (
         <Tag color={availabilityColors[v.availability]}>{availability[v.availability]}</Tag>
+      ),
+    },
+    {
+      title: "发布状态",
+      key: "publishStatus",
+      filters: Object.entries(publishStatusLabels).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: publishStatus ? [publishStatus] : null,
+      render: (_, v) => (
+        <Tag color={v.publishStatus === "published" ? "green" : "default"}>
+          {publishStatusLabels[v.publishStatus]}
+        </Tag>
       ),
     },
     {
@@ -299,6 +321,7 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
         onChange={(_pagination, values, _sorter, extra) => {
           if (extra.action !== "filter") return;
           setStatus(values.availability?.[0] as Offer["availability"] | undefined);
+          setPublishStatus(values.publishStatus?.[0] as PublishStatus | undefined);
         }}
         pagination={{
           current,
@@ -335,7 +358,7 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
             onValuesChange={() => setDirty(true)}
             scrollToFirstError
           >
-            <OfferFields eventId={eventId} />
+            <OfferFields eventId={eventId} showPublishStatus />
           </Form>
         </>
       </Modal>
@@ -343,7 +366,13 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
   );
 }
 
-export function OfferFields({ eventId }: { eventId: string }) {
+export function OfferFields({
+  eventId,
+  showPublishStatus = false,
+}: {
+  eventId: string;
+  showPublishStatus?: boolean;
+}) {
   const { data, error } = useSWR<List<Benefit>, Error>(["offer-benefit-options", eventId], () =>
     BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
   );
@@ -355,19 +384,34 @@ export function OfferFields({ eventId }: { eventId: string }) {
       <Form.Item name="sortOrder" hidden>
         <InputNumber />
       </Form.Item>
-      <Form.Item
-        label="票档名称"
-        name="name"
-        rules={[{ required: true, message: "请填写票档名称" }]}
-      >
-        <Input placeholder="例如 普通票、赞助票" />
-      </Form.Item>
+      <Row gutter={16}>
+        <Col xs={24} sm={showPublishStatus ? 12 : 24}>
+          <Form.Item
+            label="票档名称"
+            name="name"
+            rules={[{ required: true, message: "请填写票档名称" }]}
+          >
+            <Input placeholder="例如 普通票、赞助票" />
+          </Form.Item>
+        </Col>
+        {showPublishStatus && (
+          <Col xs={24} sm={12}>
+            <Form.Item
+              label="发布状态"
+              name="publishStatus"
+              rules={[{ required: true, message: "请选择发布状态" }]}
+            >
+              <Select options={toOptions(publishStatusLabels)} />
+            </Form.Item>
+          </Col>
+        )}
+      </Row>
       <Form.Item label="描述" name="description">
         <Input.TextArea autoSize={{ minRows: 2 }} />
       </Form.Item>
       <Row gutter={16}>
         <Col xs={24} sm={12}>
-          <Form.Item label="价格" extra="留空表示待公布">
+          <Form.Item label="价格">
             <Space.Compact block>
               <Form.Item
                 name="currency"

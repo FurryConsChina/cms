@@ -3,7 +3,10 @@ import { useNavigate } from "react-router";
 import useSWR from "swr";
 import { IconArrowUp, IconArrowDown } from "@tabler/icons-react";
 import type { ColumnsType } from "antd/es/table";
-import { Alert, App, Button, Flex, Form, Modal, Space, Table, Tag } from "antd";
+import { Alert, App, Button, Flex, Form, Modal, Select, Space, Table, Tag } from "antd";
+import { toOptions } from "@/consts/labels";
+import { publishStatusLabels } from "@/consts/publishStatus";
+import type { PublishStatus } from "@/types/publishStatus";
 import { ParticipantAPI, participantSchema, toParticipantInput } from "@/api/cms/participant";
 import type { Participant } from "@/types/participant";
 import type { List } from "@/types/request";
@@ -21,15 +24,16 @@ const participantName = (v: Participant) => v.profile?.name || v.organization?.n
 export default function EventParticipantPanel({ eventId }: { eventId: string }) {
   const navigate = useNavigate();
   const [role, setRole] = useState<Participant["role"]>();
+  const [publishStatus, setPublishStatus] = useState<PublishStatus>();
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   useEffect(() => {
     setCurrent(1);
-  }, [eventId, role]);
+  }, [eventId, role, publishStatus]);
   const { data, error, isLoading, mutate } = useSWR<List<Participant>, Error>(
-    ["participants", eventId, role, current, pageSize],
-    () => ParticipantAPI.list({ current, pageSize, eventId, role }),
+    ["participants", eventId, role, publishStatus, current, pageSize],
+    () => ParticipantAPI.list({ current, pageSize, eventId, role, publishStatus }),
   );
   const [sorting, setSorting] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -61,6 +65,7 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
       const values = {
         eventId,
         role: "guest",
+        publishStatus: "draft",
         sortOrder: total,
         isFeatured: false,
         profileId: null,
@@ -127,7 +132,7 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
   };
   const records = data?.records ?? [];
   const reorder: ((record: Participant, sortOrder: number) => Promise<Participant>) | undefined =
-    role
+    role || publishStatus
       ? undefined
       : (record, sortOrder) =>
           ParticipantAPI.save(record.id, { ...toParticipantInput(record), sortOrder });
@@ -201,6 +206,18 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
       filteredValue: role ? [role] : null,
       render: (_, v) => roles[v.role],
     },
+    {
+      title: "发布状态",
+      key: "publishStatus",
+      filters: Object.entries(publishStatusLabels).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: publishStatus ? [publishStatus] : null,
+      render: (_, v) => (
+        <Tag color={v.publishStatus === "published" ? "green" : "default"}>
+          {publishStatusLabels[v.publishStatus]}
+        </Tag>
+      ),
+    },
     { title: "摊位", dataIndex: "booth" },
     { title: "级别", dataIndex: "tier" },
     { title: "重点展示", render: (_, v) => (v.isFeatured ? <Tag color="gold">重点</Tag> : "—") },
@@ -273,6 +290,7 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
         onChange={(_pagination, values, _sorter, extra) => {
           if (extra.action !== "filter") return;
           setRole(values.role?.[0] as Participant["role"] | undefined);
+          setPublishStatus(values.publishStatus?.[0] as PublishStatus | undefined);
         }}
         pagination={{
           current,
@@ -318,6 +336,13 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
           onValuesChange={() => setDirty(true)}
           scrollToFirstError
         >
+          <Form.Item
+            label="发布状态"
+            name="publishStatus"
+            rules={[{ required: true, message: "请选择发布状态" }]}
+          >
+            <Select options={toOptions(publishStatusLabels)} />
+          </Form.Item>
           <ParticipantFields
             form={form}
             disabled={saving || mediaBusy}

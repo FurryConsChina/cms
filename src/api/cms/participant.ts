@@ -2,6 +2,7 @@ import Axios from "@/api";
 import { z } from "zod";
 import type { List, PageQuery } from "@/types/request";
 import type { Participant } from "@/types/participant";
+import type { PublishStatus } from "@/types/publishStatus";
 import { getMediaUsages } from "./upload";
 import { mediaBindingSchema } from "./mediaSchema";
 
@@ -11,6 +12,7 @@ export const participantSchema = z
     profileId: z.uuid().nullish(),
     organizationId: z.uuid().nullish(),
     role: z.enum(["guest", "exhibitor", "sponsor", "media"]),
+    publishStatus: z.enum(["draft", "published"]),
     description: z.string().nullish(),
     booth: z.string().max(64).nullish(),
     tier: z.string().max(64).nullish(),
@@ -30,6 +32,7 @@ export type ParticipantInput = z.infer<typeof participantSchema>;
 /** 不传 portrait / gallery 时，后端保留原有媒体。 */
 export const toParticipantInput = (v: Participant): ParticipantInput => ({
   eventId: v.eventId,
+  publishStatus: v.publishStatus,
   profileId: v.profileId,
   organizationId: v.organizationId,
   role: v.role,
@@ -42,7 +45,13 @@ export const toParticipantInput = (v: Participant): ParticipantInput => ({
 });
 
 export class ParticipantAPI {
-  static async list(params: PageQuery & { eventId?: string; role?: Participant["role"] }) {
+  static async list(
+    params: PageQuery & {
+      eventId?: string;
+      role?: Participant["role"];
+      publishStatus?: PublishStatus;
+    },
+  ) {
     return (await Axios.get<List<Participant>>("/cms/participant", { params })).data;
   }
 
@@ -76,9 +85,11 @@ export class ParticipantAPI {
     ).data;
   }
 
-  static async updateOwn(id: string, description: string | null) {
+  static async updateOwn(id: string, description: string | null, publishStatus: PublishStatus) {
     return (
-      await Axios.patch<Participant>(`/cms/participant/${id}`, { participant: { description } })
+      await Axios.patch<Participant>(`/cms/participant/${id}`, {
+        participant: { description, publishStatus },
+      })
     ).data;
   }
 
