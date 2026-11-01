@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWR, { useSWRConfig } from "swr";
-import { Alert, App, Button, Flex, Form, Space, Spin, Typography } from "antd";
+import { Alert, App, Button, Flex, Form, Select, Space, Spin, Typography } from "antd";
+import { publishStatusLabels } from "@/consts/publishStatus";
+import { toOptions } from "@/consts/labels";
 import { ParticipantAPI, participantSchema } from "@/api/cms/participant";
 import DefaultContainer from "@/components/layout/Container";
 import useMediaBusy from "@/components/media/useMediaBusy";
@@ -186,6 +188,13 @@ function ParticipantEditor({
         onValuesChange={() => setDirty(true)}
         scrollToFirstError
       >
+        <Form.Item
+          label="发布状态"
+          name="publishStatus"
+          rules={[{ required: true, message: "请选择发布状态" }]}
+        >
+          <Select options={toOptions(publishStatusLabels)} />
+        </Form.Item>
         <ParticipantFields form={form} disabled={saving || mediaBusy} onBusyChange={onBusyChange} />
       </Form>
     </DefaultContainer>

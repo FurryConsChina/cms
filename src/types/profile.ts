@@ -1,4 +1,5 @@
 import type { MediaBinding } from "./media";
+import type { PublishStatus } from "./publishStatus";
 
 export type LinkItem = { type: string; label?: string | null; value: string };
 
@@ -8,6 +9,7 @@ export type Profile = {
   slug: string;
   kind: "individual" | "group" | "brand" | "media";
   status: "active" | "inactive";
+  publishStatus: PublishStatus;
   description: string | null;
   contactMail: string | null;
   avatarUrl: string | null;

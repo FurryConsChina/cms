@@ -291,15 +291,16 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
 
   const submit = async (values: Record<string, unknown>) => {
     if (!selection || submitting.current || mediaBusy) return;
-    const { subjectType, ...fields } = values;
+    const { subjectType, ...formFields } = values;
+    const fields = { ...formFields, publishStatus: "draft" };
     const parsed =
       selection.kind === "offer"
         ? offerSchema.safeParse(toNullable(fields))
         : participantSchema.safeParse(
             toNullable({
               ...fields,
-              profileId: subjectType === "profile" ? fields.profileId : null,
-              organizationId: subjectType === "organization" ? fields.organizationId : null,
+              profileId: subjectType === "profile" ? formFields.profileId : null,
+              organizationId: subjectType === "organization" ? formFields.organizationId : null,
             }),
           );
     if (!parsed.success) {
@@ -327,7 +328,7 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
       setCreated((current) => [...current, `${selection.kind}-${selection.index}`]);
       setDirty(false);
       setSelection(undefined);
-      message.success("已创建");
+      message.success("已保存为草稿");
       mutate(
         (key: unknown) =>
           Array.isArray(key) &&

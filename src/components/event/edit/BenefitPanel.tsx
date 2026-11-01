@@ -5,7 +5,23 @@ import type { ColumnsType } from "antd/es/table";
 import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
 import useUnsavedChangesGuard from "@/hooks/useUnsavedChangesGuard";
-import { Alert, App, Button, Modal, Flex, Form, Input, InputNumber, Space, Table } from "antd";
+import {
+  Alert,
+  App,
+  Button,
+  Modal,
+  Flex,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Space,
+  Table,
+  Tag,
+} from "antd";
+import { publishStatusLabels } from "@/consts/publishStatus";
+import { toOptions } from "@/consts/labels";
+import type { PublishStatus } from "@/types/publishStatus";
 import { BenefitAPI, benefitSchema, toBenefitInput } from "@/api/cms/offer";
 import type { Benefit } from "@/types/participant";
 import type { List } from "@/types/request";
@@ -15,12 +31,13 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+  const [publishStatus, setPublishStatus] = useState<PublishStatus>();
   useEffect(() => {
     setCurrent(1);
-  }, [eventId]);
+  }, [eventId, publishStatus]);
   const { data, error, isLoading, mutate } = useSWR<List<Benefit>, Error>(
-    ["benefits", eventId, current, pageSize],
-    () => BenefitAPI.list({ current, pageSize, eventId }),
+    ["benefits", eventId, publishStatus, current, pageSize],
+    () => BenefitAPI.list({ current, pageSize, eventId, publishStatus }),
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Benefit>();
@@ -41,16 +58,21 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
   };
   const fill = (record?: Benefit) => {
     form.resetFields();
-    const values = { eventId, sortOrder: data?.total ?? 0, ...record };
+    const values = { eventId, sortOrder: data?.total ?? 0, publishStatus: "draft", ...record };
     form.setFieldsValue(values);
     form.setFields(Object.keys(values).map((name) => ({ name, touched: false })));
     setEditing(record);
     setDirty(false);
   };
-  const open = (record?: Benefit) => {
+  const open = async (record?: Benefit) => {
     try {
       setOpeningId(record?.id);
+      const total =
+        !record && publishStatus
+          ? (await BenefitAPI.list({ eventId, current: 1, pageSize: 1 })).total
+          : undefined;
       fill(record);
+      if (total !== undefined) form.setFieldValue("sortOrder", total);
       setOpened(true);
     } catch (error) {
       message.error(apiErrorMessage(error));
@@ -101,10 +123,10 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
     }
   };
   const records = data?.records ?? [];
-  const reorder: ((record: Benefit, sortOrder: number) => Promise<Benefit>) | undefined = (
-    record,
-    sortOrder,
-  ) => BenefitAPI.save(record.id, { ...toBenefitInput(record), sortOrder });
+  const reorder: ((record: Benefit, sortOrder: number) => Promise<Benefit>) | undefined =
+    publishStatus
+      ? undefined
+      : (record, sortOrder) => BenefitAPI.save(record.id, { ...toBenefitInput(record), sortOrder });
   const move = async (index: number, offset: -1 | 1) => {
     if (!reorder) return;
     const next = [...records];
@@ -127,6 +149,7 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
       title: "顺序",
       key: "order",
       width: 90,
+      hidden: !reorder,
       render: (_: unknown, _record: Benefit, index: number) => (
         <Space.Compact>
           <Button
@@ -155,6 +178,18 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
       ),
     },
     { title: "名称", dataIndex: "name" },
+    {
+      title: "发布状态",
+      key: "publishStatus",
+      filters: Object.entries(publishStatusLabels).map(([value, text]) => ({ value, text })),
+      filterMultiple: false,
+      filteredValue: publishStatus ? [publishStatus] : null,
+      render: (_, v) => (
+        <Tag color={v.publishStatus === "published" ? "green" : "default"}>
+          {publishStatusLabels[v.publishStatus]}
+        </Tag>
+      ),
+    },
     { title: "分类", dataIndex: "category" },
     { title: "描述", dataIndex: "description", ellipsis: true },
     {
@@ -219,6 +254,10 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
         dataSource={records}
         loading={isLoading || sorting}
         scroll={{ x: "max-content" }}
+        onChange={(_pagination, values, _sorter, extra) => {
+          if (extra.action !== "filter") return;
+          setPublishStatus(values.publishStatus?.[0] as PublishStatus | undefined);
+        }}
         pagination={{
           current,
           pageSize,
@@ -267,6 +306,13 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
                 rules={[{ required: true, message: "请填写权益名称" }]}
               >
                 <Input placeholder="例如 入场手环、限定徽章" />
+              </Form.Item>
+              <Form.Item
+                label="发布状态"
+                name="publishStatus"
+                rules={[{ required: true, message: "请选择发布状态" }]}
+              >
+                <Select options={toOptions(publishStatusLabels)} />
               </Form.Item>
               <Form.Item label="分类" name="category">
                 <Input maxLength={64} placeholder="例如 周边、入场" />

@@ -21,6 +21,7 @@ export const profileSchema = z.object({
   name: z.string().min(1, "请填写名称").max(256),
   kind: z.enum(["individual", "group", "brand", "media"]),
   status: z.enum(["active", "inactive"]),
+  publishStatus: z.enum(["draft", "published"]),
   description: z.string().nullish(),
   contactMail: z.email("联系邮箱格式不正确").nullish(),
   links: z.array(linkSchema).optional(),
@@ -32,7 +33,13 @@ export const profileSchema = z.object({
 export type ProfileInput = z.infer<typeof profileSchema>;
 
 export class ProfileAPI {
-  static async list(params: PageQuery & { name?: string; kind?: Profile["kind"] }) {
+  static async list(
+    params: PageQuery & {
+      name?: string;
+      kind?: Profile["kind"];
+      publishStatus?: Profile["publishStatus"];
+    },
+  ) {
     return (await Axios.get<List<Profile>>("/cms/profile", { params })).data;
   }
 

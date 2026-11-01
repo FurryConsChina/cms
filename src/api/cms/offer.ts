@@ -3,9 +3,11 @@ import { z } from "zod";
 import dayjs from "dayjs";
 import type { List, PageQuery } from "@/types/request";
 import type { Benefit, Offer } from "@/types/participant";
+import type { PublishStatus } from "@/types/publishStatus";
 
 export const benefitSchema = z.object({
   eventId: z.uuid(),
+  publishStatus: z.enum(["draft", "published"]),
   name: z.string().min(1, "请填写权益名称").max(256),
   description: z.string().nullish(),
   category: z.string().max(64).nullish(),
@@ -16,6 +18,7 @@ export type BenefitInput = z.infer<typeof benefitSchema>;
 
 export const toBenefitInput = (v: Benefit): BenefitInput => ({
   eventId: v.eventId,
+  publishStatus: v.publishStatus,
   name: v.name,
   description: v.description,
   category: v.category,
@@ -28,6 +31,7 @@ export const offerSchema = z
     name: z.string().min(1, "请填写票档名称").max(256),
     description: z.string().nullish(),
     availability: z.enum(["upcoming", "onSale", "soldOut", "ended"]),
+    publishStatus: z.enum(["draft", "published"]),
     price: z.number().min(0).nullish(),
     priceNote: z.string().nullish(),
     currency: z.string().length(3, "货币请使用三位代码，例如 CNY"),
@@ -62,6 +66,7 @@ export type OfferInput = z.infer<typeof offerSchema>;
 /** 不传 benefits 时，后端保留原有权益关联。 */
 export const toOfferInput = (v: Offer): OfferInput => ({
   eventId: v.eventId,
+  publishStatus: v.publishStatus,
   name: v.name,
   description: v.description,
   availability: v.availability,
@@ -75,7 +80,7 @@ export const toOfferInput = (v: Offer): OfferInput => ({
 });
 
 export class BenefitAPI {
-  static async list(params: PageQuery & { eventId?: string }) {
+  static async list(params: PageQuery & { eventId?: string; publishStatus?: PublishStatus }) {
     return (await Axios.get<List<Benefit>>("/cms/benefit", { params })).data;
   }
 
@@ -91,7 +96,12 @@ export class BenefitAPI {
 
 export class OfferAPI {
   static async list(
-    params: PageQuery & { eventId?: string; name?: string; availability?: Offer["availability"] },
+    params: PageQuery & {
+      eventId?: string;
+      name?: string;
+      availability?: Offer["availability"];
+      publishStatus?: PublishStatus;
+    },
   ) {
     return (await Axios.get<List<Offer>>("/cms/offer", { params })).data;
   }
