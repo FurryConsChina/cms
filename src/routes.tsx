@@ -31,6 +31,10 @@ const router = createBrowserRouter([
               { path: "benefits", lazy: page(() => import("@/pages/dashboard/event/edit")) },
               { path: "participants", lazy: page(() => import("@/pages/dashboard/event/edit")) },
               {
+                path: "poster-recognition",
+                lazy: page(() => import("@/pages/dashboard/event/edit")),
+              },
+              {
                 path: "participants/:participantId/edit",
                 lazy: page(() => import("@/pages/dashboard/event/edit")),
               },

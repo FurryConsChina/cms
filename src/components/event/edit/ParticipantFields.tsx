@@ -71,8 +71,12 @@ export default function ParticipantFields({
       </Form.Item>
       <Row gutter={16}>
         <Col xs={24} sm={8}>
-          <Form.Item label="参加角色" name="role">
-            <Select options={toOptions(roles)} />
+          <Form.Item
+            label="参加角色"
+            name="role"
+            rules={[{ required: true, message: "请选择参加角色" }]}
+          >
+            <Select options={toOptions(roles)} placeholder="请选择参加角色" />
           </Form.Item>
         </Col>
         <Col xs={24} sm={8}>
