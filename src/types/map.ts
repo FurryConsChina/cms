@@ -3,14 +3,15 @@ export type TencentLocation = {
   title: string;
   address: string;
   category: string;
-  type: number;
+  type?: number;
+  distance?: number;
   location: {
     lat: number;
     lng: number;
   };
-  adcode: number;
-  province: string;
-  city: string;
-  district: string;
+  adcode?: string | number;
+  province?: string;
+  city?: string;
+  district?: string;
   matchedRegion?: { id: string; name: string; timezone: string | null } | null;
 };
