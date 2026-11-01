@@ -43,6 +43,7 @@ import {
 } from "./posterRecognition";
 
 const settingsKey = "poster-recognition-model";
+const recognitionTimeoutMs = 5 * 60 * 1000;
 const defaultSettings = { baseUrl: "http://127.0.0.1:3425", model: "codex/gpt-6-astra" };
 
 function initialSettings(): LocalModelSettings {
@@ -89,7 +90,8 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
   const [hasRecognized, setHasRecognized] = useState(false);
   const [created, setCreated] = useState<string[]>([]);
   const [recognizingImage, setRecognizingImage] = useState<string>();
-  const recognizingRef = useRef(false);
+  const recognitionRef = useRef<AbortController | null>(null);
+  const recognitionTimerRef = useRef<number | undefined>(undefined);
   const recognizing = !!recognizingImage;
   const [opening, setOpening] = useState<string>();
   const [selection, setSelection] = useState<Selection>();
@@ -102,6 +104,16 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
     dirty: !!selection && (dirty || form.isFieldsTouched()),
     busy: saving || submitting.current || mediaBusy || !!opening || recognizing,
   });
+
+  useEffect(() => {
+    return () => {
+      const controller = recognitionRef.current;
+      recognitionRef.current = null;
+      window.clearTimeout(recognitionTimerRef.current);
+      recognitionTimerRef.current = undefined;
+      controller?.abort();
+    };
+  }, []);
 
   const { baseUrl: draftBaseUrl, token: draftToken } = settingsDraft;
   useEffect(() => {
@@ -163,11 +175,26 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
   };
 
   const recognize = async (image: MediaBinding) => {
-    if (recognizingRef.current) return;
-    recognizingRef.current = true;
+    if (recognitionRef.current) return;
+    const controller = new AbortController();
+    recognitionRef.current = controller;
     setRecognizingImage(image.mediaAssetId);
+    let timedOut = false;
+    const timer = window.setTimeout(() => {
+      if (!controller.signal.aborted) {
+        timedOut = true;
+        controller.abort();
+      }
+    }, recognitionTimeoutMs);
+    recognitionTimerRef.current = timer;
     try {
-      const { result: next, incomplete } = await recognizePoster(event, image, settings);
+      const { result: next, incomplete } = await recognizePoster(
+        event,
+        image,
+        settings,
+        controller.signal,
+      );
+      if (controller.signal.aborted) return;
       setResult((current) => ({
         offers: [...current.offers, ...next.offers],
         participants: [...current.participants, ...next.participants],
@@ -177,10 +204,22 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
         message.warning("模型返回的部分结果不完整，已保留可用内容，请核对海报。");
       }
     } catch (error) {
-      message.error(apiErrorMessage(error));
+      if (recognitionRef.current === controller) {
+        if (controller.signal.aborted && timedOut) {
+          message.error("识别超时，请检查网关和模型后重试。");
+        } else if (controller.signal.aborted) {
+          message.info("已取消识别。");
+        } else {
+          message.error(apiErrorMessage(error));
+        }
+      }
     } finally {
-      recognizingRef.current = false;
-      setRecognizingImage(undefined);
+      window.clearTimeout(timer);
+      if (recognitionRef.current === controller) {
+        recognitionTimerRef.current = undefined;
+        recognitionRef.current = null;
+        setRecognizingImage(undefined);
+      }
     }
   };
 
@@ -410,20 +449,29 @@ export default function PosterRecognitionPanel({ event }: { event: EventItem }) 
                   <Typography.Text ellipsis={{ tooltip: image.label }} className="block">
                     {image.label}
                   </Typography.Text>
-                  <Button
-                    block
-                    type="primary"
-                    loading={recognizingImage === image.mediaAssetId}
-                    disabled={recognizing && recognizingImage !== image.mediaAssetId}
-                    aria-label={`识别${image.label}`}
-                    onClick={() => {
-                      recognize(image).catch((error: unknown) =>
-                        message.error(apiErrorMessage(error)),
-                      );
-                    }}
-                  >
-                    开始识别
-                  </Button>
+                  {recognizingImage === image.mediaAssetId ? (
+                    <Button
+                      block
+                      aria-label={`取消识别${image.label}`}
+                      onClick={() => recognitionRef.current?.abort()}
+                    >
+                      取消识别
+                    </Button>
+                  ) : (
+                    <Button
+                      block
+                      type="primary"
+                      disabled={recognizing}
+                      aria-label={`识别${image.label}`}
+                      onClick={() => {
+                        recognize(image).catch((error: unknown) =>
+                          message.error(apiErrorMessage(error)),
+                        );
+                      }}
+                    >
+                      开始识别
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>

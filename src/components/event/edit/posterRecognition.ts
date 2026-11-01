@@ -248,25 +248,57 @@ async function imageContent(blob: Blob) {
   };
 }
 
-async function prepareImage(media: MediaBinding) {
+function waitForAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(new DOMException("识别已取消。", "AbortError"));
+      return;
+    }
+    const onAbort = () => reject(new DOMException("识别已取消。", "AbortError"));
+    signal.addEventListener("abort", onAbort, { once: true });
+    promise.then(
+      (value) => {
+        signal.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener("abort", onAbort);
+        reject(error instanceof Error ? error : new Error("图片处理失败。"));
+      },
+    );
+  });
+}
+
+async function prepareImage(media: MediaBinding, signal: AbortSignal) {
+  signal.throwIfAborted();
+  const prepared = prepareImageContent(media, signal);
+  return waitForAbort(prepared, signal);
+}
+
+async function prepareImageContent(media: MediaBinding, signal: AbortSignal) {
+  signal.throwIfAborted();
   if (!media.url) throw new Error("海报没有图片地址，请重新选择。");
   let response: Response;
   try {
-    response = await fetch(imageUrl(media.url), { credentials: "omit" });
+    response = await fetch(imageUrl(media.url), { credentials: "omit", signal });
   } catch {
+    signal.throwIfAborted();
     throw new Error("无法读取海报，请检查图片地址及跨域设置。");
   }
   if (!response.ok) throw new Error(`读取海报失败（HTTP ${response.status}）。`);
   const blob = await response.blob();
+  signal.throwIfAborted();
   if (blob.size > 20 * 1024 * 1024) throw new Error("海报超过 20 MB，请先压缩图片。");
 
   let image: ImageBitmap;
   try {
     image = await createImageBitmap(blob);
   } catch {
+    signal.throwIfAborted();
     throw new Error("无法读取海报格式，请使用 JPEG、PNG、WebP 或 GIF 图片。");
   }
   try {
+    signal.throwIfAborted();
     if (image.height > image.width * 2.5) {
       const height = Math.min(image.height - 1, Math.ceil(image.width * 2.3));
       const step = Math.max(1, Math.floor((height * 2) / 3));
@@ -277,10 +309,13 @@ async function prepareImage(media: MediaBinding) {
       const maxBytes = Math.min(5 * 1024 * 1024, Math.floor((20 * 1024 * 1024) / count));
       const images = [];
       for (let index = 0; index < count; index += 1) {
+        signal.throwIfAborted();
         const top = Math.round(((image.height - height) * index) / (count - 1));
         const segment = await convertImage(image, top, height, maxBytes);
+        signal.throwIfAborted();
         images.push(await imageContent(segment));
       }
+      signal.throwIfAborted();
       return { images, segmented: true };
     }
 
@@ -289,7 +324,10 @@ async function prepareImage(media: MediaBinding) {
       supported.includes(blob.type) && blob.size <= 5 * 1024 * 1024
         ? blob
         : await convertImage(image, 0, image.height, 5 * 1024 * 1024);
-    return { images: [await imageContent(prepared)], segmented: false };
+    signal.throwIfAborted();
+    const content = await imageContent(prepared);
+    signal.throwIfAborted();
+    return { images: [content], segmented: false };
   } finally {
     image.close();
   }
@@ -299,15 +337,19 @@ export async function recognizePoster(
   event: EventItem,
   image: MediaBinding,
   settings: LocalModelSettings,
+  signal: AbortSignal,
 ): Promise<ParsedExtraction> {
+  signal.throwIfAborted();
   if (!settings.model.trim()) throw new Error("请填写模型名称。");
   const endpoint = modelEndpoint(settings.baseUrl);
-  const { images, segmented } = await prepareImage(image);
+  const { images, segmented } = await prepareImage(image, signal);
+  signal.throwIfAborted();
   let response: Response;
   try {
     response = await fetch(endpoint, {
       method: "POST",
       credentials: "omit",
+      signal,
       headers: {
         "content-type": "application/json",
         ...modelAuthHeaders(settings.token),
@@ -335,8 +377,10 @@ export async function recognizePoster(
       }),
     });
   } catch {
+    signal.throwIfAborted();
     throw new Error("无法连接本地模型网关。请检查网关是否运行，并允许当前 CMS 页面跨域访问。");
   }
+  signal.throwIfAborted();
   if (!response.ok)
     throw new Error(`模型请求失败（HTTP ${response.status}），请检查本地网关配置。`);
   const responseSchema = z.object({
@@ -344,6 +388,7 @@ export async function recognizePoster(
     content: z.array(z.object({ type: z.string(), text: z.string().optional() })),
   });
   const parsedResponse = responseSchema.safeParse(await response.json());
+  signal.throwIfAborted();
   if (!parsedResponse.success || parsedResponse.data.stop_reason !== "end_turn") {
     throw new Error("模型未完成识别，请重试或更换模型。");
   }
