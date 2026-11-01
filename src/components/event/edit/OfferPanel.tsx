@@ -343,7 +343,7 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
   );
 }
 
-function OfferFields({ eventId }: { eventId: string }) {
+export function OfferFields({ eventId }: { eventId: string }) {
   const { data, error } = useSWR<List<Benefit>, Error>(["offer-benefit-options", eventId], () =>
     BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
   );
@@ -369,8 +369,16 @@ function OfferFields({ eventId }: { eventId: string }) {
         <Col xs={24} sm={12}>
           <Form.Item label="价格" extra="留空表示待公布">
             <Space.Compact block>
-              <Form.Item name="currency" noStyle>
-                <Select style={{ width: 160, flexShrink: 0 }} options={currencies} />
+              <Form.Item
+                name="currency"
+                noStyle
+                rules={[{ required: true, message: "请选择币种" }]}
+              >
+                <Select
+                  placeholder="选择币种"
+                  style={{ width: 160, flexShrink: 0 }}
+                  options={currencies}
+                />
               </Form.Item>
               <Form.Item name="price" noStyle>
                 <InputNumber min={0} style={{ width: "100%", minWidth: 0 }} placeholder="待公布" />
@@ -379,8 +387,12 @@ function OfferFields({ eventId }: { eventId: string }) {
           </Form.Item>
         </Col>
         <Col xs={24} sm={12}>
-          <Form.Item label="售卖状态" name="availability">
-            <Select options={toOptions(availability)} />
+          <Form.Item
+            label="售卖状态"
+            name="availability"
+            rules={[{ required: true, message: "请选择售卖状态" }]}
+          >
+            <Select placeholder="选择售卖状态" options={toOptions(availability)} />
           </Form.Item>
         </Col>
       </Row>

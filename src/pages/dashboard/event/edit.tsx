@@ -42,6 +42,7 @@ const OfferPanel = lazy(() => import("@/components/event/edit/OfferPanel"));
 const BenefitPanel = lazy(() => import("@/components/event/edit/BenefitPanel"));
 const ParticipantPanel = lazy(() => import("@/components/event/edit/ParticipantPanel"));
 const ParticipantEditor = lazy(() => import("@/components/event/edit/ParticipantEditor"));
+const PosterRecognitionPanel = lazy(() => import("@/components/event/edit/PosterRecognitionPanel"));
 
 export default function EventEditPage() {
   const { eventId, participantId } = useParams();
@@ -154,6 +155,7 @@ export default function EventEditPage() {
               { key: `${basePath}/offers`, label: "票档" },
               { key: `${basePath}/benefits`, label: "票档权益" },
               { key: `${basePath}/participants`, label: "参加者" },
+              { key: `${basePath}/poster-recognition`, label: "识别海报" },
             ]}
             onChange={(path) => {
               Promise.resolve(navigate(path)).catch((error: unknown) => {
@@ -169,6 +171,8 @@ export default function EventEditPage() {
             <OfferPanel eventId={eventId} />
           ) : section === "benefits" ? (
             <BenefitPanel eventId={eventId} />
+          ) : section === "poster-recognition" ? (
+            <PosterRecognitionPanel event={event} />
           ) : section === "participants" ? (
             participantId ? (
               <ParticipantEditor eventId={eventId} participantId={participantId} />
