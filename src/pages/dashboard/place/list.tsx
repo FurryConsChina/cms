@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Flex, Space, Typography, Alert, App, Table } from "antd";
+import { Button, Flex, Space, Typography, App, Table } from "antd";
 import PlaceEditor, { placeKinds } from "@/components/place/PlaceEditor";
 import { IconCirclePlus, IconRefresh, IconSearch } from "@tabler/icons-react";
 import DefaultContainer from "@/components/layout/Container";
@@ -21,7 +21,7 @@ export default function PlacePage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     ["places", search, regionId, kind, current, pageSize],
     () =>
       PlaceAPI.list({
@@ -31,6 +31,12 @@ export default function PlacePage() {
         regionId: regionId || undefined,
         kind,
       }),
+    {
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Place>();
@@ -126,14 +132,6 @@ export default function PlacePage() {
           </Space>
         </Flex>
       </DefaultContainer>
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={() => void mutate()}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}

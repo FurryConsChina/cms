@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useSWR from "swr";
-import { Alert, Descriptions, Table, Typography } from "antd";
+import { App, Button, Descriptions, Flex, Table, Typography } from "antd";
+import { IconRefresh } from "@tabler/icons-react";
 import { AdminAuditLogApi, type AuditLogQuery } from "@/api/cms/admin/auditLog";
 import { auditActionLabel, targetTypeLabels } from "@/consts/labels";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -83,22 +84,39 @@ const toQuery = (values: FilterValues, current: number): AuditLogQuery => ({
 });
 
 export default function AdminAuditLogPage() {
+  const { message } = App.useApp();
   const [filters, setFilters] = useState<FilterValues>({});
   const [current, setCurrent] = useState(1);
 
-  const { data, error, isLoading } = useSWR<List<AuditLog>, unknown>(
+  const { data, isLoading, isValidating, mutate } = useSWR<List<AuditLog>, unknown>(
     ["admin-audit-logs", filters, current],
     async () => AdminAuditLogApi.list(toQuery(filters, current)),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
 
   return (
     <div className="space-y-4">
       <DefaultContainer className="sticky top-0 z-20">
-        <Typography.Title level={3} className="m-0">
-          审计日志
-        </Typography.Title>
+        <Flex justify="space-between" align="center">
+          <Typography.Title level={3} className="m-0">
+            审计日志
+          </Typography.Title>
+          <Button
+            icon={<IconRefresh size={16} stroke={1.5} />}
+            loading={isValidating}
+            onClick={() => {
+              mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+            }}
+          >
+            刷新
+          </Button>
+        </Flex>
       </DefaultContainer>
-      {!!error && <Alert type="error" title={apiErrorMessage(error)} />}
       <Table
         rowKey="id"
         tableLayout="auto"

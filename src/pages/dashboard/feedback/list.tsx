@@ -1,7 +1,6 @@
 import { useState } from "react";
 import useSWR from "swr";
 import {
-  Alert,
   App,
   Button,
   Descriptions,
@@ -47,7 +46,7 @@ export default function FeedbackPage() {
   const [detail, setDetail] = useState<FeedbackDetail>();
   const [busy, setBusy] = useState(false);
   const [form] = Form.useForm();
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     ["feedback", current, status, category, path, range],
     () =>
       FeedbackAPI.list({
@@ -58,6 +57,12 @@ export default function FeedbackPage() {
         pagePath: path || undefined,
         ...range,
       }),
+    {
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const open = async (record: Feedback) => {
     try {
@@ -80,7 +85,6 @@ export default function FeedbackPage() {
           </Button>
         </Flex>
       </DefaultContainer>
-      {error && <Alert type="error" title={apiErrorMessage(error)} />}
       <Table<Feedback>
         rowKey="id"
         dataSource={data?.records ?? []}

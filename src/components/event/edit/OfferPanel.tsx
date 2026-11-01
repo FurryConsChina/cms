@@ -58,9 +58,15 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
   useEffect(() => {
     setCurrent(1);
   }, [eventId, status, publishStatus]);
-  const { data, error, isLoading, mutate } = useSWR<List<Offer>, Error>(
+  const { data, isLoading, mutate } = useSWR<List<Offer>, Error>(
     ["offers", eventId, status, publishStatus, current, pageSize],
     () => OfferAPI.list({ current, pageSize, eventId, availability: status, publishStatus }),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Offer>();
@@ -304,14 +310,6 @@ export default function EventOfferPanel({ eventId }: { eventId: string }) {
         </Space>
       </Flex>
 
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={refresh}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}
@@ -373,8 +371,14 @@ export function OfferFields({
   eventId: string;
   showPublishStatus?: boolean;
 }) {
-  const { data, error } = useSWR<List<Benefit>, Error>(["offer-benefit-options", eventId], () =>
-    BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
+  const { message } = App.useApp();
+  const handleBenefitsError = (error: Error) => {
+    message.error(apiErrorMessage(error, "权益加载失败，请刷新后重试"));
+  };
+  const { data, error, isValidating, mutate } = useSWR<List<Benefit>, Error>(
+    ["offer-benefit-options", eventId],
+    () => BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
+    { onError: handleBenefitsError, shouldRetryOnError: false },
   );
   return (
     <>
@@ -459,7 +463,17 @@ export function OfferFields({
         <IsoDateTimeListInput />
       </Form.Item>
       <Divider titlePlacement="start">包含的权益</Divider>
-      {error && <Alert type="error" showIcon title="权益加载失败，请刷新后重试" className="mb-2" />}
+      {error && (
+        <Button
+          className="mb-2"
+          loading={isValidating}
+          onClick={() => {
+            mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+          }}
+        >
+          重试
+        </Button>
+      )}
       {data && !data.records.length && (
         <Alert
           type="info"

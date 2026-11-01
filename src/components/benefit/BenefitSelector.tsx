@@ -1,8 +1,9 @@
-import { Select, type SelectProps } from "antd";
+import { App, Select, type SelectProps } from "antd";
 import useSWR from "swr";
 import { BenefitAPI } from "@/api/cms/offer";
 import type { Benefit } from "@/types/participant";
 import type { List } from "@/types/request";
+import { apiErrorMessage } from "@/utils/apiError";
 
 interface BenefitSelectorProps {
   id?: string;
@@ -19,9 +20,16 @@ export default function BenefitSelector({
   eventId,
   antdSelectProps,
 }: BenefitSelectorProps) {
+  const { message } = App.useApp();
   const { data, error, isLoading } = useSWR<List<Benefit>, Error>(
     ["offer-benefit-options", eventId],
     ([, eventId]: [string, string]) => BenefitAPI.list({ eventId, current: 1, pageSize: 100 }),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error, "权益加载失败，请重试"));
+      },
+      shouldRetryOnError: false,
+    },
   );
 
   return (

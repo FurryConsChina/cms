@@ -2,7 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import { isAxiosError } from "axios";
 import { IconRefresh } from "@tabler/icons-react";
-import { Alert, App, Button, Flex, Image, Select, Space, Table, Tag, Typography } from "antd";
+import { App, Button, Flex, Image, Select, Space, Table, Tag, Typography } from "antd";
 import ParticipantSelector from "@/components/participant/ParticipantSelector";
 import EventSelector from "@/components/event/EventSelector";
 import OrganizationSelector from "@/components/organization/OrganizationSelector";
@@ -37,9 +37,15 @@ export default function MediaPage() {
   const [entityType, setEntityType] = useState<MediaOwner["entityType"]>("event");
   const [entityId, setEntityId] = useState<string | null>(null);
   const owner = entityId ? { entityType, entityId } : undefined;
-  const { data, error, isLoading, isValidating, mutate } = useSWR<List<MediaAsset>, Error>(
+  const { data, isLoading, isValidating, mutate } = useSWR<List<MediaAsset>, Error>(
     ["media-library", current, owner],
     () => listMediaAssets({ current, pageSize: 20, owner }),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const selectOwner = (id: string | null) => {
     setEntityId(id);
@@ -118,21 +124,6 @@ export default function MediaPage() {
           </Flex>
         </Space>
       </DefaultContainer>
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action={
-            <Button
-              loading={isValidating}
-              onClick={() => void mutate().catch((e) => message.error(apiErrorMessage(e)))}
-            >
-              重试
-            </Button>
-          }
-        />
-      )}
       <div className="shadow-sm p-4 rounded-xl bg-white">
         <Table<MediaAsset>
           rowKey="id"

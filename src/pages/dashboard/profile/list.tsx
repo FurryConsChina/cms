@@ -1,4 +1,4 @@
-import { Avatar, Button, Space, Tag, Alert, App, Flex, Table, Typography } from "antd";
+import { Avatar, Button, Space, Tag, App, Flex, Table, Typography } from "antd";
 import { useLocation, useNavigate } from "react-router";
 import { parseAsInteger, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 import useSWR from "swr";
@@ -40,9 +40,15 @@ export default function ProfilePage() {
   const pageSize = filters.pageSize > 0 ? filters.pageSize : 20;
   const { message, modal } = App.useApp();
   const params = { current, pageSize, name: search || undefined, kind, publishStatus };
-  const { data, error, isLoading, mutate } = useSWR<List<Profile>, Error>(
+  const { data, isLoading, mutate } = useSWR<List<Profile>, Error>(
     ["profiles", params],
     () => ProfileAPI.list(params),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const records = data?.records ?? [];
   const columns: ColumnsType<Profile> = [
@@ -153,14 +159,6 @@ export default function ProfilePage() {
           </Space>
         </Flex>
       </DefaultContainer>
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={() => mutate()}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}

@@ -15,7 +15,6 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import {
-  Alert,
   App,
   Button,
   Dropdown,
@@ -57,15 +56,23 @@ export default function EventPage() {
   });
   const { currentPage, pageSize } = filters;
 
-  const { data, error, isLoading, mutate } = useEventsList({
-    pageSize,
-    current: currentPage,
-    search: filters.search?.trim() || undefined,
-    orgSearch: filters.orgSearch?.trim() || undefined,
-    regionName: filters.regionName?.trim() || undefined,
-    placeName: filters.placeName?.trim() || undefined,
-    placeAddress: filters.placeAddress?.trim() || undefined,
-  });
+  const { data, isLoading, isValidating, mutate } = useEventsList(
+    {
+      pageSize,
+      current: currentPage,
+      search: filters.search?.trim() || undefined,
+      orgSearch: filters.orgSearch?.trim() || undefined,
+      regionName: filters.regionName?.trim() || undefined,
+      placeName: filters.placeName?.trim() || undefined,
+      placeAddress: filters.placeAddress?.trim() || undefined,
+    },
+    {
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
+  );
 
   const handleDeleteEvent = async (id: string) => {
     try {
@@ -296,28 +303,30 @@ export default function EventPage() {
             展会列表
           </Title>
 
-          <Button
-            type="primary"
-            icon={<IconCirclePlus size={16} stroke={1.5} />}
-            onClick={() => {
-              void navigate("/dashboard/event/create");
-            }}
-          >
-            添加展会
-          </Button>
+          <Space>
+            <Button
+              icon={<IconRefresh size={16} stroke={1.5} />}
+              loading={isValidating}
+              onClick={() => {
+                mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+              }}
+            >
+              刷新
+            </Button>
+            <Button
+              type="primary"
+              icon={<IconCirclePlus size={16} stroke={1.5} />}
+              onClick={() => {
+                void navigate("/dashboard/event/create");
+              }}
+            >
+              添加展会
+            </Button>
+          </Space>
         </Flex>
       </DefaultContainer>
 
       <div className="shadow-sm mt-4 p-4 rounded-xl bg-white">
-        {error && (
-          <Alert
-            className="mb-4"
-            type="error"
-            showIcon
-            title={apiErrorMessage(error)}
-            action={<Button onClick={() => void mutate()}>重试</Button>}
-          />
-        )}
         <Table
           rowKey={(row) => row.id}
           columns={columns}

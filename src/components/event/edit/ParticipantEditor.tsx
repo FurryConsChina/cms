@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWR, { useSWRConfig } from "swr";
-import { Alert, App, Button, Flex, Form, Select, Space, Spin, Typography } from "antd";
+import { App, Button, Flex, Form, Select, Space, Spin, Typography } from "antd";
 import { publishStatusLabels } from "@/consts/publishStatus";
 import { toOptions } from "@/consts/labels";
 import { ParticipantAPI, participantSchema } from "@/api/cms/participant";
@@ -34,6 +34,10 @@ export default function EventParticipantEditor({
       revalidateOnMount: true,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
     },
   );
 
@@ -62,21 +66,14 @@ export default function EventParticipantEditor({
         </Button>
       </Flex>
       {error ? (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action={
-            <Button
-              loading={isValidating}
-              onClick={() => {
-                mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
-              }}
-            >
-              重试
-            </Button>
-          }
-        />
+        <Button
+          loading={isValidating}
+          onClick={() => {
+            mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+          }}
+        >
+          重试
+        </Button>
       ) : (
         <Flex justify="center" className="py-12">
           <Spin aria-label="正在加载参加者资料" />

@@ -46,26 +46,67 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
   const [busy, setBusy] = useState(false);
   const [createdToken, setCreatedToken] = useState<string>();
   const [form] = Form.useForm();
-  const { data: entity, error: entityError } = useSWR(["access-entity", kind, id], () =>
-    AccessAPI.entityName(kind, id),
+  const {
+    data: entity,
+    error: entityError,
+    isValidating: validatingEntity,
+    mutate: refreshEntity,
+  } = useSWR<Awaited<ReturnType<typeof AccessAPI.entityName>>, unknown>(
+    ["access-entity", kind, id],
+    () => AccessAPI.entityName(kind, id),
+    {
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(`加载实体失败：${apiErrorMessage(error)}`);
+      },
+    },
   );
   const {
     data: members,
     error: membersError,
     isLoading: loadingMembers,
+    isValidating: validatingMembers,
     mutate: refreshMembers,
-  } = useSWR(["members", kind, id, memberPage], () =>
-    AccessAPI.members(kind, id, { current: memberPage, pageSize: 20 }),
+  } = useSWR<Awaited<ReturnType<typeof AccessAPI.members>>, unknown>(
+    ["members", kind, id, memberPage],
+    () => AccessAPI.members(kind, id, { current: memberPage, pageSize: 20 }),
+    {
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(`加载成员失败：${apiErrorMessage(error)}`);
+      },
+    },
   );
   const canManage = !!members && !membersError;
   const {
     data: invitations,
     error: invitesError,
+    isValidating: validatingInvites,
     mutate: refreshInvites,
-  } = useSWR(canManage ? ["invitations", kind, id] : null, () => AccessAPI.invitations(kind, id));
-  const { data: audit, error: auditError } = useSWR(
+  } = useSWR<Awaited<ReturnType<typeof AccessAPI.invitations>>, unknown>(
+    canManage ? ["invitations", kind, id] : null,
+    () => AccessAPI.invitations(kind, id),
+    {
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(`加载邀请失败：${apiErrorMessage(error)}`);
+      },
+    },
+  );
+  const {
+    data: audit,
+    error: auditError,
+    isValidating: validatingAudit,
+    mutate: refreshAudit,
+  } = useSWR<Awaited<ReturnType<typeof AccessAPI.auditLogs>>, unknown>(
     tab === "audit" && kind === "organization" && canManage ? ["audit", id, auditPage] : null,
     () => AccessAPI.auditLogs(id, { current: auditPage, pageSize: 20 }),
+    {
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(`加载操作日志失败：${apiErrorMessage(error)}`);
+      },
+    },
   );
   const run = async (work: () => Promise<unknown>, refresh: () => unknown) => {
     try {
@@ -77,7 +118,19 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
       throw e;
     }
   };
-  if (entityError) return <Alert type="error" title={apiErrorMessage(entityError)} />;
+  if (entityError)
+    return (
+      <DefaultContainer>
+        <Button
+          loading={validatingEntity}
+          onClick={() => {
+            refreshEntity().catch((error: unknown) => message.error(apiErrorMessage(error)));
+          }}
+        >
+          重试
+        </Button>
+      </DefaultContainer>
+    );
   return (
     <div className="space-y-4">
       <DefaultContainer className="sticky top-0 z-20">
@@ -131,13 +184,6 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
         type="info"
         title="所有者可邀请和移除成员；所有者转移暂不支持。普通成员可以主动退出。"
       />
-      {membersError && (
-        <Alert
-          type="warning"
-          title="当前账号无法管理该实体成员。"
-          description={apiErrorMessage(membersError)}
-        />
-      )}
       <Tabs
         activeKey={tab}
         onChange={setTab}
@@ -148,6 +194,23 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
             children: (
               <Table<Member>
                 rowKey="id"
+                title={
+                  membersError
+                    ? () => (
+                        <Button
+                          loading={validatingMembers}
+                          onClick={() => {
+                            refreshMembers().catch((error: unknown) =>
+                              message.error(apiErrorMessage(error)),
+                            );
+                          }}
+                        >
+                          重试
+                        </Button>
+                      )
+                    : undefined
+                }
+                locale={membersError ? { emptyText: null } : undefined}
                 loading={loadingMembers}
                 dataSource={members?.records ?? []}
                 pagination={{
@@ -192,9 +255,22 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
             disabled: !canManage,
             children: (
               <>
-                {invitesError && <Alert type="error" title={apiErrorMessage(invitesError)} />}
+                {invitesError && (
+                  <Button
+                    className="mb-4"
+                    loading={validatingInvites}
+                    onClick={() => {
+                      refreshInvites().catch((error: unknown) =>
+                        message.error(apiErrorMessage(error)),
+                      );
+                    }}
+                  >
+                    重试
+                  </Button>
+                )}
                 <Table<Invitation>
                   rowKey="id"
+                  locale={invitesError ? { emptyText: null } : undefined}
                   dataSource={invitations ?? []}
                   columns={[
                     { title: "邮箱", dataIndex: "email" },
@@ -248,9 +324,22 @@ export default function EntityAccess({ kind }: { kind: EntityKind }) {
                   disabled: !canManage,
                   children: (
                     <>
-                      {auditError && <Alert type="error" title={apiErrorMessage(auditError)} />}
+                      {auditError && (
+                        <Button
+                          className="mb-4"
+                          loading={validatingAudit}
+                          onClick={() => {
+                            refreshAudit().catch((error: unknown) =>
+                              message.error(apiErrorMessage(error)),
+                            );
+                          }}
+                        >
+                          重试
+                        </Button>
+                      )}
                       <Table
                         rowKey="id"
+                        locale={auditError ? { emptyText: null } : undefined}
                         dataSource={audit?.records ?? []}
                         pagination={{
                           current: auditPage,

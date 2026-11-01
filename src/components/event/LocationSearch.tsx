@@ -1,7 +1,7 @@
 import { getTencentLocation, getTencentNearbyLocations } from "@/api/cms/map";
 import type { TencentLocation } from "@/types/map";
 import { apiErrorMessage } from "@/utils/apiError";
-import { Alert, Empty, Input, Modal, Radio, Spin, Tag, Typography, theme } from "antd";
+import { App, Button, Empty, Input, Modal, Radio, Spin, Tag, Typography, theme } from "antd";
 import { useState } from "react";
 import useSWR from "swr";
 import styles from "./LocationSearch.module.css";
@@ -20,6 +20,7 @@ export default function LocationSearch({
   query: LocationSearchQuery;
 }) {
   const { token } = theme.useToken();
+  const { message } = App.useApp();
   const [search, setSearch] = useState(query.kind === "address" ? query.keyword : "");
   const [input, setInput] = useState(search);
   const [selectedLocation, setSelectedLocation] = useState<TencentLocation | null>(null);
@@ -27,7 +28,7 @@ export default function LocationSearch({
     query.kind === "address"
       ? (["tencent-location", query.region, search] as const)
       : (["tencent-nearby", query.latitude, query.longitude] as const);
-  const { data, error, isLoading, mutate } = useSWR<
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
     Awaited<ReturnType<typeof getTencentLocation>>,
     Error
   >(
@@ -36,7 +37,13 @@ export default function LocationSearch({
       query.kind === "address"
         ? getTencentLocation({ keyword: search, region: query.region })
         : getTencentNearbyLocations({ latitude: query.latitude, longitude: query.longitude }),
-    { revalidateOnFocus: false, shouldRetryOnError: false },
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error, "地点搜索失败，请重试"));
+      },
+    },
   );
 
   return (
@@ -63,8 +70,11 @@ export default function LocationSearch({
             const next = value.trim();
             if (!next) return;
             setSelectedLocation(null);
-            if (next === search) void mutate();
-            else setSearch(next);
+            if (next === search) {
+              mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+            } else {
+              setSearch(next);
+            }
           }}
           enterButton="搜索"
           loading={isLoading}
@@ -76,7 +86,14 @@ export default function LocationSearch({
       )}
       <div className="mt-4">
         {error ? (
-          <Alert type="error" showIcon title={apiErrorMessage(error, "地点搜索失败，请重试")} />
+          <Button
+            loading={isValidating}
+            onClick={() => {
+              mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+            }}
+          >
+            重试
+          </Button>
         ) : isLoading ? (
           <div className="flex justify-center p-4">
             <Spin />
