@@ -41,6 +41,14 @@ export class PlaceAPI {
     return (await Axios.delete(`/cms/place/${id}`)).data;
   }
 
+  static async transferEvents(id: string, targetPlaceId: string) {
+    return (
+      await Axios.post<{ transferredCount: number }>(`/cms/place/${id}/transfer-events`, {
+        targetPlaceId,
+      })
+    ).data;
+  }
+
   static async rebuildGeoIndex() {
     return (await Axios.post<{ indexed: number }>("/cms/admin/place/rebuild-geo-index")).data;
   }
