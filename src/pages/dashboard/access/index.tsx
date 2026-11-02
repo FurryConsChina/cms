@@ -41,9 +41,15 @@ export default function AccessPage() {
   const [acceptForm] = Form.useForm();
   const canReview = isAdmin(role);
   const pending = tab === "pending" && canReview;
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, mutate } = useSWR(
     tab === "accept" ? null : ["claims", kind, pending, role],
     () => AccessAPI.claims(kind, pending),
+    {
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   return (
     <div className="space-y-4">
@@ -134,7 +140,6 @@ export default function AccessPage() {
         </Form>
       ) : (
         <>
-          {error && <Alert type="error" title={apiErrorMessage(error)} />}
           <Table<Claim>
             rowKey="id"
             loading={isLoading}

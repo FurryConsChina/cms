@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import useSWR from "swr";
 import { IconArrowUp, IconArrowDown } from "@tabler/icons-react";
 import type { ColumnsType } from "antd/es/table";
-import { Alert, App, Button, Flex, Form, Modal, Select, Space, Table, Tag } from "antd";
+import { App, Button, Flex, Form, Modal, Select, Space, Table, Tag } from "antd";
 import { toOptions } from "@/consts/labels";
 import { publishStatusLabels } from "@/consts/publishStatus";
 import type { PublishStatus } from "@/types/publishStatus";
@@ -31,9 +31,15 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
   useEffect(() => {
     setCurrent(1);
   }, [eventId, role, publishStatus]);
-  const { data, error, isLoading, mutate } = useSWR<List<Participant>, Error>(
+  const { data, isLoading, mutate } = useSWR<List<Participant>, Error>(
     ["participants", eventId, role, publishStatus, current, pageSize],
     () => ParticipantAPI.list({ current, pageSize, eventId, role, publishStatus }),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const [sorting, setSorting] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -273,14 +279,6 @@ export default function EventParticipantPanel({ eventId }: { eventId: string }) 
         </Space>
       </Flex>
 
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={refresh}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}

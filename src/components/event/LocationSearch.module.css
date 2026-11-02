@@ -1,0 +1,45 @@
+.results {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result {
+  width: 100%;
+  align-items: flex-start;
+  margin-inline-end: 0;
+  padding: 12px;
+  border: 1px solid;
+}
+
+.details {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heading {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.title,
+.address,
+.metadata {
+  overflow-wrap: anywhere;
+}
+
+.category {
+  margin-inline-end: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.metadata {
+  font-size: 12px;
+}

@@ -1,7 +1,6 @@
 import { useEffect, useId, useState } from "react";
 import useSWR from "swr";
 import {
-  Alert,
   App,
   Button,
   Card,
@@ -46,9 +45,15 @@ export default function MediaPicker({
     onBusyChange?.(busyId, busy);
     return () => onBusyChange?.(busyId, false);
   }, [busy, busyId, onBusyChange]);
-  const { data, error, mutate } = useSWR<List<MediaAsset>, Error>(
+  const { data, error, isValidating, mutate } = useSWR<List<MediaAsset>, Error>(
     opened ? ["media-picker", current] : null,
     () => listMediaAssets({ current, pageSize: 12 }),
+    {
+      shouldRetryOnError: false,
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+    },
   );
   const select = (asset: MediaBinding) => {
     onChange?.({ ...value, ...asset });
@@ -204,11 +209,15 @@ export default function MediaPicker({
           </Button>
         </Flex>
         {error && (
-          <Alert
-            type="error"
-            title={apiErrorMessage(error)}
-            action={<Button onClick={() => void mutate()}>重试</Button>}
-          />
+          <Button
+            className="mb-4"
+            loading={isValidating}
+            onClick={() => {
+              mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+            }}
+          >
+            重试
+          </Button>
         )}
         <Flex wrap gap={12}>
           {(data?.records ?? []).map((asset) => (

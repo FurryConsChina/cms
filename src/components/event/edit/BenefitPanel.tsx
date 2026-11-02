@@ -6,7 +6,6 @@ import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
 import useUnsavedChangesGuard from "@/hooks/useUnsavedChangesGuard";
 import {
-  Alert,
   App,
   Button,
   Modal,
@@ -35,9 +34,15 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
   useEffect(() => {
     setCurrent(1);
   }, [eventId, publishStatus]);
-  const { data, error, isLoading, mutate } = useSWR<List<Benefit>, Error>(
+  const { data, isLoading, mutate } = useSWR<List<Benefit>, Error>(
     ["benefits", eventId, publishStatus, current, pageSize],
     () => BenefitAPI.list({ current, pageSize, eventId, publishStatus }),
+    {
+      onError: (error) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Benefit>();
@@ -240,14 +245,6 @@ export default function EventBenefitPanel({ eventId }: { eventId: string }) {
         </Space>
       </Flex>
 
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={refresh}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}

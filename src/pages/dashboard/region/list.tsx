@@ -1,6 +1,6 @@
 import { RegionAPI, type RegionListQuery } from "@/api/cms/region";
 import { useState } from "react";
-import { Alert, App, Space, Table, Button, Flex, Typography } from "antd";
+import { App, Space, Table, Button, Flex, Typography } from "antd";
 import useSWR from "swr";
 import { type ColumnsType } from "antd/es/table";
 import { apiErrorMessage } from "@/utils/apiError";
@@ -9,16 +9,22 @@ import DefaultContainer from "@/components/layout/Container";
 import RegionEditor from "@/components/region/RegionEditor";
 import TableFilterDropdown from "@/components/common/TableFilterDropdown";
 
-import { IconCirclePlus, IconSearch } from "@tabler/icons-react";
+import { IconCirclePlus, IconRefresh, IconSearch } from "@tabler/icons-react";
 
 export default function RegionPage() {
   const { message, modal } = App.useApp();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [filters, setFilters] = useState<Omit<RegionListQuery, "current" | "pageSize">>({});
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, isLoading, isValidating, mutate } = useSWR(
     ["region-list", current, pageSize, filters],
     () => RegionAPI.getRegionList({ current, pageSize, ...filters }),
+    {
+      onError: (error: unknown) => {
+        message.error(apiErrorMessage(error));
+      },
+      shouldRetryOnError: false,
+    },
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Region>();
@@ -111,24 +117,27 @@ export default function RegionPage() {
           <Typography.Title level={3} className="m-0">
             地区列表
           </Typography.Title>
-          <Button
-            type="primary"
-            icon=<IconCirclePlus size={16} stroke={1.5} />
-            onClick={() => void open()}
-          >
-            添加地区
-          </Button>
+          <Space>
+            <Button
+              icon={<IconRefresh size={16} stroke={1.5} />}
+              loading={isValidating}
+              onClick={() => {
+                mutate().catch((error: unknown) => message.error(apiErrorMessage(error)));
+              }}
+            >
+              刷新
+            </Button>
+            <Button
+              type="primary"
+              icon=<IconCirclePlus size={16} stroke={1.5} />
+              onClick={() => void open()}
+            >
+              添加地区
+            </Button>
+          </Space>
         </Flex>
       </DefaultContainer>
 
-      {error && (
-        <Alert
-          type="error"
-          showIcon
-          title={apiErrorMessage(error)}
-          action=<Button onClick={() => void mutate()}>重试</Button>
-        />
-      )}
       <Table
         rowKey="id"
         columns={columns}

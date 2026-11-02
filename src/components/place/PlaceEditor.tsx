@@ -18,7 +18,7 @@ import type { Place } from "@/types/place";
 import type { Region } from "@/types/region";
 import { apiErrorMessage } from "@/utils/apiError";
 import { toNullable } from "@/utils/form";
-import LocationSearch from "@/components/event/LocationSearch";
+import LocationSearch, { type LocationSearchQuery } from "@/components/event/LocationSearch";
 import RegionSelector from "@/components/region/RegionSelector";
 import { toOptions } from "@/consts/labels";
 import { timezoneOptions } from "@/consts/timezones";
@@ -101,7 +101,8 @@ export default function PlaceEditor({
       setSaving(false);
     }
   };
-  const [search, setSearch] = useState<string>();
+  const [search, setSearch] = useState<LocationSearchQuery>();
+  const [searching, setSearching] = useState(false);
   const [regionNeedsSelection, setRegionNeedsSelection] = useState(false);
   const watchedRegionId = Form.useWatch("regionId", form) as string | null | undefined;
   const selectedRegionId =
@@ -114,8 +115,42 @@ export default function PlaceEditor({
 
   const searchAddress = () => {
     const keyword = (form.getFieldValue("address") as string | undefined)?.trim();
-    if (!keyword) return void message.warning("请先填写完整地址");
-    setSearch(keyword);
+    if (!keyword) {
+      message.warning("请先填写完整地址");
+      return;
+    }
+    const selectedRegionId = form.getFieldValue("regionId") as string | null | undefined;
+    if (!selectedRegionId) {
+      setSearch({ kind: "address", keyword });
+      return;
+    }
+
+    setSearching(true);
+    RegionAPI.getRegion(selectedRegionId)
+      .then((region) => setSearch({ kind: "address", keyword, region: region.name }))
+      .catch((error: unknown) => message.error(apiErrorMessage(error, "加载地区失败，请重试")))
+      .finally(() => setSearching(false));
+  };
+
+  const searchCoordinates = () => {
+    const longitude = form.getFieldValue("longitude") as number | null | undefined;
+    const latitude = form.getFieldValue("latitude") as number | null | undefined;
+    if (longitude == null || latitude == null) {
+      message.warning("请先填写经度和纬度");
+      return;
+    }
+    if (
+      !Number.isFinite(longitude) ||
+      !Number.isFinite(latitude) ||
+      longitude < -180 ||
+      longitude > 180 ||
+      latitude < -90 ||
+      latitude > 90
+    ) {
+      message.warning("请填写有效的经度和纬度");
+      return;
+    }
+    setSearch({ kind: "coordinates", latitude, longitude });
   };
 
   return (
@@ -146,6 +181,7 @@ export default function PlaceEditor({
           longitude: null,
           coordinateSource: "manual",
           ...place,
+          timezone: place?.timezone ?? "Asia/Shanghai",
         }}
         onFinish={(values: Record<string, unknown>) => void submit(values)}
         onValuesChange={() => setDirty(true)}
@@ -159,15 +195,21 @@ export default function PlaceEditor({
             title="已填入地点信息，但未匹配到唯一地区，请手动选择所属地区。"
           />
         )}
-        <Form.Item label="完整地址" name="address">
-          <Input.TextArea
-            placeholder="例如：广东省广州市海珠区阅江中路 380 号"
-            autoSize={{ minRows: 2 }}
+        <Form.Item
+          label="所属地区"
+          name="regionId"
+          getValueFromEvent={(value: string | undefined) => value ?? null}
+          rules={[{ required: true, message: "请选择所属地区" }]}
+        >
+          <RegionSelector
+            selectedOption={place?.region}
+            antdSelectProps={{
+              allowClear: true,
+              placeholder: "输入名称或代码搜索",
+              style: { width: "100%", minWidth: 0 },
+            }}
           />
         </Form.Item>
-        <Button type="primary" size="large" block className="mb-4" onClick={searchAddress}>
-          按地址搜索腾讯地图
-        </Button>
         <Form.Item
           label="地点名称"
           name="name"
@@ -175,31 +217,29 @@ export default function PlaceEditor({
         >
           <Input />
         </Form.Item>
+        <Form.Item label="完整地址" name="address">
+          <Input.TextArea
+            placeholder="例如：广东省广州市海珠区阅江中路 380 号"
+            autoSize={{ minRows: 2 }}
+          />
+        </Form.Item>
+        <Button
+          type="primary"
+          size="large"
+          block
+          className="mb-4"
+          loading={searching}
+          onClick={searchAddress}
+        >
+          按地址搜索腾讯地图
+        </Button>
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Form.Item
-              label="所属地区"
-              name="regionId"
-              getValueFromEvent={(value: string | undefined) => value ?? null}
-              rules={[{ required: true, message: "请选择所属地区" }]}
-              extra={place ? "修改地区后，使用此地点的活动会同步更新地区和页面地址。" : undefined}
-            >
-              <RegionSelector
-                selectedOption={place?.region}
-                antdSelectProps={{
-                  allowClear: true,
-                  placeholder: "输入名称或代码搜索",
-                  style: { width: "100%", minWidth: 0 },
-                }}
-              />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={6}>
             <Form.Item label="地点类型" name="kind">
               <Select options={toOptions(placeKinds)} />
             </Form.Item>
           </Col>
-          <Col xs={24} sm={6}>
+          <Col xs={24} sm={12}>
             <Form.Item label="子类型" name="subtype">
               <Input placeholder="例如 会展中心" />
             </Form.Item>
@@ -217,6 +257,9 @@ export default function PlaceEditor({
             </Form.Item>
           </Col>
         </Row>
+        <Button block className="mb-4" onClick={searchCoordinates}>
+          根据经纬度查找附近地点
+        </Button>
         <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Form.Item label="时区" name="timezone">
@@ -246,7 +289,7 @@ export default function PlaceEditor({
             <Form.Item
               label="原始坐标系"
               name="sourceCoordinateSystem"
-              tooltip="记录坐标来源使用的坐标系。腾讯地图搜索结果按 GCJ-02 原值回填；修改此选项不会转换上方经纬度。"
+              tooltip="记录坐标来源使用的坐标系。修改此选项不会转换上方经纬度。"
             >
               <Select
                 allowClear
@@ -278,9 +321,10 @@ export default function PlaceEditor({
         </Row>
         {search && (
           <LocationSearch
-            keyword={search}
+            query={search}
             handleCancel={() => setSearch(undefined)}
             handleOk={(location) => {
+              const existingRegionId = form.getFieldValue("regionId") as string | null | undefined;
               form.setFieldsValue({
                 longitude: location.location.lng,
                 latitude: location.location.lat,
@@ -292,16 +336,24 @@ export default function PlaceEditor({
                     .map((category) => category.trim())
                     .filter(Boolean)
                     .pop() ?? null,
-                regionId: location.matchedRegion?.id ?? null,
-                timezone: location.matchedRegion?.timezone ?? null,
+                regionId:
+                  location.matchedRegion?.id ??
+                  (search.kind === "coordinates" ? (existingRegionId ?? null) : null),
+                timezone:
+                  location.matchedRegion?.timezone ??
+                  (form.getFieldValue("timezone") as string | null | undefined),
                 coordinateSource: "tencent",
-                sourceCoordinateSystem: "GCJ02",
+                sourceCoordinateSystem: search.kind === "coordinates" ? null : "GCJ02",
                 sourcePlaceId: location.id,
               });
               setDirty(true);
               setRegionNeedsSelection(!location.matchedRegion);
               setSearch(undefined);
-              message.success("已填入地点信息，请确认后保存");
+              if (search.kind === "coordinates" && !location.matchedRegion && existingRegionId) {
+                message.warning("已填入地点信息，请确认所属地区");
+              } else {
+                message.success("已填入地点信息，请确认后保存");
+              }
             }}
           />
         )}
