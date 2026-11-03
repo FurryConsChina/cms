@@ -16,6 +16,7 @@ interface PlaceSelectorProps {
   onChange?: (value?: string) => void;
   regionId?: string;
   selectedOption?: Place | null;
+  disabledIds?: string[];
   antdSelectProps?: SelectProps;
 }
 
@@ -26,6 +27,7 @@ export default function PlaceSelector({
   onChange,
   regionId,
   selectedOption,
+  disabledIds,
   antdSelectProps,
 }: PlaceSelectorProps) {
   const [search, setSearch] = useState("");
@@ -64,6 +66,7 @@ export default function PlaceSelector({
       options={places.map((place) => ({
         value: place.id,
         label: `${place.name}${place.address ? `（${place.address}）` : ""}`,
+        disabled: disabledIds?.includes(place.id),
       }))}
       notFoundContent={error ? "场地加载失败，请重试" : isLoading ? "加载中…" : "没有匹配的场地"}
     />

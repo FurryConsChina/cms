@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button, Flex, Space, Typography, App, Table } from "antd";
 import PlaceEditor, { placeKinds } from "@/components/place/PlaceEditor";
+import PlaceTransferModal from "@/components/place/PlaceTransferModal";
 import { IconCirclePlus, IconRefresh, IconSearch } from "@tabler/icons-react";
 import DefaultContainer from "@/components/layout/Container";
 
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { type ColumnsType } from "antd/es/table";
 import { apiErrorMessage } from "@/utils/apiError";
 import TableFilterDropdown from "@/components/common/TableFilterDropdown";
@@ -19,6 +20,7 @@ export default function PlacePage() {
   const [regionId, setRegionId] = useState<string | null>(null);
   const [kind, setKind] = useState<Place["kind"]>();
   const { message, modal } = App.useApp();
+  const { mutate: invalidateCache } = useSWRConfig();
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const { data, isLoading, mutate } = useSWR(
@@ -40,6 +42,7 @@ export default function PlacePage() {
   );
   const [opened, setOpened] = useState(false);
   const [editing, setEditing] = useState<Place>();
+  const [transferSource, setTransferSource] = useState<Place>();
   const open = (record?: Place) => {
     setEditing(record);
     setOpened(true);
@@ -80,6 +83,7 @@ export default function PlacePage() {
       render: (_, record) => (
         <Space wrap>
           {platform && <Button onClick={() => open(record)}>编辑</Button>}
+          {platform && <Button onClick={() => setTransferSource(record)}>转移活动</Button>}
 
           {platform && (
             <Button
@@ -164,6 +168,34 @@ export default function PlacePage() {
           onSaved={() => {
             setOpened(false);
             void mutate();
+          }}
+        />
+      )}
+      {platform && transferSource && (
+        <PlaceTransferModal
+          place={transferSource}
+          onCancel={() => setTransferSource(undefined)}
+          onTransfer={async (targetPlaceId) => {
+            const { transferredCount } = await PlaceAPI.transferEvents(
+              transferSource.id,
+              targetPlaceId,
+            );
+            setTransferSource(undefined);
+            if (transferredCount === 0) {
+              message.info("该地点没有可转移的活动");
+            } else {
+              message.success(`已转移 ${transferredCount} 个活动`);
+            }
+            invalidateCache(
+              (key) =>
+                Array.isArray(key) &&
+                typeof key[0] === "string" &&
+                ["event-list", "event-detail", "event-selector", "event-selector-value"].includes(
+                  key[0],
+                ),
+              undefined,
+              { revalidate: true },
+            ).catch(() => message.warning("活动已转移，请刷新活动页面"));
           }}
         />
       )}
