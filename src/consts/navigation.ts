@@ -54,6 +54,12 @@ export const navigation: NavGroup[] = [
     items: [
       { path: "/admin/application", label: "应用管理", icon: IconCode, roles: [UserRole.Admin] },
       {
+        path: "/admin/site-settings",
+        label: "网站设置",
+        icon: IconWorld,
+        roles: [UserRole.Admin],
+      },
+      {
         path: "/admin/infrastructure",
         label: "运维工具",
         icon: IconServerCog,
