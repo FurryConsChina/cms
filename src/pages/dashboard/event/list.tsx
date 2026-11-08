@@ -80,7 +80,7 @@ export default function EventPage() {
       message.success("删除活动成功，如果是误操作请马上联系管理员。");
       mutate();
     } catch (error) {
-      message.error("删除活动失败，请稍后重试。");
+      message.error(apiErrorMessage(error, "删除活动失败，请稍后重试。"));
     }
   };
 
