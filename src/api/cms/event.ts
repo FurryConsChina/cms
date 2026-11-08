@@ -15,64 +15,69 @@ import { toEventItem } from "./eventAdapter";
 
 import { mediaBindingSchema, singleMediaBindingSchema } from "./mediaSchema";
 
-export const EditEventApiBody = z.object({
-  name: z.string().min(1).max(256),
-  startAt: z.iso.datetime().nullish(),
-  endAt: z.iso.datetime().nullish(),
-  status: z.enum(EventStatus),
-  scale: z.enum(EventScale),
-  type: z.enum(EventType).optional(),
-  locationType: z.enum(EventLocationType).optional(),
-  organizations: z.array(
-    z.object({
-      id: z.uuid(),
-      isPrimary: z.boolean(),
-    }),
-  ),
-  regionId: z.uuid().nullish(),
-  placeId: z.uuid().nullish(),
-  locationNotes: z.string().nullish(),
-  sources: z
-    .array(
+export const EditEventApiBody = z
+  .object({
+    name: z.string().min(1).max(256),
+    startAt: z.iso.datetime().nullish(),
+    endAt: z.iso.datetime().nullish(),
+    status: z.enum(EventStatus),
+    scale: z.enum(EventScale),
+    type: z.enum(EventType).optional(),
+    locationType: z.enum(EventLocationType).optional(),
+    organizations: z.array(
       z.object({
-        url: z.string(),
-        name: z.string().nullish(),
-        description: z.string().nullish(),
+        id: z.uuid(),
+        isPrimary: z.boolean(),
       }),
-    )
-    .nullish(),
-  ticketChannels: z
-    .array(
-      z.object({
-        type: z.enum(EventTicketChannelType),
-        name: z.string(),
-        url: z.string(),
-        available: z.boolean(),
-      }),
-    )
-    .nullish(),
+    ),
+    regionId: z.uuid().nullish(),
+    placeId: z.uuid().nullish(),
+    locationNotes: z.string().nullish(),
+    sources: z
+      .array(
+        z.object({
+          url: z.string(),
+          name: z.string().nullish(),
+          description: z.string().nullish(),
+        }),
+      )
+      .nullish(),
+    ticketChannels: z
+      .array(
+        z.object({
+          type: z.enum(EventTicketChannelType),
+          name: z.string(),
+          url: z.string(),
+          available: z.boolean(),
+        }),
+      )
+      .nullish(),
 
-  cover: singleMediaBindingSchema,
-  poster: z.array(mediaBindingSchema).nullish(),
-  gallery: z.array(mediaBindingSchema).nullish(),
-  videos: z.array(mediaBindingSchema).nullish(),
-  lives: z.array(mediaBindingSchema).nullish(),
-  detail: z.string().nullish(),
-  features: z
-    .array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })]))
-    .nullish(),
-  extra: z
-    .object({
-      overrideOrganizationContact: z
-        .object({
-          qqGroups: z
-            .array(z.object({ label: z.string().nullish(), value: z.string() }))
-            .optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-});
+    cover: singleMediaBindingSchema,
+    poster: z.array(mediaBindingSchema).nullish(),
+    gallery: z.array(mediaBindingSchema).nullish(),
+    videos: z.array(mediaBindingSchema).nullish(),
+    lives: z.array(mediaBindingSchema).nullish(),
+    detail: z.string().nullish(),
+    features: z
+      .array(z.union([z.object({ id: z.uuid() }), z.object({ name: z.string().min(1).max(256) })]))
+      .nullish(),
+    extra: z
+      .object({
+        overrideOrganizationContact: z
+          .object({
+            qqGroups: z
+              .array(z.object({ label: z.string().nullish(), value: z.string() }))
+              .optional(),
+          })
+          .optional(),
+      })
+      .optional(),
+  })
+  .refine((v) => !v.startAt || !v.endAt || Date.parse(v.startAt) <= Date.parse(v.endAt), {
+    message: "结束时间不能早于开始时间",
+    path: ["endAt"],
+  });
 
 export interface EventListQuery extends PageQuery {
   search?: string;
