@@ -246,7 +246,7 @@ export default function EventPage() {
             icon: <IconRefresh style={{ width: 14, height: 14 }} />,
             label: "刷新",
             onClick: () => {
-              handleRefreshPage(`/event/${record.eventKey}`);
+              handleRefreshPage(`/event/${record.urlKey}`);
             },
           },
           {
@@ -254,7 +254,7 @@ export default function EventPage() {
             icon: <IconLink style={{ width: 14, height: 14 }} />,
             label: "在网站上查看",
             onClick: () => {
-              window.open(`https://www.furrycons.cn/event/${record.eventKey}`, "_blank");
+              window.open(`https://www.furrycons.cn/event/${record.urlKey}`, "_blank");
             },
           },
           { type: "divider" },
