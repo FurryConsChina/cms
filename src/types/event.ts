@@ -114,6 +114,7 @@ export interface IEvent extends BaseModel {
   place: Place | null;
   placeId: string | null;
   locationNotes: string | null;
+  urlKey: string;
   eventKey: string;
   isPublished: boolean;
   isSuspended: boolean;
